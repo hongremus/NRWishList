@@ -123,15 +123,17 @@ export default function HomePage() {
       </main>
 
       {/* 手機版右下角 Floating Action Button (新增願望) */}
-      <div className="fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom))] right-4 sm:bottom-8 sm:right-8 z-40">
-        <button
-          onClick={() => setShowNew(true)}
-          className={`px-4 py-3 text-white font-bold rounded-full shadow-2xl flex items-center gap-2 active:scale-95 transition-all border-2 border-white/40 bg-gradient-to-r ${themeHeaderGradient}`}
-        >
-          <span className="text-xl">✨</span>
-          <span className="text-sm">加願望 ➕</span>
-        </button>
-      </div>
+      {!showNew && !showTagManager && !showStats && (
+        <div className="fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom))] right-4 sm:bottom-8 sm:right-8 z-40">
+          <button
+            onClick={() => setShowNew(true)}
+            className={`px-4 py-3 text-white font-bold rounded-full shadow-2xl flex items-center gap-2 active:scale-95 transition-all border-2 border-white/40 bg-gradient-to-r ${themeHeaderGradient}`}
+          >
+            <span className="text-xl">✨</span>
+            <span className="text-sm">加願望 ➕</span>
+          </button>
+        </div>
+      )}
 
       {/* Modals 彈窗 */}
       {showNew && <NewWishModal onClose={() => setShowNew(false)} />}

@@ -85,7 +85,7 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-xs animate-fadeIn">
+    <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-xs animate-fadeIn">
       <div
         className="bg-white dark:bg-gray-900 rounded-t-3xl sm:rounded-3xl p-4 sm:p-6 w-full max-w-2xl shadow-2xl border border-gray-100 dark:border-gray-800 max-h-[90vh] overflow-y-auto"
         onClick={(event) => event.stopPropagation()}

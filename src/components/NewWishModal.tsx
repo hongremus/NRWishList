@@ -74,7 +74,7 @@ export default function NewWishModal({ onClose }: { onClose: () => void }) {
     : "bg-gradient-to-r from-pink-500 to-rose-500 shadow-pink-500/20";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-xs animate-fadeIn">
+    <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-xs animate-fadeIn">
       <div className="bg-white dark:bg-gray-900 rounded-t-3xl sm:rounded-3xl p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:p-6 w-full max-w-lg shadow-2xl border border-gray-100 dark:border-gray-800 max-h-[calc(100dvh-1rem)] sm:max-h-[90vh] overflow-y-auto overscroll-contain">
         <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
           <div className="flex min-w-0 items-center gap-2">
