@@ -224,7 +224,7 @@ export default function NewWishModal({ onClose }: { onClose: () => void }) {
               className={`flex-1 py-2.5 text-white rounded-xl text-sm font-semibold shadow-md active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed ${themeBtnClass}`}
               onClick={submit}
             >
-              加入願望 💕
+              許願 💕
             </button>
           </div>
         </div>
