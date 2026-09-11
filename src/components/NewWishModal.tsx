@@ -64,7 +64,7 @@ export default function NewWishModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-xs animate-fadeIn">
-      <div className="bg-white dark:bg-gray-800 rounded-t-3xl sm:rounded-3xl p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:p-6 w-full max-w-lg shadow-2xl border border-gray-100 dark:border-gray-700 max-h-[calc(100dvh-1rem)] sm:max-h-[90vh] overflow-y-auto overscroll-contain">
+      <div className="bg-white dark:bg-gray-900 rounded-t-3xl sm:rounded-3xl p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:p-6 w-full max-w-lg shadow-2xl border border-gray-100 dark:border-gray-800 max-h-[calc(100dvh-1rem)] sm:max-h-[90vh] overflow-y-auto overscroll-contain">
         <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
           <div className="flex min-w-0 items-center gap-2">
             <span className="text-2xl">✨</span>
@@ -83,7 +83,7 @@ export default function NewWishModal({ onClose }: { onClose: () => void }) {
           <div>
             <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">願望名 *</label>
             <input
-              className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 dark:text-white"
+              className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 dark:text-white"
               placeholder="例如：一齊去日本睇櫻花 🌸"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -95,7 +95,7 @@ export default function NewWishModal({ onClose }: { onClose: () => void }) {
             <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">詳情 / 備註</label>
             <textarea
               rows={2}
-              className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 dark:text-white resize-none"
+              className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 dark:text-white resize-none"
               placeholder="有咩想做、想去嘅地方或者諗法..."
               value={desc}
               onChange={(e) => setDesc(e.target.value)}
@@ -134,7 +134,7 @@ export default function NewWishModal({ onClose }: { onClose: () => void }) {
             <div className="flex gap-2 mt-2">
               <input
                 type="text"
-                className="flex-1 px-3 py-1.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-purple-400 dark:text-white"
+                className="flex-1 px-3 py-1.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-purple-400 dark:text-white"
                 placeholder="+ 自訂 Tag"
                 value={customTag}
                 onChange={(e) => setCustomTag(e.target.value)}

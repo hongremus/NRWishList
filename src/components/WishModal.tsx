@@ -106,7 +106,7 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-xs animate-fadeIn">
       <div
-        className="bg-white dark:bg-gray-800 rounded-t-3xl sm:rounded-3xl p-4 sm:p-6 w-full max-w-2xl shadow-2xl border border-gray-100 dark:border-gray-700 max-h-[90vh] overflow-y-auto"
+        className="bg-white dark:bg-gray-900 rounded-t-3xl sm:rounded-3xl p-4 sm:p-6 w-full max-w-2xl shadow-2xl border border-gray-100 dark:border-gray-800 max-h-[90vh] overflow-y-auto"
         onClick={(event) => event.stopPropagation()}
       >
         {/* Header */}
@@ -145,7 +145,7 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
             <div>
               <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">標題</label>
               <input
-                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm dark:text-white"
+                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm dark:text-white"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
               />
@@ -154,7 +154,7 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
               <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">詳情</label>
               <textarea
                 rows={3}
-                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm dark:text-white resize-none"
+                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm dark:text-white resize-none"
                 value={desc}
                 onChange={(e) => setDesc(e.target.value)}
               />
@@ -173,7 +173,7 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
         ) : (
           <div className="space-y-4 mb-6">
             {wish.description && (
-              <p className="text-sm text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 p-3 rounded-2xl">
+              <p className="text-sm text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 p-3 rounded-2xl">
                 {wish.description}
               </p>
             )}
@@ -292,7 +292,7 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
                           </div>
                         ) : (
                           /* 內嵌評分表單 */
-                          <div className="p-3 bg-white dark:bg-gray-800 rounded-2xl border border-purple-200 dark:border-purple-800 space-y-3 animate-fadeIn">
+                          <div className="p-3 bg-white dark:bg-gray-900 rounded-2xl border border-purple-200 dark:border-purple-800 space-y-3 animate-fadeIn">
                             <div className="flex items-center justify-between text-xs font-bold text-purple-700 dark:text-purple-300">
                               <span>俾分 — {ratingRole === "me" ? "Remus" : "Nicole"}</span>
                               <button

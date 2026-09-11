@@ -43,7 +43,7 @@ export default function StatsModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-xs">
-      <div className="bg-white dark:bg-gray-800 rounded-t-3xl sm:rounded-3xl p-4 sm:p-6 w-full max-w-md shadow-2xl border border-gray-100 dark:border-gray-700 max-h-[85vh] overflow-y-auto">
+      <div className="bg-white dark:bg-gray-900 rounded-t-3xl sm:rounded-3xl p-4 sm:p-6 w-full max-w-md shadow-2xl border border-gray-100 dark:border-gray-800 max-h-[85vh] overflow-y-auto">
         <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
           <div className="flex min-w-0 items-center gap-2">
             <span className="text-2xl">📊</span>
@@ -80,12 +80,12 @@ export default function StatsModal({ onClose }: { onClose: () => void }) {
         </div>
 
         <div className="space-y-2 text-xs mb-6">
-          <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl flex flex-wrap justify-between items-center gap-1">
+          <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl flex flex-wrap justify-between items-center gap-1">
             <span className="text-gray-500 dark:text-gray-400">🏷️ 最常用 Tag：</span>
             <span className="font-bold text-gray-800 dark:text-gray-200">{stats.topTag}</span>
           </div>
 
-          <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl flex flex-wrap justify-between items-center gap-1">
+          <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl flex flex-wrap justify-between items-center gap-1">
             <span className="text-gray-500 dark:text-gray-400">🏆 完成最多次：</span>
             <span className="font-bold text-gray-800 dark:text-gray-200 truncate max-w-[180px]">
               {stats.mostCompletedWish}
@@ -95,7 +95,7 @@ export default function StatsModal({ onClose }: { onClose: () => void }) {
 
         <button
           onClick={onClose}
-          className="w-full py-2.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-xl font-semibold text-sm active:scale-95 transition-all"
+          className="w-full py-2.5 bg-gray-900 dark:bg-gray-800 text-white dark:text-gray-100 border border-gray-700 rounded-xl font-semibold text-sm active:scale-95 transition-all"
         >
           閂咗
         </button>

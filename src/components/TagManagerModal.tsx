@@ -19,7 +19,7 @@ export default function TagManagerModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-xs">
-      <div className="bg-white dark:bg-gray-800 rounded-t-3xl sm:rounded-3xl p-4 sm:p-6 w-full max-w-md shadow-2xl border border-gray-100 dark:border-gray-700 max-h-[85vh] overflow-y-auto">
+      <div className="bg-white dark:bg-gray-900 rounded-t-3xl sm:rounded-3xl p-4 sm:p-6 w-full max-w-md shadow-2xl border border-gray-100 dark:border-gray-800 max-h-[85vh] overflow-y-auto">
         <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
           <div className="flex min-w-0 items-center gap-2">
             <span className="text-xl">🏷️</span>
@@ -41,7 +41,7 @@ export default function TagManagerModal({ onClose }: { onClose: () => void }) {
         <div className="flex gap-2 mb-6">
           <input
             type="text"
-            className="flex-1 px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 dark:text-white"
+            className="flex-1 px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 dark:text-white"
             placeholder="打新 Tag 名（例如：踩點）"
             value={newTagInput}
             onChange={(e) => setNewTagInput(e.target.value)}
@@ -85,7 +85,7 @@ export default function TagManagerModal({ onClose }: { onClose: () => void }) {
         <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700 text-right">
           <button
             onClick={onClose}
-            className="w-full sm:w-auto px-6 py-2.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-xl font-medium text-sm active:scale-95 transition-all"
+            className="w-full sm:w-auto px-6 py-2.5 bg-gray-900 dark:bg-gray-800 text-white dark:text-gray-100 border border-gray-700 rounded-xl font-medium text-sm active:scale-95 transition-all"
           >
             搞掂
           </button>

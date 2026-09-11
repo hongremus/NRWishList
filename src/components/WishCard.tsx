@@ -68,8 +68,8 @@ export default function WishCard({ wish }: { wish: Wish }) {
     <div
       className={`p-4 rounded-3xl transition-all shadow-md hover:shadow-lg border ${
         wish.status === "completed"
-          ? "bg-gray-50/90 dark:bg-gray-800/80 border-gray-200 dark:border-gray-700 opacity-90"
-          : "bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700"
+          ? "bg-gray-50/90 dark:bg-gray-900/90 border-gray-200 dark:border-gray-800 opacity-90"
+          : "bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800"
       } cursor-pointer`}
       onClick={() => setShowDetail(true)}
       role="button"
