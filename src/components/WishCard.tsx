@@ -128,11 +128,11 @@ export default function WishCard({ wish }: { wish: Wish }) {
       </div>
 
       {/* 操作按鈕組 */}
-      <div className="flex flex-wrap items-stretch gap-2 pt-2">
+      <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] items-stretch gap-2 pt-2 sm:flex">
         {wish.status === "open" ? (
           <button
             onClick={handleToggleComplete}
-            className={`min-w-[calc(100%-3rem)] flex-1 py-2 px-3 text-white rounded-xl text-xs font-semibold shadow-sm active:scale-95 transition-all flex items-center justify-center gap-1 sm:min-w-0 ${
+            className={`min-w-0 flex-1 py-2.5 px-2 text-white rounded-xl text-xs font-semibold shadow-sm active:scale-95 transition-all flex items-center justify-center gap-1 sm:px-3 ${
               isRemus
                 ? "bg-gradient-to-r from-blue-500 to-indigo-600 shadow-blue-500/20"
                 : "bg-gradient-to-r from-pink-500 to-rose-500 shadow-pink-500/20"
@@ -144,7 +144,7 @@ export default function WishCard({ wish }: { wish: Wish }) {
         ) : (
           <button
             disabled
-            className="flex-1 py-2 px-3 bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-xl text-xs font-medium cursor-default text-center"
+            className="min-w-0 flex-1 py-2.5 px-2 bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-xl text-xs font-medium cursor-default text-center sm:px-3"
           >
             ✓ 已完成 (可重置)
           </button>
@@ -152,7 +152,7 @@ export default function WishCard({ wish }: { wish: Wish }) {
 
         <button
           onClick={() => setShowDetail(true)}
-          className="min-w-[calc(100%-3rem)] flex-1 py-2 px-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 rounded-xl text-xs font-medium active:scale-95 transition-all sm:min-w-0"
+          className="min-w-0 flex-1 py-2.5 px-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 rounded-xl text-xs font-medium active:scale-95 transition-all sm:px-3"
         >
           詳情 / 評分
         </button>

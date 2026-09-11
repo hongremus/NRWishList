@@ -54,11 +54,11 @@ export default function WishList() {
     : "bg-pink-500 text-white shadow-md shadow-pink-500/20";
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       {/* 篩選器與排序工具列 */}
       <div className="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 space-y-3">
         {/* 狀態切換 */}
-        <div className="flex flex-col items-stretch gap-3 pb-1 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col items-stretch gap-2 pb-1 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
           <div className="flex w-full gap-1.5 overflow-x-auto p-1 bg-gray-100 dark:bg-gray-700/60 rounded-2xl sm:w-auto">
             <button
                 className={`px-3.5 py-2 rounded-xl text-sm sm:text-xs font-semibold transition-all ${
@@ -71,7 +71,7 @@ export default function WishList() {
               未完成 ({wishes.filter((w) => w.status === "open").length})
             </button>
             <button
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+              className={`px-3.5 py-2 rounded-xl text-sm sm:text-xs font-semibold transition-all ${
                 statusFilter === "completed"
                   ? activeStatusClass
                   : "text-gray-600 dark:text-gray-300 hover:text-gray-900"
@@ -81,7 +81,7 @@ export default function WishList() {
               已完成 ({wishes.filter((w) => w.status === "completed").length})
             </button>
             <button
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+              className={`px-3.5 py-2 rounded-xl text-sm sm:text-xs font-semibold transition-all ${
                 statusFilter === "all"
                   ? activeStatusClass
                   : "text-gray-600 dark:text-gray-300 hover:text-gray-900"
@@ -140,12 +140,12 @@ export default function WishList() {
 
       {/* 願望卡片列表 */}
       {filteredAndSorted.length === 0 ? (
-        <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 text-center shadow-sm border border-gray-100 dark:border-gray-700 my-6">
-          <div className="text-4xl mb-3">🎈</div>
+        <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 sm:p-8 text-center shadow-sm border border-gray-100 dark:border-gray-700 my-4 sm:my-6">
+          <div className="text-3xl sm:text-4xl mb-2 sm:mb-3">🎈</div>
           <h3 className="text-base font-bold text-gray-700 dark:text-gray-200 mb-1">
             尚無相符的許願項目
           </h3>
-          <p className="text-sm text-gray-400">
+          <p className="mx-auto max-w-xs text-sm leading-5 text-gray-400">
             {statusFilter === "open"
               ? "目前沒有未完成的願望，快點擊「新增願望」許下你們的心願吧！"
               : "試試切換其他 Tag 或篩選條件看看。"}

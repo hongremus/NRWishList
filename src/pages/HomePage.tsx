@@ -60,10 +60,10 @@ export default function HomePage() {
   return (
     <div className={`${dark ? "dark" : ""} min-h-screen overflow-x-hidden transition-colors duration-300 bg-surface dark:bg-gray-900 text-gray-900 dark:text-gray-100 pb-20`}>
       {/* 頂部 Header */}
-      <header className={`bg-gradient-to-r ${themeHeaderGradient} text-white px-4 py-4 sm:px-6 sm:py-5 shadow-lg rounded-b-3xl`}>
-        <div className="max-w-4xl mx-auto flex flex-wrap items-center justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-3">
-            <div className="w-11 h-11 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-2xl shadow-inner">
+      <header className={`bg-gradient-to-r ${themeHeaderGradient} text-white px-4 py-3 sm:px-6 sm:py-5 shadow-lg rounded-b-3xl`}>
+        <div className="max-w-4xl mx-auto flex flex-wrap items-center justify-between gap-2 sm:gap-3">
+          <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-xl sm:text-2xl shadow-inner">
               {isRemus ? "👦🏻" : "👧🏻"}
             </div>
             <div className="min-w-0">
@@ -78,7 +78,7 @@ export default function HomePage() {
           <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
             <button
               onClick={() => setShowStats(true)}
-              className="p-2.5 bg-white/15 hover:bg-white/25 active:scale-95 text-white rounded-xl backdrop-blur-sm transition-all"
+              className="flex h-10 w-10 items-center justify-center bg-white/15 hover:bg-white/25 active:scale-95 text-white rounded-xl backdrop-blur-sm transition-all sm:h-11 sm:w-11"
               title="查看統計"
             >
               📊
@@ -91,7 +91,7 @@ export default function HomePage() {
             </button>
             <button
               onClick={toggleDark}
-              className="p-2.5 bg-white/15 hover:bg-white/25 active:scale-95 text-white rounded-xl backdrop-blur-sm transition-all"
+              className="flex h-10 w-10 items-center justify-center bg-white/15 hover:bg-white/25 active:scale-95 text-white rounded-xl backdrop-blur-sm transition-all sm:h-11 sm:w-11"
               title={dark ? "切換淺色" : "切換深色"}
             >
               {dark ? "☀️" : "🌙"}
@@ -113,7 +113,7 @@ export default function HomePage() {
       </header>
 
       {/* 主內容區塊 */}
-      <main className="max-w-4xl mx-auto p-4 sm:p-6">
+      <main className="max-w-4xl mx-auto p-3 sm:p-6">
         {syncError && (
           <div className="mb-4 flex items-start justify-between gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 shadow-sm">
             <span>⚠️ {syncError}</span>
@@ -124,16 +124,16 @@ export default function HomePage() {
         )}
 
         {/* 手機版頂部快捷功能區 */}
-        <div className="flex flex-wrap items-center justify-between gap-2 mb-4 sm:hidden">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-3 sm:hidden">
           <button
             onClick={() => setShowTagManager(true)}
-              className="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-200 shadow-xs"
+              className="px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-200 shadow-xs"
           >
             🏷️ Tag 標籤管理
           </button>
           <button
             onClick={() => setShowNew(true)}
-            className={`px-4 py-2 text-white rounded-xl text-sm font-bold shadow-md active:scale-95 transition-all bg-gradient-to-r ${themeHeaderGradient}`}
+            className={`px-4 py-2.5 text-white rounded-xl text-sm font-bold shadow-md active:scale-95 transition-all bg-gradient-to-r ${themeHeaderGradient}`}
           >
             ＋ 新增願望
           </button>
