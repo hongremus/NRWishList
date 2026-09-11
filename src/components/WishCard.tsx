@@ -144,9 +144,9 @@ export default function WishCard({ wish }: { wish: Wish }) {
         ) : (
           <button
             disabled
-            className="min-w-0 flex-1 py-2.5 px-2 bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-xl text-xs font-medium cursor-default text-center sm:px-3"
+            className="min-w-0 flex-1 whitespace-nowrap py-2.5 px-2 bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-xl text-xs font-medium cursor-default text-center sm:px-3"
           >
-            ✓ 已完成 (可重置)
+            ✓ 已完成
           </button>
         )}
 
