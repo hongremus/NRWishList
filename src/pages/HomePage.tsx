@@ -18,11 +18,6 @@ export default function HomePage() {
   const [showTagManager, setShowTagManager] = useState(false);
   const [showStats, setShowStats] = useState(false);
 
-  // 深色模式狀態持久化
-  const [dark, setDark] = useState(() => {
-    return localStorage.getItem("nr-theme-dark") === "true";
-  });
-
   const isRemus = currentUser?.username === "Remus";
 
   useEffect(() => {
@@ -39,14 +34,6 @@ export default function HomePage() {
     return unsubscribe;
   }, [loadRemoteData, lockExpiredHistories, setCurrentUser, subscribeToRemoteData]);
 
-  function toggleDark() {
-    setDark((prev) => {
-      const next = !prev;
-      localStorage.setItem("nr-theme-dark", String(next));
-      return next;
-    });
-  }
-
   function logout() {
     setCurrentUser(null);
     localStorage.removeItem("nr-current-user");
@@ -58,7 +45,7 @@ export default function HomePage() {
     : "from-pink-500 to-rose-500 shadow-pink-500/20";
 
   return (
-    <div className={`${dark ? "dark" : ""} min-h-screen overflow-x-hidden transition-colors duration-300 bg-surface dark:bg-gray-900 text-gray-900 dark:text-gray-100 pb-20`}>
+    <div className="min-h-screen overflow-x-hidden transition-colors duration-300 bg-surface text-gray-900 pb-20">
       {/* 頂部 Header */}
       <header className={`bg-gradient-to-r ${themeHeaderGradient} text-white px-4 py-3 sm:px-6 sm:py-5 shadow-lg rounded-b-3xl`}>
         <div className="max-w-4xl mx-auto flex flex-wrap items-center justify-between gap-2 sm:gap-3">
@@ -88,13 +75,6 @@ export default function HomePage() {
               className="hidden p-2.5 bg-white/15 hover:bg-white/25 active:scale-95 text-white rounded-xl backdrop-blur-sm transition-all text-xs font-semibold sm:inline-flex sm:items-center sm:gap-1"
             >
               🏷️ 管理 Tag
-            </button>
-            <button
-              onClick={toggleDark}
-              className="flex h-10 w-10 items-center justify-center bg-white/15 hover:bg-white/25 active:scale-95 text-white rounded-xl backdrop-blur-sm transition-all sm:h-11 sm:w-11"
-              title={dark ? "切換淺色" : "切換深色"}
-            >
-              {dark ? "☀️" : "🌙"}
             </button>
             <button
               onClick={logout}
