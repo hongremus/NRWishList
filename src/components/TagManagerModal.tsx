@@ -19,11 +19,11 @@ export default function TagManagerModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-xs">
-      <div className="bg-white dark:bg-gray-800 rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-md shadow-2xl border border-gray-100 dark:border-gray-700 max-h-[85vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
+      <div className="bg-white dark:bg-gray-800 rounded-t-3xl sm:rounded-3xl p-4 sm:p-6 w-full max-w-md shadow-2xl border border-gray-100 dark:border-gray-700 max-h-[85vh] overflow-y-auto">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+          <div className="flex min-w-0 items-center gap-2">
             <span className="text-xl">🏷️</span>
-            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">管理 Tag 標籤</h3>
+            <h3 className="truncate text-lg font-bold text-gray-900 dark:text-gray-100">管理 Tag 標籤</h3>
           </div>
           <button
             onClick={onClose}

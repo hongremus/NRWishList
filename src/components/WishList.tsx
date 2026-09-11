@@ -58,8 +58,8 @@ export default function WishList() {
       {/* 篩選器與排序工具列 */}
       <div className="bg-white dark:bg-gray-800 p-4 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 space-y-3">
         {/* 狀態切換 */}
-        <div className="flex items-center justify-between gap-2 overflow-x-auto pb-1">
-          <div className="flex gap-1.5 p-1 bg-gray-100 dark:bg-gray-700/60 rounded-2xl">
+        <div className="flex flex-col items-stretch gap-3 pb-1 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex w-full gap-1.5 overflow-x-auto p-1 bg-gray-100 dark:bg-gray-700/60 rounded-2xl sm:w-auto">
             <button
               className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
                 statusFilter === "open"
@@ -93,11 +93,11 @@ export default function WishList() {
           </div>
 
           {/* 排序選單 */}
-          <div className="flex-shrink-0">
+          <div className="w-full flex-shrink-0 sm:w-auto">
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as SortOption)}
-              className="px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-xs font-medium focus:outline-none dark:text-white"
+              className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-xs font-medium focus:outline-none dark:text-white sm:w-auto"
             >
               <option value="createdAt">🕒 建立日期 (最新)</option>
               <option value="priority">🔥 優先級 (高到低)</option>

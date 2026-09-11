@@ -93,10 +93,10 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-xs animate-fadeIn">
-      <div className="bg-white dark:bg-gray-800 rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-2xl shadow-2xl border border-gray-100 dark:border-gray-700 max-h-[90vh] overflow-y-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-t-3xl sm:rounded-3xl p-4 sm:p-6 w-full max-w-2xl shadow-2xl border border-gray-100 dark:border-gray-700 max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-start justify-between pb-3 border-b border-gray-100 dark:border-gray-700 mb-4">
-          <div className="flex-1 pr-4">
+        <div className="flex flex-wrap items-start justify-between gap-2 pb-3 border-b border-gray-100 dark:border-gray-700 mb-4">
+          <div className="min-w-0 flex-1 pr-2 sm:pr-4">
             <span
               className={`inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full mb-1 ${
                 wish.status === "completed"
@@ -106,9 +106,9 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
             >
               {wish.status === "completed" ? "✓ 已完成" : "⏳ 進行中"}
             </span>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">{wish.title}</h2>
+            <h2 className="break-words text-xl font-bold text-gray-900 dark:text-gray-100">{wish.title}</h2>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="ml-auto flex shrink-0 items-center gap-2">
             <button
               onClick={() => setEditing(!editing)}
               className="px-3 py-1.5 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl hover:bg-gray-200 transition-all"

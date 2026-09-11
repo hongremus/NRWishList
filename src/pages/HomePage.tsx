@@ -58,24 +58,24 @@ export default function HomePage() {
     : "from-pink-500 to-rose-500 shadow-pink-500/20";
 
   return (
-    <div className={`${dark ? "dark" : ""} min-h-screen transition-colors duration-300 bg-surface dark:bg-gray-900 text-gray-900 dark:text-gray-100 pb-20`}>
+    <div className={`${dark ? "dark" : ""} min-h-screen overflow-x-hidden transition-colors duration-300 bg-surface dark:bg-gray-900 text-gray-900 dark:text-gray-100 pb-20`}>
       {/* 頂部 Header */}
       <header className={`bg-gradient-to-r ${themeHeaderGradient} text-white px-4 py-4 sm:px-6 sm:py-5 shadow-lg rounded-b-3xl`}>
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="max-w-4xl mx-auto flex flex-wrap items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
             <div className="w-11 h-11 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-2xl shadow-inner">
               {isRemus ? "👦🏻" : "👧🏻"}
             </div>
-            <div>
+            <div className="min-w-0">
               <div className="text-xs text-white/80 font-medium">專屬許願空間</div>
-              <div className="font-bold text-base sm:text-lg flex items-center gap-1.5">
-                <span>{currentUser?.displayName || currentUser?.username}</span>
+              <div className="font-bold text-base sm:text-lg flex items-center gap-1.5 truncate">
+                <span className="truncate">{currentUser?.displayName || currentUser?.username}</span>
               </div>
             </div>
           </div>
 
           {/* 右側操作按鈕 */}
-          <div className="flex items-center gap-2">
+          <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
             <button
               onClick={() => setShowStats(true)}
               className="p-2.5 bg-white/15 hover:bg-white/25 active:scale-95 text-white rounded-xl backdrop-blur-sm transition-all"
@@ -85,7 +85,7 @@ export default function HomePage() {
             </button>
             <button
               onClick={() => setShowTagManager(true)}
-              className="p-2.5 bg-white/15 hover:bg-white/25 active:scale-95 text-white rounded-xl backdrop-blur-sm transition-all text-xs font-semibold hidden sm:inline-flex items-center gap-1"
+              className="hidden p-2.5 bg-white/15 hover:bg-white/25 active:scale-95 text-white rounded-xl backdrop-blur-sm transition-all text-xs font-semibold sm:inline-flex sm:items-center sm:gap-1"
             >
               🏷️ Tag 管理
             </button>
@@ -119,7 +119,7 @@ export default function HomePage() {
         )}
 
         {/* 手機版頂部快捷功能區 */}
-        <div className="flex items-center justify-between mb-4 sm:hidden">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-4 sm:hidden">
           <button
             onClick={() => setShowTagManager(true)}
             className="px-3 py-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-200 shadow-xs"

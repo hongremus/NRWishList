@@ -128,11 +128,11 @@ export default function WishCard({ wish }: { wish: Wish }) {
       </div>
 
       {/* 操作按鈕組 */}
-      <div className="flex items-center gap-2 pt-2">
+      <div className="flex flex-wrap items-stretch gap-2 pt-2">
         {wish.status === "open" ? (
           <button
             onClick={handleToggleComplete}
-            className={`flex-1 py-2 px-3 text-white rounded-xl text-xs font-semibold shadow-sm active:scale-95 transition-all flex items-center justify-center gap-1 ${
+            className={`min-w-[calc(100%-3rem)] flex-1 py-2 px-3 text-white rounded-xl text-xs font-semibold shadow-sm active:scale-95 transition-all flex items-center justify-center gap-1 sm:min-w-0 ${
               isRemus
                 ? "bg-gradient-to-r from-blue-500 to-indigo-600 shadow-blue-500/20"
                 : "bg-gradient-to-r from-pink-500 to-rose-500 shadow-pink-500/20"
@@ -152,7 +152,7 @@ export default function WishCard({ wish }: { wish: Wish }) {
 
         <button
           onClick={() => setShowDetail(true)}
-          className="py-2 px-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 rounded-xl text-xs font-medium active:scale-95 transition-all"
+          className="min-w-[calc(100%-3rem)] flex-1 py-2 px-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 rounded-xl text-xs font-medium active:scale-95 transition-all sm:min-w-0"
         >
           詳情 / 評分
         </button>
