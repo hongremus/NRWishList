@@ -4,7 +4,7 @@ import { useStore } from "../store";
 import WishModal from "./WishModal";
 import ConfirmModal from "./ConfirmModal";
 
-export default function WishCard({ wish }: { wish: Wish }) {
+export default function WishCard({ wish, onDetailChange }: { wish: Wish; onDetailChange: (isOpen: boolean) => void }) {
   const update = useStore((s) => s.updateWish);
   const deleteWish = useStore((s) => s.deleteWish);
   const currentUser = useStore((s) => s.currentUser);
@@ -13,6 +13,16 @@ export default function WishCard({ wish }: { wish: Wish }) {
   const [showDetail, setShowDetail] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+
+  function openDetail() {
+    setShowDetail(true);
+    onDetailChange(true);
+  }
+
+  function closeDetail() {
+    setShowDetail(false);
+    onDetailChange(false);
+  }
 
   function handleToggleComplete() {
     if (wish.status === "open") {
@@ -71,13 +81,13 @@ export default function WishCard({ wish }: { wish: Wish }) {
           ? "bg-gray-50/90 dark:bg-gray-800/80 border-gray-200 dark:border-gray-700 opacity-90"
           : "bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800"
       } cursor-pointer`}
-      onClick={() => setShowDetail(true)}
+      onClick={openDetail}
       role="button"
       tabIndex={0}
       onKeyDown={(event) => {
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
-          setShowDetail(true);
+          openDetail();
         }
       }}
     >
@@ -174,7 +184,7 @@ export default function WishCard({ wish }: { wish: Wish }) {
             if (wish.status === "completed") {
               setShowResetConfirm(true);
             } else {
-              setShowDetail(true);
+              openDetail();
             }
           }}
           className="min-w-0 flex-1 py-2.5 px-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 rounded-xl text-xs font-medium active:scale-95 transition-all sm:px-3"
@@ -194,7 +204,7 @@ export default function WishCard({ wish }: { wish: Wish }) {
         </button>
       </div>
 
-      {showDetail && <WishModal wish={wish} onClose={() => setShowDetail(false)} />}
+      {showDetail && <WishModal wish={wish} onClose={closeDetail} />}
 
       {/* 刪除確認 Modal (取代 confirm) */}
       <ConfirmModal

@@ -4,7 +4,7 @@ import WishCard from "./WishCard";
 
 type SortOption = "createdAt" | "priority" | "deadline" | "completedCount";
 
-export default function WishList() {
+export default function WishList({ onDetailChange }: { onDetailChange: (isOpen: boolean) => void }) {
   const wishes = useStore((s) => s.wishes);
   const availableTags = useStore((s) => s.availableTags);
   const currentUser = useStore((s) => s.currentUser);
@@ -154,7 +154,7 @@ export default function WishList() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           {filteredAndSorted.map((w) => (
-            <WishCard key={w.id} wish={w} />
+            <WishCard key={w.id} wish={w} onDetailChange={onDetailChange} />
           ))}
         </div>
       )}

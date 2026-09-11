@@ -17,6 +17,7 @@ export default function HomePage() {
   const [showNew, setShowNew] = useState(false);
   const [showTagManager, setShowTagManager] = useState(false);
   const [showStats, setShowStats] = useState(false);
+  const [showWishDetail, setShowWishDetail] = useState(false);
 
   const isRemus = currentUser?.username === "Remus";
 
@@ -119,11 +120,11 @@ export default function HomePage() {
           </button>
         </div>
 
-        <WishList />
+        <WishList onDetailChange={setShowWishDetail} />
       </main>
 
       {/* 手機版右下角 Floating Action Button (新增願望) */}
-      {!showNew && !showTagManager && !showStats && (
+      {!showNew && !showTagManager && !showStats && !showWishDetail && (
         <div className="fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom))] right-4 sm:bottom-8 sm:right-8 z-40">
           <button
             onClick={() => setShowNew(true)}
