@@ -67,7 +67,7 @@ export default function HomePage() {
               {isRemus ? "👦🏻" : "👧🏻"}
             </div>
             <div className="min-w-0">
-              <div className="text-xs text-white/80 font-medium">專屬許願空間</div>
+              <div className="text-xs text-white/80 font-medium">我哋嘅願望空間</div>
               <div className="font-bold text-base sm:text-lg flex items-center gap-1.5 truncate">
                 <span className="truncate">{currentUser?.displayName || currentUser?.username}</span>
               </div>
@@ -79,7 +79,7 @@ export default function HomePage() {
             <button
               onClick={() => setShowStats(true)}
               className="flex h-10 w-10 items-center justify-center bg-white/15 hover:bg-white/25 active:scale-95 text-white rounded-xl backdrop-blur-sm transition-all sm:h-11 sm:w-11"
-              title="查看統計"
+              title="睇統計"
             >
               📊
             </button>
@@ -87,7 +87,7 @@ export default function HomePage() {
               onClick={() => setShowTagManager(true)}
               className="hidden p-2.5 bg-white/15 hover:bg-white/25 active:scale-95 text-white rounded-xl backdrop-blur-sm transition-all text-xs font-semibold sm:inline-flex sm:items-center sm:gap-1"
             >
-              🏷️ Tag 管理
+              🏷️ 管理 Tag
             </button>
             <button
               onClick={toggleDark}
@@ -129,13 +129,13 @@ export default function HomePage() {
             onClick={() => setShowTagManager(true)}
               className="px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-200 shadow-xs"
           >
-            🏷️ Tag 標籤管理
+            🏷️ 管理 Tag
           </button>
           <button
             onClick={() => setShowNew(true)}
             className={`px-4 py-2.5 text-white rounded-xl text-sm font-bold shadow-md active:scale-95 transition-all bg-gradient-to-r ${themeHeaderGradient}`}
           >
-            ＋ 新增願望
+            ＋ 加願望
           </button>
         </div>
 
@@ -149,7 +149,7 @@ export default function HomePage() {
           className={`px-4 py-3 text-white font-bold rounded-full shadow-2xl flex items-center gap-2 active:scale-95 transition-all border-2 border-white/40 bg-gradient-to-r ${themeHeaderGradient}`}
         >
           <span className="text-xl">✨</span>
-          <span className="text-sm">許願 ➕</span>
+          <span className="text-sm">加願望 ➕</span>
         </button>
       </div>
 

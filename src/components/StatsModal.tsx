@@ -19,7 +19,7 @@ export default function StatsModal({ onClose }: { onClose: () => void }) {
     const avgRating =
       allRatings.length > 0
         ? (allRatings.reduce((a, b) => a + b, 0) / allRatings.length).toFixed(1)
-        : "尚無";
+        : "未有";
 
     // 最常用 Tag
     const tagCounts: Record<string, number> = {};
@@ -47,7 +47,7 @@ export default function StatsModal({ onClose }: { onClose: () => void }) {
         <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
           <div className="flex min-w-0 items-center gap-2">
             <span className="text-2xl">📊</span>
-            <h3 className="truncate text-xl font-bold text-gray-900 dark:text-gray-100">許願與實現統計</h3>
+            <h3 className="truncate text-xl font-bold text-gray-900 dark:text-gray-100">願望統計</h3>
           </div>
           <button
             onClick={onClose}
@@ -60,33 +60,33 @@ export default function StatsModal({ onClose }: { onClose: () => void }) {
         <div className="grid grid-cols-2 gap-3 mb-4">
           <div className="p-4 bg-pink-50 dark:bg-pink-900/20 rounded-2xl border border-pink-100 dark:border-pink-900/30 text-center">
             <div className="text-2xl font-black text-pink-600 dark:text-pink-300">{stats.total}</div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">總許願數</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">願望總數</div>
           </div>
 
           <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-2xl border border-green-100 dark:border-green-900/30 text-center">
             <div className="text-2xl font-black text-green-600 dark:text-green-300">{stats.completed}</div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">已實現願望</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">已搞掂</div>
           </div>
 
           <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-2xl border border-purple-100 dark:border-purple-900/30 text-center">
             <div className="text-2xl font-black text-purple-600 dark:text-purple-300">{stats.rate}%</div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">實現達成率</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">完成率</div>
           </div>
 
           <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-2xl border border-amber-100 dark:border-amber-900/30 text-center">
             <div className="text-2xl font-black text-amber-500">{stats.avgRating}</div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">平均實現評分</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">平均分</div>
           </div>
         </div>
 
         <div className="space-y-2 text-xs mb-6">
           <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl flex flex-wrap justify-between items-center gap-1">
-            <span className="text-gray-500 dark:text-gray-400">🏷️ 最常用 Tag:</span>
+            <span className="text-gray-500 dark:text-gray-400">🏷️ 最常用 Tag：</span>
             <span className="font-bold text-gray-800 dark:text-gray-200">{stats.topTag}</span>
           </div>
 
           <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl flex flex-wrap justify-between items-center gap-1">
-            <span className="text-gray-500 dark:text-gray-400">🏆 最多完成願望:</span>
+            <span className="text-gray-500 dark:text-gray-400">🏆 完成最多次：</span>
             <span className="font-bold text-gray-800 dark:text-gray-200 truncate max-w-[180px]">
               {stats.mostCompletedWish}
             </span>
@@ -97,7 +97,7 @@ export default function StatsModal({ onClose }: { onClose: () => void }) {
           onClick={onClose}
           className="w-full py-2.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-xl font-semibold text-sm active:scale-95 transition-all"
         >
-          關閉
+          閂咗
         </button>
       </div>
     </div>

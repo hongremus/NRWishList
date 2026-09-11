@@ -15,7 +15,7 @@ export default function LoginPage() {
       setErr("");
       localStorage.setItem("nr-current-user", JSON.stringify(u));
     } else {
-      setErr("登入失敗：帳號或密碼錯誤");
+      setErr("登入唔到：帳號或者密碼唔啱");
     }
   }
 
@@ -29,16 +29,16 @@ export default function LoginPage() {
           <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 bg-clip-text text-transparent">
             NR Wish List
           </h1>
-          <p className="text-xs sm:text-sm text-gray-500 mt-1">專屬於我們的雙人許願清單 💕</p>
+          <p className="text-xs sm:text-sm text-gray-500 mt-1">我哋兩個嘅願望清單 💕</p>
         </div>
 
         {/* 手動輸入登入 */}
         <div className="space-y-3">
           <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">使用者名稱</label>
+            <label className="block text-sm font-medium text-gray-600 mb-1">帳號</label>
             <input
               className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-purple-400 focus:bg-white transition-all"
-              placeholder="請輸入帳號"
+              placeholder="打你個帳號"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
             />
@@ -48,7 +48,7 @@ export default function LoginPage() {
             <input
               type="password"
               className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-purple-400 focus:bg-white transition-all"
-              placeholder="請輸入密碼"
+              placeholder="打你個密碼"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && doLogin()}
@@ -65,7 +65,7 @@ export default function LoginPage() {
           </button>
         </div>
 
-        <div className="mt-5 text-center text-[11px] text-gray-400">v1.0.11</div>
+        <div className="mt-5 text-center text-[11px] text-gray-400">v1.0.12</div>
       </div>
     </div>
   );

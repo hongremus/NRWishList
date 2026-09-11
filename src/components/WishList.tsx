@@ -68,7 +68,7 @@ export default function WishList() {
               }`}
               onClick={() => setStatusFilter("open")}
             >
-              未完成 ({wishes.filter((w) => w.status === "open").length})
+              未搞掂 ({wishes.filter((w) => w.status === "open").length})
             </button>
             <button
               className={`px-3.5 py-2 rounded-xl text-sm sm:text-xs font-semibold transition-all ${
@@ -78,7 +78,7 @@ export default function WishList() {
               }`}
               onClick={() => setStatusFilter("completed")}
             >
-              已完成 ({wishes.filter((w) => w.status === "completed").length})
+              搞掂咗 ({wishes.filter((w) => w.status === "completed").length})
             </button>
             <button
               className={`px-3.5 py-2 rounded-xl text-sm sm:text-xs font-semibold transition-all ${
@@ -99,10 +99,10 @@ export default function WishList() {
               onChange={(e) => setSortBy(e.target.value as SortOption)}
               className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm sm:w-auto sm:text-xs"
             >
-              <option value="createdAt">🕒 建立日期 (最新)</option>
-              <option value="priority">🔥 優先級 (高到低)</option>
-              <option value="completedCount">🎉 完成次數 (最多)</option>
-              <option value="deadline">📅 截止日期 (最接近)</option>
+              <option value="createdAt">🕒 新增日期（最新）</option>
+              <option value="priority">🔥 優先度（高至低）</option>
+              <option value="completedCount">🎉 完成咗幾多次</option>
+              <option value="deadline">📅 截止日（最近）</option>
             </select>
           </div>
         </div>
@@ -119,7 +119,7 @@ export default function WishList() {
                   : "bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100"
               }`}
             >
-              全部 Tag
+              所有 Tag
             </button>
             {allTags.map((t) => (
               <button
@@ -143,12 +143,12 @@ export default function WishList() {
         <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 sm:p-8 text-center shadow-sm border border-gray-100 dark:border-gray-700 my-4 sm:my-6">
           <div className="text-3xl sm:text-4xl mb-2 sm:mb-3">🎈</div>
           <h3 className="text-base font-bold text-gray-700 dark:text-gray-200 mb-1">
-            尚無相符的許願項目
+            搵唔到啱嘅願望
           </h3>
           <p className="mx-auto max-w-xs text-sm leading-5 text-gray-400">
             {statusFilter === "open"
-              ? "目前沒有未完成的願望，快點擊「新增願望」許下你們的心願吧！"
-              : "試試切換其他 Tag 或篩選條件看看。"}
+              ? "而家未有未搞掂嘅願望，快啲撳「加願望」啦！"
+              : "試下轉另一個 Tag 或篩選條件啦。"}
           </p>
         </div>
       ) : (

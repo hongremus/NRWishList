@@ -63,20 +63,20 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
   }
 
   function getRatingStatusText(completedAtStr: string, isLocked?: boolean) {
-    if (isLocked) return { text: "🔒 評分已鎖定", canRate: false };
+    if (isLocked) return { text: "🔒 評分已鎖住", canRate: false };
     const compTime = new Date(completedAtStr).getTime();
-    if (isNaN(compTime)) return { text: "可評分", canRate: true };
+    if (isNaN(compTime)) return { text: "可以打分", canRate: true };
 
     const TWO_DAYS_MS = 2 * 24 * 60 * 60 * 1000;
     const diff = compTime + TWO_DAYS_MS - Date.now();
     if (diff <= 0) {
-      return { text: "⏰ 2天評分期限已過", canRate: false };
+      return { text: "⏰ 評分時間過咗", canRate: false };
     }
 
     const hoursLeft = Math.floor(diff / (1000 * 60 * 60));
     const minsLeft = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
     return {
-      text: `⏳ 剩餘評分時間: ${hoursLeft}小時 ${minsLeft}分`,
+      text: `⏳ 仲有 ${hoursLeft}個鐘 ${minsLeft}分鐘可以打分`,
       canRate: true,
     };
   }
@@ -97,7 +97,7 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
                   : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300"
               }`}
             >
-              {wish.status === "completed" ? "✓ 已完成" : "⏳ 進行中"}
+              {wish.status === "completed" ? "✓ 搞掂咗" : "⏳ 做緊"}
             </span>
             <h2 className="break-words text-xl font-bold text-gray-900 dark:text-gray-100">{wish.title}</h2>
           </div>
@@ -106,7 +106,7 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
               onClick={() => setEditing(!editing)}
               className="px-3 py-1.5 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl hover:bg-gray-200 transition-all"
             >
-              {editing ? "取消" : "✏️ 編輯"}
+              {editing ? "取消" : "✏️ 修改"}
             </button>
             <button
               onClick={onClose}
@@ -129,7 +129,7 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">詳情描述</label>
+              <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">詳情</label>
               <textarea
                 rows={3}
                 className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm dark:text-white resize-none"
@@ -144,7 +144,7 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
                   isRemus ? "bg-blue-500 hover:bg-blue-600" : "bg-pink-500 hover:bg-pink-600"
                 }`}
               >
-                儲存修改
+                儲存
               </button>
             </div>
           </div>
@@ -167,11 +167,11 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
                 </span>
               ))}
               <span className="px-2.5 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg">
-                完成次數: {wish.completedCount} 次
+                完成咗 {wish.completedCount} 次
               </span>
               {wish.deadline && (
                 <span className="px-2.5 py-1 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-300 rounded-lg">
-                  📅 截止: {wish.deadline}
+                  📅 截止日：{wish.deadline}
                 </span>
               )}
             </div>
@@ -182,13 +182,13 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
         <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700">
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-bold text-gray-800 dark:text-gray-200 text-base flex items-center gap-1.5">
-              <span>📜</span> 完成歷史紀錄 ({wish.history.length})
+              <span>📜</span> 完成紀錄 ({wish.history.length})
             </h3>
           </div>
 
           {wish.history.length === 0 ? (
             <div className="text-center py-8 text-gray-400 text-sm bg-gray-50 dark:bg-gray-700/30 rounded-2xl">
-              尚未有完成紀錄。標記為已完成後會在這裡記錄！
+              仲未完成過，搞掂咗之後就會喺呢度有紀錄！
             </div>
           ) : (
             <div className="space-y-4">
@@ -210,7 +210,7 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
 
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-gray-600 dark:text-gray-300">
-                        平均評分:{" "}
+                        平均分：{" "}
                         <span className="font-bold text-amber-500 text-sm">
                           {h.averageRating ? `⭐ ${h.averageRating}` : "暫無"}
                         </span>
@@ -223,20 +223,20 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
                       <div className="p-2.5 bg-blue-50/60 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-900/30">
                         <div className="font-semibold text-blue-700 dark:text-blue-300 mb-1 flex items-center justify-between">
                           <span>👦🏻 Remus</span>
-                          <span>{h.ratings.me ? `⭐ ${h.ratings.me}` : "未評分"}</span>
+                          <span>{h.ratings.me ? `⭐ ${h.ratings.me}` : "未打分"}</span>
                         </div>
                         <p className="text-gray-600 dark:text-gray-300 italic">
-                          {h.remarks.me ? `"${h.remarks.me}"` : "尚無 Remark"}
+                          {h.remarks.me ? `"${h.remarks.me}"` : "未有 Remark"}
                         </p>
                       </div>
 
                       <div className="p-2.5 bg-pink-50/60 dark:bg-pink-900/20 rounded-xl border border-pink-100 dark:border-pink-900/30">
                         <div className="font-semibold text-pink-700 dark:text-pink-300 mb-1 flex items-center justify-between">
                           <span>👧🏻 Nicole</span>
-                          <span>{h.ratings.gf ? `⭐ ${h.ratings.gf}` : "未評分"}</span>
+                          <span>{h.ratings.gf ? `⭐ ${h.ratings.gf}` : "未打分"}</span>
                         </div>
                         <p className="text-gray-600 dark:text-gray-300 italic">
-                          {h.remarks.gf ? `"${h.remarks.gf}"` : "尚無 Remark"}
+                          {h.remarks.gf ? `"${h.remarks.gf}"` : "未有 Remark"}
                         </p>
                       </div>
                     </div>
@@ -251,28 +251,28 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
                                 onClick={() => openRatingForm(h, "me")}
                                 className="px-3 py-1.5 bg-blue-500 text-white rounded-xl text-xs font-medium active:scale-95 transition-all shadow-sm"
                               >
-                                👦🏻 Remus 填寫評分
+                                👦🏻 Remus 打分
                               </button>
                             ) : (
                               <button
                                 onClick={() => openRatingForm(h, "gf")}
                                 className="px-3 py-1.5 bg-pink-500 text-white rounded-xl text-xs font-medium active:scale-95 transition-all shadow-sm"
                               >
-                                👧🏻 Nicole 填寫評分
+                                👧🏻 Nicole 打分
                               </button>
                             )}
                             <button
                               onClick={() => lockHistoryItem(h.id)}
                               className="px-3 py-1.5 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-xl text-xs font-medium hover:bg-gray-300 transition-all ml-auto"
                             >
-                              🔒 提前鎖定
+                              🔒 提前鎖住
                             </button>
                           </div>
                         ) : (
                           /* 內嵌評分表單 */
                           <div className="p-3 bg-white dark:bg-gray-800 rounded-2xl border border-purple-200 dark:border-purple-800 space-y-3 animate-fadeIn">
                             <div className="flex items-center justify-between text-xs font-bold text-purple-700 dark:text-purple-300">
-                              <span>填寫評分 — {ratingRole === "me" ? "Remus" : "Nicole"}</span>
+                              <span>打分 — {ratingRole === "me" ? "Remus" : "Nicole"}</span>
                               <button
                                 onClick={() => setActiveRatingHistoryId(null)}
                                 className="text-gray-400 hover:text-gray-600"
@@ -283,7 +283,7 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
 
                             {/* 星星點選 */}
                             <div className="flex items-center gap-1">
-                              <span className="text-xs text-gray-500 mr-2">星級:</span>
+                              <span className="text-xs text-gray-500 mr-2">星星：</span>
                               {[1, 2, 3, 4, 5].map((star) => (
                                 <button
                                   key={star}
@@ -302,7 +302,7 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
                               <textarea
                                 rows={2}
                                 className="w-full p-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-xs dark:text-white resize-none"
-                                placeholder="對這次實現許願嘅感受或 Remark..."
+                                placeholder="你對今次願望有咩感受或者 Remark..."
                                 value={remarkText}
                                 onChange={(e) => setRemarkText(e.target.value)}
                               />
@@ -314,7 +314,7 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
                                 ratingRole === "me" ? "bg-blue-500" : "bg-pink-500"
                               }`}
                             >
-                              送出評分與 Remark ✨
+                              送出分數同 Remark ✨
                             </button>
                           </div>
                         )}

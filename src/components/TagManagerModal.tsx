@@ -23,7 +23,7 @@ export default function TagManagerModal({ onClose }: { onClose: () => void }) {
         <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
           <div className="flex min-w-0 items-center gap-2">
             <span className="text-xl">🏷️</span>
-            <h3 className="truncate text-lg font-bold text-gray-900 dark:text-gray-100">管理 Tag 標籤</h3>
+            <h3 className="truncate text-lg font-bold text-gray-900 dark:text-gray-100">管理 Tag</h3>
           </div>
           <button
             onClick={onClose}
@@ -34,7 +34,7 @@ export default function TagManagerModal({ onClose }: { onClose: () => void }) {
         </div>
 
         <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
-          自訂常用標籤，新增願望或篩選時可以直接點擊選擇。
+          自己加啲常用 Tag，之後加願望或者篩選嗰陣可以直接揀。
         </p>
 
         {/* 新增 Tag 輸入框 */}
@@ -42,7 +42,7 @@ export default function TagManagerModal({ onClose }: { onClose: () => void }) {
           <input
             type="text"
             className="flex-1 px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 dark:text-white"
-            placeholder="輸入新標籤名稱 (如: 踩點)"
+            placeholder="打新 Tag 名（例如：踩點）"
             value={newTagInput}
             onChange={(e) => setNewTagInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleAdd()}
@@ -53,13 +53,13 @@ export default function TagManagerModal({ onClose }: { onClose: () => void }) {
               isRemus ? "bg-blue-500 hover:bg-blue-600" : "bg-pink-500 hover:bg-pink-600"
             }`}
           >
-            新增
+            加入
           </button>
         </div>
 
         {/* 現有 Tag 列表 */}
         <div className="space-y-2">
-          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">已有標籤 ({availableTags.length})</div>
+          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">而家有嘅 Tag ({availableTags.length})</div>
           <div className="flex flex-wrap gap-2">
             {availableTags.map((tag) => (
               <span
@@ -70,14 +70,14 @@ export default function TagManagerModal({ onClose }: { onClose: () => void }) {
                 <button
                   onClick={() => deleteTag(tag)}
                   className="w-4 h-4 rounded-full hover:bg-purple-200 dark:hover:bg-purple-800 flex items-center justify-center text-xs text-purple-500"
-                  title="刪除標籤"
+                  title="刪除 Tag"
                 >
                   ×
                 </button>
               </span>
             ))}
             {availableTags.length === 0 && (
-              <div className="text-xs text-gray-400 py-4 text-center w-full">尚無任何標籤，請在上方新增。</div>
+              <div className="text-xs text-gray-400 py-4 text-center w-full">未有 Tag，喺上面加一個啦。</div>
             )}
           </div>
         </div>
@@ -87,7 +87,7 @@ export default function TagManagerModal({ onClose }: { onClose: () => void }) {
             onClick={onClose}
             className="w-full sm:w-auto px-6 py-2.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-xl font-medium text-sm active:scale-95 transition-all"
           >
-            完成
+            搞掂
           </button>
         </div>
       </div>

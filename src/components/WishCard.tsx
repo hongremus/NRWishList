@@ -62,7 +62,7 @@ export default function WishCard({ wish }: { wish: Wish }) {
       ? "👦🏻 Remus"
       : wish.assignedTo === "gf"
       ? "👧🏻 Nicole"
-      : "👥 共同";
+      : "👥 一齊";
 
   return (
     <div
@@ -128,7 +128,7 @@ export default function WishCard({ wish }: { wish: Wish }) {
       {/* 提出者 & 負責人 & 評分資訊 */}
       <div className="flex flex-wrap items-center justify-between text-xs text-gray-500 dark:text-gray-400 pt-2 border-t border-gray-100 dark:border-gray-700 my-2 gap-y-1">
         <div className="flex items-center gap-3">
-          <span>負責: <strong className="text-gray-700 dark:text-gray-300">{assignedLabel}</strong></span>
+          <span>邊個搞: <strong className="text-gray-700 dark:text-gray-300">{assignedLabel}</strong></span>
           {wish.deadline && (
             <span className="text-red-500 dark:text-red-400 font-medium">
               ⏰ {wish.deadline}
@@ -137,7 +137,7 @@ export default function WishCard({ wish }: { wish: Wish }) {
         </div>
         {latestHistory?.averageRating && (
           <div className="text-amber-500 font-bold">
-            最新評分: ⭐ {latestHistory.averageRating}
+            最新分數: ⭐ {latestHistory.averageRating}
           </div>
         )}
       </div>
@@ -157,14 +157,14 @@ export default function WishCard({ wish }: { wish: Wish }) {
             }`}
           >
             <span>✓</span>
-            <span>標示已完成</span>
+            <span>搞掂咗</span>
           </button>
         ) : (
           <button
             disabled
             className="min-w-0 flex-1 whitespace-nowrap py-2.5 px-2 bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-xl text-xs font-medium cursor-default text-center sm:px-3"
           >
-            ✓ 已完成
+            ✓ 搞掂咗
           </button>
         )}
 
@@ -179,7 +179,7 @@ export default function WishCard({ wish }: { wish: Wish }) {
           }}
           className="min-w-0 flex-1 py-2.5 px-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 rounded-xl text-xs font-medium active:scale-95 transition-all sm:px-3"
         >
-          {wish.status === "completed" ? "↺ 重置活動" : "詳情 / 評分"}
+          {wish.status === "completed" ? "↺ 再做一次" : "詳情 / 評分"}
         </button>
 
         <button
@@ -199,8 +199,8 @@ export default function WishCard({ wish }: { wish: Wish }) {
       {/* 刪除確認 Modal (取代 confirm) */}
       <ConfirmModal
         isOpen={showDeleteConfirm}
-        title="確認刪除願望？"
-        message={`確定要刪除「${wish.title}」嗎？此操作將無法復原。`}
+        title="真係要刪除呢個願望？"
+        message={`真係要刪除「${wish.title}」？刪咗就返唔到轉頭喎。`}
         confirmText="刪除"
         cancelText="取消"
         isDanger={true}
@@ -209,9 +209,9 @@ export default function WishCard({ wish }: { wish: Wish }) {
       />
       <ConfirmModal
         isOpen={showResetConfirm}
-        title="確認重置活動？"
-        message="重置後這個願望會變回『未完成』狀態，可以再次被實現。之前的完成歷史紀錄與評分將會完整保留！"
-        confirmText="確定重置"
+        title="真係要再做一次？"
+        message="重置之後個願望會變返未搞掂，可以再做一次。之前嘅完成紀錄同評分會保留！"
+        confirmText="再做啦"
         cancelText="取消"
         onConfirm={handleConfirmReset}
         onCancel={() => setShowResetConfirm(false)}
