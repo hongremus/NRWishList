@@ -1,4 +1,5 @@
 import React from "react";
+import { createPortal } from "react-dom";
 import { useBodyScrollLock } from "../hooks/useBodyScrollLock";
 
 interface ConfirmModalProps {
@@ -25,7 +26,8 @@ export default function ConfirmModal({
   useBodyScrollLock(isOpen);
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
+    (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-fadeIn">
       <div
         className="bg-white dark:bg-gray-900 rounded-3xl p-6 w-full max-w-sm shadow-2xl border border-gray-100 dark:border-gray-800 animate-scaleUp"
@@ -55,5 +57,7 @@ export default function ConfirmModal({
         </div>
       </div>
     </div>
+    ),
+    document.body,
   );
 }
