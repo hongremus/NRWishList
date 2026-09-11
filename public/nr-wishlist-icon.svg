@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">NR Wish List</title>
+  <desc id="desc">Two hearts and a star representing a shared wish list.</desc>
+  <defs>
+    <linearGradient id="background" x1="64" y1="32" x2="448" y2="480" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2563EB"/>
+      <stop offset="0.52" stop-color="#7C3AED"/>
+      <stop offset="1" stop-color="#EC4899"/>
+    </linearGradient>
+    <linearGradient id="heartBlue" x1="160" y1="188" x2="336" y2="382" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#DBEAFE"/>
+      <stop offset="1" stop-color="#93C5FD"/>
+    </linearGradient>
+    <linearGradient id="heartPink" x1="214" y1="184" x2="388" y2="382" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FCE7F3"/>
+      <stop offset="1" stop-color="#F9A8D4"/>
+    </linearGradient>
+    <filter id="shadow" x="104" y="112" width="304" height="310" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="12" stdDeviation="10" flood-color="#172554" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="116" fill="url(#background)"/>
+  <circle cx="130" cy="132" r="9" fill="#fff" fill-opacity="0.9"/>
+  <circle cx="399" cy="132" r="6" fill="#fff" fill-opacity="0.65"/>
+  <path d="M366 79l8 18 18 8-18 8-8 18-8-18-18-8 18-8 8-18z" fill="#FDE68A"/>
+  <g filter="url(#shadow)">
+    <path d="M256 383c-12-13-105-91-129-119-40-46-24-113 28-130 40-13 77 6 101 36 24-30 61-49 101-36 52 17 68 84 28 130-24 28-117 106-129 119z" fill="url(#heartBlue)" stroke="#fff" stroke-opacity="0.7" stroke-width="8"/>
+    <path d="M256 383c-12-13-47-43-76-72 21-22 42-47 55-66 11-16 17-34 18-54 24-30 61-49 101-36 52 17 68 84 28 130-24 28-117 106-129 119z" fill="url(#heartPink)" fill-opacity="0.92"/>
+    <path d="M256 383c-12-13-105-91-129-119-40-46-24-113 28-130 40-13 77 6 101 36 24-30 61-49 101-36 52 17 68 84 28 130-24 28-117 106-129 119z" fill="none" stroke="#fff" stroke-opacity="0.85" stroke-width="8"/>
+  </g>
+  <path d="M256 218l7 15 16 7-16 7-7 16-7-16-16-7 16-7 7-15z" fill="#fff" fill-opacity="0.92"/>
+</svg>

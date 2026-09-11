@@ -1,0 +1,17 @@
+{
+  "name": "NR Wish List",
+  "short_name": "NR Wish List",
+  "description": "Remus and Nicole 的雙人許願清單",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fff7f9",
+  "theme_color": "#7c3aed",
+  "icons": [
+    {
+      "src": "/nr-wishlist-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
