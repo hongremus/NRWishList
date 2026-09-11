@@ -1,8 +1,10 @@
 import React, { useMemo } from "react";
 import { useStore } from "../store";
+import { useBodyScrollLock } from "../hooks/useBodyScrollLock";
 
 export default function StatsModal({ onClose }: { onClose: () => void }) {
   const wishes = useStore((s) => s.wishes);
+  useBodyScrollLock();
 
   const stats = useMemo(() => {
     const total = wishes.length;

@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { useStore } from "../store";
+import { useBodyScrollLock } from "../hooks/useBodyScrollLock";
 
 export default function TagManagerModal({ onClose }: { onClose: () => void }) {
+  useBodyScrollLock();
   const availableTags = useStore((s) => s.availableTags);
   const addTag = useStore((s) => s.addTag);
   const deleteTag = useStore((s) => s.deleteTag);

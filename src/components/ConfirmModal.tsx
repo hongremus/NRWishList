@@ -1,4 +1,5 @@
 import React from "react";
+import { useBodyScrollLock } from "../hooks/useBodyScrollLock";
 
 interface ConfirmModalProps {
   isOpen: boolean;
@@ -21,6 +22,7 @@ export default function ConfirmModal({
   onConfirm,
   onCancel,
 }: ConfirmModalProps) {
+  useBodyScrollLock(isOpen);
   if (!isOpen) return null;
 
   return (

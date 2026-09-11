@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { useStore } from "../store";
 import { Wish, Priority, AssignedTo } from "../types";
+import { useBodyScrollLock } from "../hooks/useBodyScrollLock";
 
 export default function NewWishModal({ onClose }: { onClose: () => void }) {
+  useBodyScrollLock();
   const addWish = useStore((s) => s.addWish);
   const currentUser = useStore((s) => s.currentUser);
   const availableTags = useStore((s) => s.availableTags);
