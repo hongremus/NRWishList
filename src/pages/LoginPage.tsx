@@ -35,19 +35,19 @@ export default function LoginPage() {
         {/* 手動輸入登入 */}
         <div className="space-y-3">
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">使用者名稱</label>
+            <label className="block text-sm font-medium text-gray-600 mb-1">使用者名稱</label>
             <input
-              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 focus:bg-white transition-all"
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-purple-400 focus:bg-white transition-all"
               placeholder="請輸入帳號"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">密碼</label>
+            <label className="block text-sm font-medium text-gray-600 mb-1">密碼</label>
             <input
               type="password"
-              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 focus:bg-white transition-all"
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-purple-400 focus:bg-white transition-all"
               placeholder="請輸入密碼"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -55,10 +55,10 @@ export default function LoginPage() {
             />
           </div>
 
-          {err && <div className="text-red-500 text-xs text-center bg-red-50 py-1.5 px-3 rounded-lg">{err}</div>}
+          {err && <div className="text-red-500 text-sm text-center bg-red-50 py-1.5 px-3 rounded-lg">{err}</div>}
 
           <button
-            className="w-full py-2.5 bg-gray-800 text-white font-medium text-sm rounded-xl shadow-md hover:bg-gray-900 active:scale-95 transition-all"
+            className="w-full py-3 bg-gray-800 text-white font-medium text-base rounded-xl shadow-md hover:bg-gray-900 active:scale-95 transition-all"
             onClick={doLogin}
           >
             登入

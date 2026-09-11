@@ -122,13 +122,13 @@ export default function HomePage() {
         <div className="flex flex-wrap items-center justify-between gap-2 mb-4 sm:hidden">
           <button
             onClick={() => setShowTagManager(true)}
-            className="px-3 py-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-200 shadow-xs"
+              className="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-200 shadow-xs"
           >
             🏷️ Tag 標籤管理
           </button>
           <button
             onClick={() => setShowNew(true)}
-            className={`px-4 py-1.5 text-white rounded-xl text-xs font-bold shadow-md active:scale-95 transition-all bg-gradient-to-r ${themeHeaderGradient}`}
+            className={`px-4 py-2 text-white rounded-xl text-sm font-bold shadow-md active:scale-95 transition-all bg-gradient-to-r ${themeHeaderGradient}`}
           >
             ＋ 新增願望
           </button>
@@ -138,10 +138,10 @@ export default function HomePage() {
       </main>
 
       {/* 手機版右下角 Floating Action Button (新增願望) */}
-      <div className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 z-40">
+      <div className="fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom))] right-4 sm:bottom-8 sm:right-8 z-40">
         <button
           onClick={() => setShowNew(true)}
-          className={`px-5 py-3.5 text-white font-bold rounded-full shadow-2xl flex items-center gap-2 active:scale-95 transition-all border-2 border-white/40 bg-gradient-to-r ${themeHeaderGradient}`}
+          className={`px-4 py-3 text-white font-bold rounded-full shadow-2xl flex items-center gap-2 active:scale-95 transition-all border-2 border-white/40 bg-gradient-to-r ${themeHeaderGradient}`}
         >
           <span className="text-xl">✨</span>
           <span className="text-sm">許願 ➕</span>

@@ -56,12 +56,12 @@ export default function WishList() {
   return (
     <div className="space-y-4">
       {/* 篩選器與排序工具列 */}
-      <div className="bg-white dark:bg-gray-800 p-4 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 space-y-3">
+      <div className="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 space-y-3">
         {/* 狀態切換 */}
         <div className="flex flex-col items-stretch gap-3 pb-1 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex w-full gap-1.5 overflow-x-auto p-1 bg-gray-100 dark:bg-gray-700/60 rounded-2xl sm:w-auto">
             <button
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                className={`px-3.5 py-2 rounded-xl text-sm sm:text-xs font-semibold transition-all ${
                 statusFilter === "open"
                   ? activeStatusClass
                   : "text-gray-600 dark:text-gray-300 hover:text-gray-900"
@@ -97,7 +97,7 @@ export default function WishList() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as SortOption)}
-              className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-xs font-medium focus:outline-none dark:text-white sm:w-auto"
+              className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm sm:w-auto sm:text-xs"
             >
               <option value="createdAt">🕒 建立日期 (最新)</option>
               <option value="priority">🔥 優先級 (高到低)</option>
@@ -110,10 +110,10 @@ export default function WishList() {
         {/* Tag 標籤速選列 */}
         {allTags.length > 0 && (
           <div className="flex items-center gap-1.5 overflow-x-auto pt-1 pb-0.5 no-scrollbar">
-            <span className="text-xs text-gray-400 font-medium flex-shrink-0 mr-1">Tag:</span>
+            <span className="text-sm sm:text-xs text-gray-400 font-medium flex-shrink-0 mr-1">Tag:</span>
             <button
               onClick={() => setTagFilter(null)}
-              className={`px-2.5 py-1 rounded-lg text-xs font-medium flex-shrink-0 transition-all ${
+              className={`px-3 py-1.5 rounded-lg text-sm sm:text-xs font-medium flex-shrink-0 transition-all ${
                 tagFilter === null
                   ? "bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 border border-purple-300"
                   : "bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100"
@@ -125,7 +125,7 @@ export default function WishList() {
               <button
                 key={t}
                 onClick={() => setTagFilter(tagFilter === t ? null : t)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-medium flex-shrink-0 transition-all ${
+                className={`px-3 py-1.5 rounded-lg text-sm sm:text-xs font-medium flex-shrink-0 transition-all ${
                   tagFilter === t
                     ? "bg-purple-500 text-white shadow-xs"
                     : "bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100"
@@ -145,7 +145,7 @@ export default function WishList() {
           <h3 className="text-base font-bold text-gray-700 dark:text-gray-200 mb-1">
             尚無相符的許願項目
           </h3>
-          <p className="text-xs text-gray-400">
+          <p className="text-sm text-gray-400">
             {statusFilter === "open"
               ? "目前沒有未完成的願望，快點擊「新增願望」許下你們的心願吧！"
               : "試試切換其他 Tag 或篩選條件看看。"}
