@@ -83,7 +83,10 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-xs animate-fadeIn">
-      <div className="bg-white dark:bg-gray-800 rounded-t-3xl sm:rounded-3xl p-4 sm:p-6 w-full max-w-2xl shadow-2xl border border-gray-100 dark:border-gray-700 max-h-[90vh] overflow-y-auto">
+      <div
+        className="bg-white dark:bg-gray-800 rounded-t-3xl sm:rounded-3xl p-4 sm:p-6 w-full max-w-2xl shadow-2xl border border-gray-100 dark:border-gray-700 max-h-[90vh] overflow-y-auto"
+        onClick={(event) => event.stopPropagation()}
+      >
         {/* Header */}
         <div className="flex flex-wrap items-start justify-between gap-2 pb-3 border-b border-gray-100 dark:border-gray-700 mb-4">
           <div className="min-w-0 flex-1 pr-2 sm:pr-4">
@@ -219,7 +222,7 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-1">
                       <div className="p-2.5 bg-blue-50/60 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-900/30">
                         <div className="font-semibold text-blue-700 dark:text-blue-300 mb-1 flex items-center justify-between">
-                          <span>👦🏻 Remus (我)</span>
+                          <span>👦🏻 Remus</span>
                           <span>{h.ratings.me ? `⭐ ${h.ratings.me}` : "未評分"}</span>
                         </div>
                         <p className="text-gray-600 dark:text-gray-300 italic">
@@ -229,7 +232,7 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
 
                       <div className="p-2.5 bg-pink-50/60 dark:bg-pink-900/20 rounded-xl border border-pink-100 dark:border-pink-900/30">
                         <div className="font-semibold text-pink-700 dark:text-pink-300 mb-1 flex items-center justify-between">
-                          <span>👧🏻 Nicole (女友)</span>
+                          <span>👧🏻 Nicole</span>
                           <span>{h.ratings.gf ? `⭐ ${h.ratings.gf}` : "未評分"}</span>
                         </div>
                         <p className="text-gray-600 dark:text-gray-300 italic">
