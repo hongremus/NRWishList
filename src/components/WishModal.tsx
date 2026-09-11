@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Wish, WishHistory } from "../types";
 import { useStore } from "../store";
-import ConfirmModal from "./ConfirmModal";
 
 export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () => void }) {
   const update = useStore((s) => s.updateWish);
@@ -11,9 +10,6 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(wish.title);
   const [desc, setDesc] = useState(wish.description || "");
-
-  // 用於重置確認彈窗
-  const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   // 用於評分介面的 state
   const [activeRatingHistoryId, setActiveRatingHistoryId] = useState<string | null>(null);
@@ -25,12 +21,6 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
     if (!title.trim()) return;
     update({ ...wish, title: title.trim(), description: desc.trim() });
     setEditing(false);
-  }
-
-  function handleConfirmReset() {
-    const nw = { ...wish, status: "open" as const };
-    update(nw);
-    setShowResetConfirm(false);
   }
 
   function lockHistoryItem(hId: string) {
@@ -191,14 +181,6 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
             <h3 className="font-bold text-gray-800 dark:text-gray-200 text-base flex items-center gap-1.5">
               <span>📜</span> 完成歷史紀錄 ({wish.history.length})
             </h3>
-            {wish.status === "completed" && (
-              <button
-                onClick={() => setShowResetConfirm(true)}
-                className="px-3 py-1.5 bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800 rounded-xl text-xs font-medium hover:bg-amber-100 active:scale-95 transition-all"
-              >
-                ↺ 重置願望為未完成
-              </button>
-            )}
           </div>
 
           {wish.history.length === 0 ? (
@@ -339,16 +321,6 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
           )}
         </div>
 
-        {/* 底部重置確認 modal */}
-        <ConfirmModal
-          isOpen={showResetConfirm}
-          title="確認重置願望？"
-          message="重置後這個願望會變回『未完成』狀態，可以再次被實現。之前的完成歷史紀錄與評分將會完整保留！"
-          confirmText="確定重置"
-          cancelText="取消"
-          onConfirm={handleConfirmReset}
-          onCancel={() => setShowResetConfirm(false)}
-        />
       </div>
     </div>
   );

@@ -12,6 +12,7 @@ export default function WishCard({ wish }: { wish: Wish }) {
 
   const [showDetail, setShowDetail] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   function handleToggleComplete() {
     if (wish.status === "open") {
@@ -39,6 +40,11 @@ export default function WishCard({ wish }: { wish: Wish }) {
     setShowDeleteConfirm(false);
   }
 
+  function handleConfirmReset() {
+    update({ ...wish, status: "open" });
+    setShowResetConfirm(false);
+  }
+
   // 最新歷史紀錄的評分
   const latestHistory = wish.history[0];
 
@@ -64,7 +70,16 @@ export default function WishCard({ wish }: { wish: Wish }) {
         wish.status === "completed"
           ? "bg-gray-50/90 dark:bg-gray-800/80 border-gray-200 dark:border-gray-700 opacity-90"
           : "bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700"
-      }`}
+      } cursor-pointer`}
+      onClick={() => setShowDetail(true)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          setShowDetail(true);
+        }
+      }}
     >
       <div className="flex justify-between items-start gap-2 mb-2">
         <div className="flex-1">
@@ -131,7 +146,10 @@ export default function WishCard({ wish }: { wish: Wish }) {
       <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] items-stretch gap-2 pt-2 sm:flex">
         {wish.status === "open" ? (
           <button
-            onClick={handleToggleComplete}
+            onClick={(event) => {
+              event.stopPropagation();
+              handleToggleComplete();
+            }}
             className={`min-w-0 flex-1 py-2.5 px-2 text-white rounded-xl text-xs font-semibold shadow-sm active:scale-95 transition-all flex items-center justify-center gap-1 sm:px-3 ${
               isRemus
                 ? "bg-gradient-to-r from-blue-500 to-indigo-600 shadow-blue-500/20"
@@ -151,14 +169,24 @@ export default function WishCard({ wish }: { wish: Wish }) {
         )}
 
         <button
-          onClick={() => setShowDetail(true)}
+          onClick={(event) => {
+            event.stopPropagation();
+            if (wish.status === "completed") {
+              setShowResetConfirm(true);
+            } else {
+              setShowDetail(true);
+            }
+          }}
           className="min-w-0 flex-1 py-2.5 px-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 rounded-xl text-xs font-medium active:scale-95 transition-all sm:px-3"
         >
-          詳情 / 評分
+          {wish.status === "completed" ? "↺ 重置活動" : "詳情 / 評分"}
         </button>
 
         <button
-          onClick={() => setShowDeleteConfirm(true)}
+          onClick={(event) => {
+            event.stopPropagation();
+            setShowDeleteConfirm(true);
+          }}
           className="py-2 px-2.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl text-xs font-medium active:scale-95 transition-all"
           title="刪除"
         >
@@ -178,6 +206,15 @@ export default function WishCard({ wish }: { wish: Wish }) {
         isDanger={true}
         onConfirm={handleConfirmDelete}
         onCancel={() => setShowDeleteConfirm(false)}
+      />
+      <ConfirmModal
+        isOpen={showResetConfirm}
+        title="確認重置活動？"
+        message="重置後這個願望會變回『未完成』狀態，可以再次被實現。之前的完成歷史紀錄與評分將會完整保留！"
+        confirmText="確定重置"
+        cancelText="取消"
+        onConfirm={handleConfirmReset}
+        onCancel={() => setShowResetConfirm(false)}
       />
     </div>
   );
