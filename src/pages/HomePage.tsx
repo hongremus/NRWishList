@@ -98,10 +98,15 @@ export default function HomePage() {
             </button>
             <button
               onClick={logout}
-              className="p-2.5 bg-white/15 hover:bg-white/25 active:scale-95 text-white rounded-xl backdrop-blur-sm transition-all text-xs font-semibold"
+              className="flex h-11 w-11 shrink-0 items-center justify-center bg-white/15 hover:bg-white/25 active:scale-95 text-white rounded-xl backdrop-blur-sm transition-all"
               title="登出"
+              aria-label="登出"
             >
-              🚪
+              <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <path d="m16 17 5-5-5-5" />
+                <path d="M21 12H9" />
+              </svg>
             </button>
           </div>
         </div>
