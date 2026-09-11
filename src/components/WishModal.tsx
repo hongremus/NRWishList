@@ -65,7 +65,7 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
   function getRatingStatusText(completedAtStr: string, isLocked?: boolean) {
     if (isLocked) return { text: "🔒 評分已鎖住", canRate: false };
     const compTime = new Date(completedAtStr).getTime();
-    if (isNaN(compTime)) return { text: "可以打分", canRate: true };
+    if (isNaN(compTime)) return { text: "可以俾分", canRate: true };
 
     const TWO_DAYS_MS = 2 * 24 * 60 * 60 * 1000;
     const diff = compTime + TWO_DAYS_MS - Date.now();
@@ -76,7 +76,7 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
     const hoursLeft = Math.floor(diff / (1000 * 60 * 60));
     const minsLeft = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
     return {
-      text: `⏳ 仲有 ${hoursLeft}個鐘 ${minsLeft}分鐘可以打分`,
+      text: `⏳ 仲有 ${hoursLeft}個鐘 ${minsLeft}分鐘可以俾分`,
       canRate: true,
     };
   }
@@ -223,7 +223,7 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
                       <div className="p-2.5 bg-blue-50/60 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-900/30">
                         <div className="font-semibold text-blue-700 dark:text-blue-300 mb-1 flex items-center justify-between">
                           <span>👦🏻 Remus</span>
-                          <span>{h.ratings.me ? `⭐ ${h.ratings.me}` : "未打分"}</span>
+                          <span>{h.ratings.me ? `⭐ ${h.ratings.me}` : "未俾分"}</span>
                         </div>
                         <p className="text-gray-600 dark:text-gray-300 italic">
                           {h.remarks.me ? `"${h.remarks.me}"` : "未有 Remark"}
@@ -233,7 +233,7 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
                       <div className="p-2.5 bg-pink-50/60 dark:bg-pink-900/20 rounded-xl border border-pink-100 dark:border-pink-900/30">
                         <div className="font-semibold text-pink-700 dark:text-pink-300 mb-1 flex items-center justify-between">
                           <span>👧🏻 Nicole</span>
-                          <span>{h.ratings.gf ? `⭐ ${h.ratings.gf}` : "未打分"}</span>
+                          <span>{h.ratings.gf ? `⭐ ${h.ratings.gf}` : "未俾分"}</span>
                         </div>
                         <p className="text-gray-600 dark:text-gray-300 italic">
                           {h.remarks.gf ? `"${h.remarks.gf}"` : "未有 Remark"}
@@ -251,14 +251,14 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
                                 onClick={() => openRatingForm(h, "me")}
                                 className="px-3 py-1.5 bg-blue-500 text-white rounded-xl text-xs font-medium active:scale-95 transition-all shadow-sm"
                               >
-                                👦🏻 Remus 打分
+                                👦🏻 Remus 俾分
                               </button>
                             ) : (
                               <button
                                 onClick={() => openRatingForm(h, "gf")}
                                 className="px-3 py-1.5 bg-pink-500 text-white rounded-xl text-xs font-medium active:scale-95 transition-all shadow-sm"
                               >
-                                👧🏻 Nicole 打分
+                                👧🏻 Nicole 俾分
                               </button>
                             )}
                             <button
@@ -272,7 +272,7 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
                           /* 內嵌評分表單 */
                           <div className="p-3 bg-white dark:bg-gray-800 rounded-2xl border border-purple-200 dark:border-purple-800 space-y-3 animate-fadeIn">
                             <div className="flex items-center justify-between text-xs font-bold text-purple-700 dark:text-purple-300">
-                              <span>打分 — {ratingRole === "me" ? "Remus" : "Nicole"}</span>
+                              <span>俾分 — {ratingRole === "me" ? "Remus" : "Nicole"}</span>
                               <button
                                 onClick={() => setActiveRatingHistoryId(null)}
                                 className="text-gray-400 hover:text-gray-600"
