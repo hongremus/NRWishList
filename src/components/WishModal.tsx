@@ -246,18 +246,21 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
                       <div className="pt-2">
                         {!isFormOpen ? (
                           <div className="flex flex-wrap gap-2">
-                            <button
-                              onClick={() => openRatingForm(h, "me")}
-                              className="px-3 py-1.5 bg-blue-500 text-white rounded-xl text-xs font-medium active:scale-95 transition-all shadow-sm"
-                            >
-                              👦🏻 Remus 填寫評分
-                            </button>
-                            <button
-                              onClick={() => openRatingForm(h, "gf")}
-                              className="px-3 py-1.5 bg-pink-500 text-white rounded-xl text-xs font-medium active:scale-95 transition-all shadow-sm"
-                            >
-                              👧🏻 Nicole 填寫評分
-                            </button>
+                            {isRemus ? (
+                              <button
+                                onClick={() => openRatingForm(h, "me")}
+                                className="px-3 py-1.5 bg-blue-500 text-white rounded-xl text-xs font-medium active:scale-95 transition-all shadow-sm"
+                              >
+                                👦🏻 Remus 填寫評分
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => openRatingForm(h, "gf")}
+                                className="px-3 py-1.5 bg-pink-500 text-white rounded-xl text-xs font-medium active:scale-95 transition-all shadow-sm"
+                              >
+                                👧🏻 Nicole 填寫評分
+                              </button>
+                            )}
                             <button
                               onClick={() => lockHistoryItem(h.id)}
                               className="px-3 py-1.5 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-xl text-xs font-medium hover:bg-gray-300 transition-all ml-auto"
