@@ -64,6 +64,8 @@ export default function LoginPage() {
             登入
           </button>
         </div>
+
+        <div className="mt-5 text-center text-[11px] text-gray-400">v1.0.0</div>
       </div>
     </div>
   );
