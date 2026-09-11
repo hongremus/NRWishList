@@ -1,0 +1,355 @@
+import React, { useState } from "react";
+import { Wish, WishHistory } from "../types";
+import { useStore } from "../store";
+import ConfirmModal from "./ConfirmModal";
+
+export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () => void }) {
+  const update = useStore((s) => s.updateWish);
+  const currentUser = useStore((s) => s.currentUser);
+  const isRemus = currentUser?.username === "Remus";
+
+  const [editing, setEditing] = useState(false);
+  const [title, setTitle] = useState(wish.title);
+  const [desc, setDesc] = useState(wish.description || "");
+
+  // 用於重置確認彈窗
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+
+  // 用於評分介面的 state
+  const [activeRatingHistoryId, setActiveRatingHistoryId] = useState<string | null>(null);
+  const [ratingRole, setRatingRole] = useState<"me" | "gf">(isRemus ? "me" : "gf");
+  const [ratingVal, setRatingVal] = useState<number>(5);
+  const [remarkText, setRemarkText] = useState<string>("");
+
+  function save() {
+    if (!title.trim()) return;
+    update({ ...wish, title: title.trim(), description: desc.trim() });
+    setEditing(false);
+  }
+
+  function handleConfirmReset() {
+    const nw = { ...wish, status: "open" as const };
+    update(nw);
+    setShowResetConfirm(false);
+  }
+
+  function lockHistoryItem(hId: string) {
+    const nw = {
+      ...wish,
+      history: wish.history.map((h) => (h.id === hId ? { ...h, isLocked: true } : h)),
+    };
+    update(nw);
+  }
+
+  function submitRating(hId: string) {
+    const nw = {
+      ...wish,
+      history: wish.history.map((h) => {
+        if (h.id !== hId) return h;
+        const newRatings = { ...h.ratings, [ratingRole]: ratingVal };
+        const newRemarks = { ...h.remarks, [ratingRole]: remarkText.trim() };
+
+        const ratingVals: number[] = [];
+        if (newRatings.me) ratingVals.push(newRatings.me);
+        if (newRatings.gf) ratingVals.push(newRatings.gf);
+
+        const avgVal = ratingVals.length
+          ? Math.round((ratingVals.reduce((a, b) => a + b, 0) / ratingVals.length) * 10) / 10
+          : undefined;
+
+        return { ...h, ratings: newRatings, remarks: newRemarks, averageRating: avgVal };
+      }),
+    };
+    update(nw);
+    setActiveRatingHistoryId(null);
+    setRemarkText("");
+  }
+
+  function openRatingForm(h: WishHistory, role: "me" | "gf") {
+    setActiveRatingHistoryId(h.id);
+    setRatingRole(role);
+    setRatingVal(h.ratings[role] || 5);
+    setRemarkText(h.remarks[role] || "");
+  }
+
+  function getRatingStatusText(completedAtStr: string, isLocked?: boolean) {
+    if (isLocked) return { text: "🔒 評分已鎖定", canRate: false };
+    const compTime = new Date(completedAtStr).getTime();
+    if (isNaN(compTime)) return { text: "可評分", canRate: true };
+
+    const TWO_DAYS_MS = 2 * 24 * 60 * 60 * 1000;
+    const diff = compTime + TWO_DAYS_MS - Date.now();
+    if (diff <= 0) {
+      return { text: "⏰ 2天評分期限已過", canRate: false };
+    }
+
+    const hoursLeft = Math.floor(diff / (1000 * 60 * 60));
+    const minsLeft = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    return {
+      text: `⏳ 剩餘評分時間: ${hoursLeft}小時 ${minsLeft}分`,
+      canRate: true,
+    };
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-xs animate-fadeIn">
+      <div className="bg-white dark:bg-gray-800 rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-2xl shadow-2xl border border-gray-100 dark:border-gray-700 max-h-[90vh] overflow-y-auto">
+        {/* Header */}
+        <div className="flex items-start justify-between pb-3 border-b border-gray-100 dark:border-gray-700 mb-4">
+          <div className="flex-1 pr-4">
+            <span
+              className={`inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full mb-1 ${
+                wish.status === "completed"
+                  ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
+                  : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300"
+              }`}
+            >
+              {wish.status === "completed" ? "✓ 已完成" : "⏳ 進行中"}
+            </span>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">{wish.title}</h2>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setEditing(!editing)}
+              className="px-3 py-1.5 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl hover:bg-gray-200 transition-all"
+            >
+              {editing ? "取消" : "✏️ 編輯"}
+            </button>
+            <button
+              onClick={onClose}
+              className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-500 flex items-center justify-center hover:bg-gray-200 transition-all"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+
+        {/* Edit mode vs Normal view */}
+        {editing ? (
+          <div className="space-y-4 mb-6">
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">標題</label>
+              <input
+                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm dark:text-white"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">詳情描述</label>
+              <textarea
+                rows={3}
+                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm dark:text-white resize-none"
+                value={desc}
+                onChange={(e) => setDesc(e.target.value)}
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={save}
+                className={`px-5 py-2 text-white font-medium text-sm rounded-xl active:scale-95 transition-all shadow-md ${
+                  isRemus ? "bg-blue-500 hover:bg-blue-600" : "bg-pink-500 hover:bg-pink-600"
+                }`}
+              >
+                儲存修改
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-4 mb-6">
+            {wish.description && (
+              <p className="text-sm text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 p-3 rounded-2xl">
+                {wish.description}
+              </p>
+            )}
+
+            {/* 願望屬性標籤 */}
+            <div className="flex flex-wrap gap-2 text-xs">
+              {wish.tags.map((t) => (
+                <span
+                  key={t}
+                  className="px-2.5 py-1 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-lg font-medium"
+                >
+                  #{t}
+                </span>
+              ))}
+              <span className="px-2.5 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg">
+                完成次數: {wish.completedCount} 次
+              </span>
+              {wish.deadline && (
+                <span className="px-2.5 py-1 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-300 rounded-lg">
+                  📅 截止: {wish.deadline}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* 歷史完成紀錄 & 評分 Remark 區塊 */}
+        <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-bold text-gray-800 dark:text-gray-200 text-base flex items-center gap-1.5">
+              <span>📜</span> 完成歷史紀錄 ({wish.history.length})
+            </h3>
+            {wish.status === "completed" && (
+              <button
+                onClick={() => setShowResetConfirm(true)}
+                className="px-3 py-1.5 bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800 rounded-xl text-xs font-medium hover:bg-amber-100 active:scale-95 transition-all"
+              >
+                ↺ 重置願望為未完成
+              </button>
+            )}
+          </div>
+
+          {wish.history.length === 0 ? (
+            <div className="text-center py-8 text-gray-400 text-sm bg-gray-50 dark:bg-gray-700/30 rounded-2xl">
+              尚未有完成紀錄。標記為已完成後會在這裡記錄！
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {wish.history.map((h, index) => {
+                const statusInfo = getRatingStatusText(h.completedAt, h.isLocked);
+                const isFormOpen = activeRatingHistoryId === h.id;
+
+                return (
+                  <div
+                    key={h.id}
+                    className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-2xl border border-gray-100 dark:border-gray-600 space-y-3"
+                  >
+                    <div className="flex flex-wrap justify-between items-center text-xs text-gray-500 dark:text-gray-400 gap-1">
+                      <span className="font-semibold text-gray-700 dark:text-gray-200">
+                        第 {wish.history.length - index} 次完成
+                      </span>
+                      <span>{new Date(h.completedAt).toLocaleString()}</span>
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-gray-600 dark:text-gray-300">
+                        平均評分:{" "}
+                        <span className="font-bold text-amber-500 text-sm">
+                          {h.averageRating ? `⭐ ${h.averageRating}` : "暫無"}
+                        </span>
+                      </span>
+                      <span className="text-gray-400 font-medium">{statusInfo.text}</span>
+                    </div>
+
+                    {/* 雙方 Rating & Remarks 顯示 */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-1">
+                      <div className="p-2.5 bg-blue-50/60 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-900/30">
+                        <div className="font-semibold text-blue-700 dark:text-blue-300 mb-1 flex items-center justify-between">
+                          <span>👦🏻 Remus (我)</span>
+                          <span>{h.ratings.me ? `⭐ ${h.ratings.me}` : "未評分"}</span>
+                        </div>
+                        <p className="text-gray-600 dark:text-gray-300 italic">
+                          {h.remarks.me ? `"${h.remarks.me}"` : "尚無 Remark"}
+                        </p>
+                      </div>
+
+                      <div className="p-2.5 bg-pink-50/60 dark:bg-pink-900/20 rounded-xl border border-pink-100 dark:border-pink-900/30">
+                        <div className="font-semibold text-pink-700 dark:text-pink-300 mb-1 flex items-center justify-between">
+                          <span>👧🏻 Nicole (女友)</span>
+                          <span>{h.ratings.gf ? `⭐ ${h.ratings.gf}` : "未評分"}</span>
+                        </div>
+                        <p className="text-gray-600 dark:text-gray-300 italic">
+                          {h.remarks.gf ? `"${h.remarks.gf}"` : "尚無 Remark"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* 評分按鈕 / 表單 (無需 prompt!) */}
+                    {statusInfo.canRate && !h.isLocked && (
+                      <div className="pt-2">
+                        {!isFormOpen ? (
+                          <div className="flex flex-wrap gap-2">
+                            <button
+                              onClick={() => openRatingForm(h, "me")}
+                              className="px-3 py-1.5 bg-blue-500 text-white rounded-xl text-xs font-medium active:scale-95 transition-all shadow-sm"
+                            >
+                              👦🏻 Remus 填寫評分
+                            </button>
+                            <button
+                              onClick={() => openRatingForm(h, "gf")}
+                              className="px-3 py-1.5 bg-pink-500 text-white rounded-xl text-xs font-medium active:scale-95 transition-all shadow-sm"
+                            >
+                              👧🏻 Nicole 填寫評分
+                            </button>
+                            <button
+                              onClick={() => lockHistoryItem(h.id)}
+                              className="px-3 py-1.5 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-xl text-xs font-medium hover:bg-gray-300 transition-all ml-auto"
+                            >
+                              🔒 提前鎖定
+                            </button>
+                          </div>
+                        ) : (
+                          /* 內嵌評分表單 */
+                          <div className="p-3 bg-white dark:bg-gray-800 rounded-2xl border border-purple-200 dark:border-purple-800 space-y-3 animate-fadeIn">
+                            <div className="flex items-center justify-between text-xs font-bold text-purple-700 dark:text-purple-300">
+                              <span>填寫評分 — {ratingRole === "me" ? "Remus" : "Nicole"}</span>
+                              <button
+                                onClick={() => setActiveRatingHistoryId(null)}
+                                className="text-gray-400 hover:text-gray-600"
+                              >
+                                取消
+                              </button>
+                            </div>
+
+                            {/* 星星點選 */}
+                            <div className="flex items-center gap-1">
+                              <span className="text-xs text-gray-500 mr-2">星級:</span>
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <button
+                                  key={star}
+                                  type="button"
+                                  onClick={() => setRatingVal(star)}
+                                  className="text-xl active:scale-125 transition-all"
+                                >
+                                  {star <= ratingVal ? "⭐" : "☆"}
+                                </button>
+                              ))}
+                              <span className="text-xs font-bold text-amber-500 ml-2">{ratingVal} 分</span>
+                            </div>
+
+                            {/* Remark TextArea */}
+                            <div>
+                              <textarea
+                                rows={2}
+                                className="w-full p-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-xs dark:text-white resize-none"
+                                placeholder="對這次實現許願嘅感受或 Remark..."
+                                value={remarkText}
+                                onChange={(e) => setRemarkText(e.target.value)}
+                              />
+                            </div>
+
+                            <button
+                              onClick={() => submitRating(h.id)}
+                              className={`w-full py-2 text-white font-medium text-xs rounded-xl shadow-md active:scale-95 transition-all ${
+                                ratingRole === "me" ? "bg-blue-500" : "bg-pink-500"
+                              }`}
+                            >
+                              送出評分與 Remark ✨
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* 底部重置確認 modal */}
+        <ConfirmModal
+          isOpen={showResetConfirm}
+          title="確認重置願望？"
+          message="重置後這個願望會變回『未完成』狀態，可以再次被實現。之前的完成歷史紀錄與評分將會完整保留！"
+          confirmText="確定重置"
+          cancelText="取消"
+          onConfirm={handleConfirmReset}
+          onCancel={() => setShowResetConfirm(false)}
+        />
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root{
+  --surface: #fff7f9;
+}
+
+.dark{
+  --surface: #0b1220;
+}
+
+.bg-surface{background-color:var(--surface)}
