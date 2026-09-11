@@ -23,9 +23,11 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50 p-4 sm:p-6">
       <div className="w-full max-w-sm sm:max-w-md bg-white/90 backdrop-blur-md rounded-3xl p-6 sm:p-8 shadow-xl border border-white/50">
         <div className="text-center mb-6">
-          <div className="w-16 h-16 mx-auto bg-gradient-to-tr from-pink-400 to-blue-400 rounded-full flex items-center justify-center text-3xl shadow-md mb-2">
-            ✨
-          </div>
+          <img
+            src="/nr-wishlist-icon.svg"
+            alt="NR Wish List"
+            className="w-16 h-16 mx-auto rounded-2xl shadow-md mb-2"
+          />
           <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 bg-clip-text text-transparent">
             NR Wish List
           </h1>
@@ -65,7 +67,7 @@ export default function LoginPage() {
           </button>
         </div>
 
-        <div className="mt-5 text-center text-[11px] text-gray-400">v1.1.2</div>
+        <div className="mt-5 text-center text-[11px] text-gray-400">v1.1.3</div>
       </div>
     </div>
   );
