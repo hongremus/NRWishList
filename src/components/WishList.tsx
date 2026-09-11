@@ -147,7 +147,7 @@ export default function WishList({ onDetailChange }: { onDetailChange: (isOpen: 
           </h3>
           <p className="mx-auto max-w-xs text-sm leading-5 text-gray-400">
             {statusFilter === "open"
-              ? "而家未有未搞掂嘅願望，快啲撳「加願望」啦！"
+              ? "而家未有未搞掂嘅願望，快啲撳「許願」啦！"
               : "試下轉另一個 Tag 或篩選條件啦。"}
           </p>
         </div>

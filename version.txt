@@ -90,3 +90,8 @@ v1.1.6
 v1.1.7
 - 修正 completed item 嘅評分頁被 card 透明層級壓住，導致上唔到最上層同半透明嘅問題。
 - 將 Wish detail 同確認 modal portal 到 body，避免受 card stacking context 影響。
+
+v1.1.8
+- 移除右上角手機快捷區嘅加願望按鈕，只保留下方 FAB。
+- 下方按鈕改名做「許願」，並移除加號。
+- 新增願望版面標題及相關提示統一改做「許願」。

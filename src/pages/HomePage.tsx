@@ -112,12 +112,6 @@ export default function HomePage() {
           >
             🏷️ 管理 Tag
           </button>
-          <button
-            onClick={() => setShowNew(true)}
-            className={`px-4 py-2.5 text-white rounded-xl text-sm font-bold shadow-md active:scale-95 transition-all bg-gradient-to-r ${themeHeaderGradient}`}
-          >
-            ＋ 加願望
-          </button>
         </div>
 
         <WishList onDetailChange={setShowWishDetail} />
@@ -131,7 +125,7 @@ export default function HomePage() {
             className={`px-4 py-3 text-white font-bold rounded-full shadow-2xl flex items-center gap-2 active:scale-95 transition-all border-2 border-white/40 bg-gradient-to-r ${themeHeaderGradient}`}
           >
             <span className="text-xl">✨</span>
-            <span className="text-sm">加願望 ➕</span>
+            <span className="text-sm">許願</span>
           </button>
         </div>
       )}

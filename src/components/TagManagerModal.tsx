@@ -36,7 +36,7 @@ export default function TagManagerModal({ onClose }: { onClose: () => void }) {
         </div>
 
         <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
-          自己加啲常用 Tag，之後加願望或者篩選嗰陣可以直接揀。
+          自己加啲常用 Tag，之後許願或者篩選嗰陣可以直接揀。
         </p>
 
         {/* 新增 Tag 輸入框 */}

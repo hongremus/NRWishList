@@ -79,7 +79,7 @@ export default function NewWishModal({ onClose }: { onClose: () => void }) {
         <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
           <div className="flex min-w-0 items-center gap-2">
             <span className="text-2xl">✨</span>
-            <h3 className="truncate text-xl font-bold text-gray-900 dark:text-gray-100">加個願望</h3>
+            <h3 className="truncate text-xl font-bold text-gray-900 dark:text-gray-100">許願</h3>
           </div>
           <button
             onClick={onClose}
