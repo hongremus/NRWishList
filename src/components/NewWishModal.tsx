@@ -16,15 +16,19 @@ export default function NewWishModal({ onClose }: { onClose: () => void }) {
   const [desc, setDesc] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [customTag, setCustomTag] = useState("");
+  const [tagError, setTagError] = useState(false);
   const [priority, setPriority] = useState<Priority>("medium");
   const [assignedTo, setAssignedTo] = useState<AssignedTo>("both");
   const [deadline, setDeadline] = useState<string>("");
 
   function toggleTag(tag: string) {
     if (selectedTags.includes(tag)) {
-      setSelectedTags(selectedTags.filter((t) => t !== tag));
+      const nextTags = selectedTags.filter((t) => t !== tag);
+      setSelectedTags(nextTags);
+      setTagError(nextTags.length === 0);
     } else {
       setSelectedTags([...selectedTags, tag]);
+      setTagError(false);
     }
   }
 
@@ -35,12 +39,17 @@ export default function NewWishModal({ onClose }: { onClose: () => void }) {
       if (!selectedTags.includes(trimmed)) {
         setSelectedTags([...selectedTags, trimmed]);
       }
+      setTagError(false);
       setCustomTag("");
     }
   }
 
   function submit() {
     if (!title.trim()) return;
+    if (selectedTags.length === 0) {
+      setTagError(true);
+      return;
+    }
 
     const w: Wish = {
       id: crypto.randomUUID(),
@@ -107,7 +116,7 @@ export default function NewWishModal({ onClose }: { onClose: () => void }) {
           {/* 標籤選擇區 (直接點選，不用手打) */}
           <div>
             <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1.5">
-              揀 Tag <span className="font-normal text-gray-400">(撳下面揀)</span>
+              揀 Tag * <span className="font-normal text-gray-400">(最少揀一個)</span>
             </label>
             <div className="flex flex-wrap gap-2 mb-2 max-h-32 overflow-y-auto p-1">
               {availableTags.map((tag) => {
@@ -131,6 +140,10 @@ export default function NewWishModal({ onClose }: { onClose: () => void }) {
                 );
               })}
             </div>
+
+            {tagError && (
+              <p className="mt-1 text-xs font-medium text-red-500">要揀最少一個 Tag 先可以加入願望。</p>
+            )}
 
             {/* 自訂 Tag 輸入 */}
             <div className="flex gap-2 mt-2">
@@ -207,7 +220,7 @@ export default function NewWishModal({ onClose }: { onClose: () => void }) {
             </button>
             <button
               type="button"
-              disabled={!title.trim()}
+              disabled={!title.trim() || selectedTags.length === 0}
               className={`flex-1 py-2.5 text-white rounded-xl text-sm font-semibold shadow-md active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed ${themeBtnClass}`}
               onClick={submit}
             >
