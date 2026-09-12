@@ -13,6 +13,7 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
   const [title, setTitle] = useState(wish.title);
   const [desc, setDesc] = useState(wish.description || "");
   const [region, setRegion] = useState(wish.region || "");
+  const [deadline, setDeadline] = useState(wish.deadline || "");
 
   // 用於評分介面的 state
   const [activeRatingHistoryId, setActiveRatingHistoryId] = useState<string | null>(null);
@@ -24,7 +25,13 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
 
   function save() {
     if (!title.trim()) return;
-    update({ ...wish, title: title.trim(), description: desc.trim(), region: region || undefined });
+    update({
+      ...wish,
+      title: title.trim(),
+      description: desc.trim(),
+      region: region || undefined,
+      deadline: deadline || null,
+    });
     setEditing(false);
   }
 
@@ -152,6 +159,26 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
                 placeholder="例如：尖沙咀、沙田、銅鑼灣"
                 className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm dark:text-white"
               />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">截止日（可以唔填）</label>
+              <div className="flex gap-2">
+                <input
+                  type="date"
+                  value={deadline}
+                  onChange={(e) => setDeadline(e.target.value)}
+                  className="min-w-0 flex-1 px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm dark:text-white"
+                />
+                {deadline && (
+                  <button
+                    type="button"
+                    onClick={() => setDeadline("")}
+                    className="shrink-0 rounded-xl bg-gray-100 px-3 text-xs font-medium text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300"
+                  >
+                    清除
+                  </button>
+                )}
+              </div>
             </div>
             <div className="flex justify-end gap-2">
               <button

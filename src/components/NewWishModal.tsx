@@ -213,12 +213,23 @@ export default function NewWishModal({ onClose }: { onClose: () => void }) {
 
             <div>
               <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">截止日（可以唔填）</label>
-              <input
-                type="date"
-                value={deadline}
-                onChange={(e) => setDeadline(e.target.value)}
-                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-purple-400 dark:text-white"
-              />
+              <div className="flex gap-2">
+                <input
+                  type="date"
+                  value={deadline}
+                  onChange={(e) => setDeadline(e.target.value)}
+                  className="min-w-0 flex-1 px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-purple-400 dark:text-white"
+                />
+                {deadline && (
+                  <button
+                    type="button"
+                    onClick={() => setDeadline("")}
+                    className="shrink-0 rounded-xl bg-gray-100 px-3 text-xs font-medium text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300"
+                  >
+                    清除
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
