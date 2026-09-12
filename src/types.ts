@@ -12,27 +12,6 @@ export type Priority = "high" | "medium" | "low";
 
 export type AssignedTo = "me" | "gf" | "both";
 
-export const hongKongDistricts = [
-  "中西區",
-  "東區",
-  "南區",
-  "灣仔區",
-  "九龍城區",
-  "觀塘區",
-  "深水埗區",
-  "黃大仙區",
-  "油尖旺區",
-  "離島區",
-  "葵青區",
-  "北區",
-  "西貢區",
-  "沙田區",
-  "大埔區",
-  "荃灣區",
-  "屯門區",
-  "元朗區",
-] as const;
-
 export type WishHistory = {
   id: string;
   completedAt: string; // ISO

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useStore } from "../store";
-import { hongKongDistricts, Wish, Priority, AssignedTo } from "../types";
+import { Wish, Priority, AssignedTo } from "../types";
 import { useBodyScrollLock } from "../hooks/useBodyScrollLock";
 
 export default function NewWishModal({ onClose }: { onClose: () => void }) {
@@ -117,16 +117,13 @@ export default function NewWishModal({ onClose }: { onClose: () => void }) {
 
           <div>
             <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">地區（可以唔填）</label>
-            <select
+            <input
+              type="text"
               value={region}
               onChange={(e) => setRegion(e.target.value)}
+              placeholder="例如：尖沙咀、沙田、銅鑼灣"
               className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 dark:text-white"
-            >
-              <option value="">未指定地區</option>
-              {hongKongDistricts.map((district) => (
-                <option key={district} value={district}>{district}</option>
-              ))}
-            </select>
+            />
           </div>
 
           {/* 標籤選擇區 (直接點選，不用手打) */}

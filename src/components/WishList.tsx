@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import { useStore } from "../store";
 import WishCard from "./WishCard";
 
-type SortOption = "createdAt" | "priority" | "deadline" | "completedCount";
+type SortOption = "createdAt" | "priority" | "deadline" | "completedCount" | "region";
 
 export default function WishList({ onDetailChange }: { onDetailChange: (isOpen: boolean) => void }) {
   const wishes = useStore((s) => s.wishes);
@@ -41,6 +41,11 @@ export default function WishList({ onDetailChange }: { onDetailChange: (isOpen: 
         if (!a.deadline) return 1;
         if (!b.deadline) return -1;
         return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
+      }
+      if (sortBy === "region") {
+        if (!a.region) return 1;
+        if (!b.region) return -1;
+        return a.region.localeCompare(b.region, "zh-Hant");
       }
       // createdAt 預設由新到舊
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
@@ -103,6 +108,7 @@ export default function WishList({ onDetailChange }: { onDetailChange: (isOpen: 
               <option value="priority">🔥 優先度（高至低）</option>
               <option value="completedCount">🎉 完成咗幾多次</option>
               <option value="deadline">📅 截止日（最近）</option>
+              <option value="region">📍 地區（A-Z）</option>
             </select>
           </div>
         </div>

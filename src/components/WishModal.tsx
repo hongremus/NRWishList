@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
-import { hongKongDistricts, Wish, WishHistory } from "../types";
+import { Wish, WishHistory } from "../types";
 import { useStore } from "../store";
 import { useBodyScrollLock } from "../hooks/useBodyScrollLock";
 
@@ -145,16 +145,13 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">地區（可以唔填）</label>
-              <select
+              <input
+                type="text"
                 value={region}
                 onChange={(e) => setRegion(e.target.value)}
+                placeholder="例如：尖沙咀、沙田、銅鑼灣"
                 className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm dark:text-white"
-              >
-                <option value="">未指定地區</option>
-                {hongKongDistricts.map((district) => (
-                  <option key={district} value={district}>{district}</option>
-                ))}
-              </select>
+              />
             </div>
             <div className="flex justify-end gap-2">
               <button
