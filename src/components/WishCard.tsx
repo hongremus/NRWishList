@@ -69,13 +69,6 @@ export default function WishCard({ wish, onDetailChange }: { wish: Wish; onDetai
 
   const priorityLabel = wish.priority === "high" ? "🔴 高" : wish.priority === "medium" ? "🟡 中" : "🔵 低";
 
-  const assignedLabel =
-    wish.assignedTo === "me"
-      ? "👦🏻 Remus"
-      : wish.assignedTo === "gf"
-      ? "👧🏻 Nicole"
-      : "👥 一齊";
-
   return (
     <div
       className={`p-4 rounded-3xl transition-all shadow-md hover:shadow-lg border ${
@@ -138,10 +131,9 @@ export default function WishCard({ wish, onDetailChange }: { wish: Wish; onDetai
         ))}
       </div>
 
-      {/* 提出者 & 負責人 & 評分資訊 */}
+      {/* 截止日 & 評分資訊 */}
       <div className="flex flex-wrap items-center justify-between text-xs text-gray-500 dark:text-gray-400 pt-2 border-t border-gray-100 dark:border-gray-700 my-2 gap-y-1">
         <div className="flex items-center gap-3">
-          <span>邊個搞: <strong className="text-gray-700 dark:text-gray-300">{assignedLabel}</strong></span>
           {wish.deadline && (
             <span className="text-red-500 dark:text-red-400 font-medium">
               ⏰ {wish.deadline}

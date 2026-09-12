@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useStore } from "../store";
-import { Wish, Priority, AssignedTo } from "../types";
+import { Wish, Priority } from "../types";
 import { useBodyScrollLock } from "../hooks/useBodyScrollLock";
 
 export default function NewWishModal({ onClose }: { onClose: () => void }) {
@@ -19,7 +19,6 @@ export default function NewWishModal({ onClose }: { onClose: () => void }) {
   const [customTag, setCustomTag] = useState("");
   const [tagError, setTagError] = useState(false);
   const [priority, setPriority] = useState<Priority>("medium");
-  const [assignedTo, setAssignedTo] = useState<AssignedTo>("both");
   const [deadline, setDeadline] = useState<string>("");
 
   function toggleTag(tag: string) {
@@ -60,7 +59,7 @@ export default function NewWishModal({ onClose }: { onClose: () => void }) {
       tags: selectedTags,
       priority,
       proposedBy: currentUser?.username === "Remus" ? "me" : "gf",
-      assignedTo,
+      assignedTo: "both",
       deadline: deadline || null,
       status: "open",
       createdAt: new Date().toISOString(),
@@ -183,8 +182,8 @@ export default function NewWishModal({ onClose }: { onClose: () => void }) {
             </div>
           </div>
 
-          {/* 優先級 & 負責人 & 截止日期 */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {/* 優先度 & 截止日期 */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">優先度</label>
               <select
@@ -195,19 +194,6 @@ export default function NewWishModal({ onClose }: { onClose: () => void }) {
                 <option value="high">🔴 高</option>
                 <option value="medium">🟡 中</option>
                 <option value="low">🔵 低</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">邊個負責</label>
-              <select
-                value={assignedTo}
-                onChange={(e) => setAssignedTo(e.target.value as AssignedTo)}
-                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-purple-400 dark:text-white"
-              >
-                <option value="both">👥 一齊搞</option>
-                <option value="me">👦🏻 Remus 搞</option>
-                <option value="gf">👧🏻 Nicole 搞</option>
               </select>
             </div>
 
