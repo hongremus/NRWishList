@@ -9,8 +9,6 @@ v1.0.1
 - 集中改善手機版 responsive layout，優化 header、願望卡片、操作按鈕同列表間距。
 - 修正 iPhone logout icon、Wish modal viewport、高度、安全區域同完成按鈕換行問題。
 - Login page 顯示版本，並加入 NR Wish List app icon 同 favicon。
-- 許願時加入選填香港地區 dropdown，支援 18 區。
-- 地區會保存到 Supabase，並於願望卡及詳情頁顯示，亦可以編輯。
 
 v1.0.2
 - 重整願望詳情、評分、重做同刪除操作流程，成張願望卡可以撳入詳情頁。
@@ -43,4 +41,8 @@ v1.0.7
 v1.0.8
 - 移除右上角加願望按鈕，只保留下方 FAB，按鈕及新增版面統一改做「許願」。
 - 移除 password，改為只輸入 Account Name 登入，並支援按 Enter 登入。
+
+v1.0.9
+- 許願時加入選填香港地區 dropdown，支援 18 區。
+- 地區會保存到 Supabase，並於願望卡及詳情頁顯示，亦可以編輯。
 
