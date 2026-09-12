@@ -350,7 +350,7 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
                               <textarea
                                 rows={2}
                                 className="w-full p-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-xs dark:text-white resize-none"
-                                placeholder="你對今次願望有咩感受或者 Remark..."
+                                placeholder="你對今次願望有咩感受或者想講嘅嘢..."
                                 value={remarkText}
                                 onChange={(e) => setRemarkText(e.target.value)}
                               />

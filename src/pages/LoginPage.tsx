@@ -39,7 +39,7 @@ export default function LoginPage() {
             <label className="block text-sm font-medium text-gray-600 mb-1">帳號</label>
             <input
               className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-purple-400 focus:bg-white transition-all"
-              placeholder="打你個帳號"
+              placeholder="輸入你個帳號"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && doLogin()}

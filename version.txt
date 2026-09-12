@@ -1,5 +1,3 @@
-NR Wish List Version History
-
 NR Wish List 係 Remus 同 Nicole 共用嘅願望清單 app，主要功能包括：
 - 帳戶登入：Remus 同 Nicole 可以用自己嘅 Account Name 登入，使用各自身份操作願望。
 - 新增願望：記錄願望名稱、詳細描述、提出者、負責人、優先度、截止日同 Tag。
@@ -13,6 +11,8 @@ NR Wish List 係 Remus 同 Nicole 共用嘅願望清單 app，主要功能包括
 - 清單篩選排序：可以按未搞掂、已完成、Tag 篩選，並按建立日期、優先度、截止日、完成次數或地區排序。
 - 共享同步：資料會保存到 Supabase，兩個人可以共享同一份願望清單，並同步最新變更。
 - 手機支援：針對 iPhone 同手機瀏覽器調整版面、輸入框、Modal 同滑動操作，方便隨時使用。
+
+NR Wish List Version History
 
 v1.0.0
 - 初版 NR Wish List。
@@ -62,4 +62,5 @@ v1.0.9
 - 排序選單加入按地區排列功能，未指定地區會排最後。
 - 截止日可以清除，方便 iPhone 唔揀日期；編輯願望時亦可以修改或清除截止日。
 - 將願望轉為完成前會先顯示確認訊息。
+- 更新輸入框提示文字，改用更自然嘅香港廣東話。
 

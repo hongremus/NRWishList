@@ -109,7 +109,7 @@ export default function NewWishModal({ onClose }: { onClose: () => void }) {
             <textarea
               rows={2}
               className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 dark:text-white resize-none"
-              placeholder="有咩想做、想去嘅地方或者諗法..."
+              placeholder="寫低想做嘅事、想去嘅地方或者其他諗法..."
               value={desc}
               onChange={(e) => setDesc(e.target.value)}
             />
@@ -163,7 +163,7 @@ export default function NewWishModal({ onClose }: { onClose: () => void }) {
               <input
                 type="text"
                 className="flex-1 px-3 py-1.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-purple-400 dark:text-white"
-                placeholder="+ 自訂 Tag"
+                placeholder="+ 自己加個分類"
                 value={customTag}
                 onChange={(e) => setCustomTag(e.target.value)}
                 onKeyDown={(e) => {

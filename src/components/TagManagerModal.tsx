@@ -44,7 +44,7 @@ export default function TagManagerModal({ onClose }: { onClose: () => void }) {
           <input
             type="text"
             className="flex-1 px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 dark:text-white"
-            placeholder="打新 Tag 名（例如：踩點）"
+            placeholder="打新分類名稱（例如：打卡好去處）"
             value={newTagInput}
             onChange={(e) => setNewTagInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleAdd()}
