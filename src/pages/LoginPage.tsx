@@ -55,7 +55,7 @@ export default function LoginPage() {
           </button>
         </div>
 
-        <div className="mt-5 text-center text-[11px] text-gray-400">v1.1.9</div>
+        <div className="mt-5 text-center text-[11px] text-gray-400">v1.0.0</div>
       </div>
     </div>
   );
