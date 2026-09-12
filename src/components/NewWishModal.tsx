@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useStore } from "../store";
-import { Wish, Priority, AssignedTo } from "../types";
+import { hongKongDistricts, Wish, Priority, AssignedTo } from "../types";
 import { useBodyScrollLock } from "../hooks/useBodyScrollLock";
 
 export default function NewWishModal({ onClose }: { onClose: () => void }) {
@@ -14,6 +14,7 @@ export default function NewWishModal({ onClose }: { onClose: () => void }) {
 
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
+  const [region, setRegion] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [customTag, setCustomTag] = useState("");
   const [tagError, setTagError] = useState(false);
@@ -55,6 +56,7 @@ export default function NewWishModal({ onClose }: { onClose: () => void }) {
       id: crypto.randomUUID(),
       title: title.trim(),
       description: desc.trim(),
+      region: region || undefined,
       tags: selectedTags,
       priority,
       proposedBy: currentUser?.username === "Remus" ? "me" : "gf",
@@ -111,6 +113,20 @@ export default function NewWishModal({ onClose }: { onClose: () => void }) {
               value={desc}
               onChange={(e) => setDesc(e.target.value)}
             />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">地區（可以唔填）</label>
+            <select
+              value={region}
+              onChange={(e) => setRegion(e.target.value)}
+              className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 dark:text-white"
+            >
+              <option value="">未指定地區</option>
+              {hongKongDistricts.map((district) => (
+                <option key={district} value={district}>{district}</option>
+              ))}
+            </select>
           </div>
 
           {/* 標籤選擇區 (直接點選，不用手打) */}

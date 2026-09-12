@@ -113,6 +113,7 @@ export default function WishCard({ wish, onDetailChange }: { wish: Wish; onDetai
               {wish.description}
             </p>
           )}
+          {wish.region && <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">📍 {wish.region}</p>}
         </div>
 
         {/* 完成次數徽章 */}

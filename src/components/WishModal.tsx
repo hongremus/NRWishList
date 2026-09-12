@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
-import { Wish, WishHistory } from "../types";
+import { hongKongDistricts, Wish, WishHistory } from "../types";
 import { useStore } from "../store";
 import { useBodyScrollLock } from "../hooks/useBodyScrollLock";
 
@@ -12,6 +12,7 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(wish.title);
   const [desc, setDesc] = useState(wish.description || "");
+  const [region, setRegion] = useState(wish.region || "");
 
   // 用於評分介面的 state
   const [activeRatingHistoryId, setActiveRatingHistoryId] = useState<string | null>(null);
@@ -23,7 +24,7 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
 
   function save() {
     if (!title.trim()) return;
-    update({ ...wish, title: title.trim(), description: desc.trim() });
+    update({ ...wish, title: title.trim(), description: desc.trim(), region: region || undefined });
     setEditing(false);
   }
 
@@ -142,6 +143,19 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
                 onChange={(e) => setDesc(e.target.value)}
               />
             </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">地區（可以唔填）</label>
+              <select
+                value={region}
+                onChange={(e) => setRegion(e.target.value)}
+                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm dark:text-white"
+              >
+                <option value="">未指定地區</option>
+                {hongKongDistricts.map((district) => (
+                  <option key={district} value={district}>{district}</option>
+                ))}
+              </select>
+            </div>
             <div className="flex justify-end gap-2">
               <button
                 onClick={save}
@@ -158,6 +172,11 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
             {wish.description && (
               <p className="text-sm text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 p-3 rounded-2xl">
                 {wish.description}
+              </p>
+            )}
+            {wish.region && (
+              <p className="text-sm text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 p-3 rounded-2xl">
+                📍 地區：{wish.region}
               </p>
             )}
 

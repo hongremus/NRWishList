@@ -8,6 +8,7 @@ create table if not exists public.wishes (
   couple_id text not null default 'remus-nicole',
   title text not null,
   description text,
+  region text,
   tags text[] not null default '{}',
   priority text not null default 'medium' check (priority in ('high', 'medium', 'low')),
   proposed_by text not null default 'both' check (proposed_by in ('me', 'gf', 'both')),
@@ -18,6 +19,8 @@ create table if not exists public.wishes (
   completed_count integer not null default 0,
   history jsonb not null default '[]'::jsonb
 );
+
+alter table public.wishes add column if not exists region text;
 
 create table if not exists public.wish_tags (
   id uuid primary key default gen_random_uuid(),
