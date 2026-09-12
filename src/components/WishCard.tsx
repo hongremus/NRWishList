@@ -13,6 +13,7 @@ export default function WishCard({ wish, onDetailChange }: { wish: Wish; onDetai
   const [showDetail, setShowDetail] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [showCompleteConfirm, setShowCompleteConfirm] = useState(false);
 
   function openDetail() {
     setShowDetail(true);
@@ -24,7 +25,7 @@ export default function WishCard({ wish, onDetailChange }: { wish: Wish; onDetai
     onDetailChange(false);
   }
 
-  function handleToggleComplete() {
+  function handleConfirmComplete() {
     if (wish.status === "open") {
       const h = {
         id: crypto.randomUUID(),
@@ -43,6 +44,7 @@ export default function WishCard({ wish, onDetailChange }: { wish: Wish; onDetai
       };
       update(nw);
     }
+    setShowCompleteConfirm(false);
   }
 
   function handleConfirmDelete() {
@@ -159,7 +161,7 @@ export default function WishCard({ wish, onDetailChange }: { wish: Wish; onDetai
           <button
             onClick={(event) => {
               event.stopPropagation();
-              handleToggleComplete();
+              setShowCompleteConfirm(true);
             }}
             className={`min-w-0 flex-1 py-2.5 px-2 text-white rounded-xl text-xs font-semibold shadow-sm active:scale-95 transition-all flex items-center justify-center gap-1 sm:px-3 ${
               isRemus
@@ -226,6 +228,15 @@ export default function WishCard({ wish, onDetailChange }: { wish: Wish; onDetai
         cancelText="取消"
         onConfirm={handleConfirmReset}
         onCancel={() => setShowResetConfirm(false)}
+      />
+      <ConfirmModal
+        isOpen={showCompleteConfirm}
+        title="確認要搞掂呢個願望？"
+        message={`確認將「${wish.title}」轉做完成？`}
+        confirmText="搞掂咗"
+        cancelText="取消"
+        onConfirm={handleConfirmComplete}
+        onCancel={() => setShowCompleteConfirm(false)}
       />
     </div>
   );
