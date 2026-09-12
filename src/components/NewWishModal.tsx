@@ -97,7 +97,7 @@ export default function NewWishModal({ onClose }: { onClose: () => void }) {
             <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">願望名 *</label>
             <input
               className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 dark:text-white"
-              placeholder="例如：一齊去日本睇櫻花 🌸"
+              placeholder="例如：一齊去日本參加夏祭 🎆"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
