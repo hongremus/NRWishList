@@ -1,5 +1,7 @@
 NR Wish List Version History
 
+NR Wish List 係 Remus 同 Nicole 共用嘅願望清單 app，可以新增同管理願望、設定優先度、負責人、截止日同 Tag，並追蹤完成狀態、完成紀錄、評分同備註。資料會同步保存，方便兩個人一齊計劃同完成想做嘅事。
+
 v1.0.0
 - 初版 NR Wish List。
 - 支援新增、完成、重做、刪除願望，以及優先度、負責人、截止日、Tag、備註同完成紀錄。
