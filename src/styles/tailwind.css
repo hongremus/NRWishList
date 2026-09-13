@@ -4,13 +4,49 @@
 
 :root{
   --surface: #fff7f9;
+  color-scheme: light;
 }
 
 .dark{
   --surface: #070b14;
+  color-scheme: dark;
 }
 
 .bg-surface{background-color:var(--surface)}
+
+input,
+textarea,
+select {
+  color: #111827;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #9ca3af;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+  }
+
+  input,
+  textarea,
+  select {
+    color: #f9fafb;
+  }
+}
+
+.dark input,
+.dark textarea,
+.dark select {
+  color: #f9fafb;
+}
+
+.login-page input {
+  color: #111827;
+  color-scheme: light;
+}
 
 @media (max-width: 640px) {
   input,

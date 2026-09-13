@@ -4,6 +4,7 @@ import WishList from "../components/WishList";
 import NewWishModal from "../components/NewWishModal";
 import TagManagerModal from "../components/TagManagerModal";
 import StatsModal from "../components/StatsModal";
+import CalendarPage from "./CalendarPage";
 
 export default function HomePage() {
   const currentUser = useStore((s) => s.currentUser);
@@ -18,6 +19,7 @@ export default function HomePage() {
   const [showTagManager, setShowTagManager] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [showWishDetail, setShowWishDetail] = useState(false);
+  const [activePage, setActivePage] = useState<"wishes" | "calendar">("wishes");
 
   const isRemus = currentUser?.username === "Remus";
 
@@ -114,11 +116,30 @@ export default function HomePage() {
           </button>
         </div>
 
-        <WishList onDetailChange={setShowWishDetail} />
+        <div className="mb-3 flex gap-1 rounded-2xl bg-gray-100 p-1 dark:bg-gray-800">
+          <button
+            onClick={() => setActivePage("wishes")}
+            className={`flex-1 rounded-xl px-3 py-2 text-sm font-bold transition-all ${
+              activePage === "wishes" ? "bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-gray-100" : "text-gray-500 dark:text-gray-400"
+            }`}
+          >
+            願望清單
+          </button>
+          <button
+            onClick={() => setActivePage("calendar")}
+            className={`flex-1 rounded-xl px-3 py-2 text-sm font-bold transition-all ${
+              activePage === "calendar" ? "bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-gray-100" : "text-gray-500 dark:text-gray-400"
+            }`}
+          >
+            📅 行事曆
+          </button>
+        </div>
+
+        {activePage === "wishes" ? <WishList onDetailChange={setShowWishDetail} /> : <CalendarPage />}
       </main>
 
       {/* 手機版右下角 Floating Action Button (新增願望) */}
-      {!showNew && !showTagManager && !showStats && !showWishDetail && (
+      {activePage === "wishes" && !showNew && !showTagManager && !showStats && !showWishDetail && (
         <div className="fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom))] right-4 sm:bottom-8 sm:right-8 z-40">
           <button
             onClick={() => setShowNew(true)}

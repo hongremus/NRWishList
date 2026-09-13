@@ -108,6 +108,9 @@ export default function WishCard({ wish, onDetailChange }: { wish: Wish; onDetai
               {wish.description}
             </p>
           )}
+          {wish.proposedBy !== "both" && (
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">提出：{wish.proposedBy}</p>
+          )}
           {wish.region && <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">📍 {wish.region}</p>}
         </div>
 

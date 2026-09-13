@@ -15,6 +15,7 @@ export default function NewWishModal({ onClose }: { onClose: () => void }) {
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
   const [region, setRegion] = useState("");
+  const [address, setAddress] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [customTag, setCustomTag] = useState("");
   const [tagError, setTagError] = useState(false);
@@ -56,9 +57,10 @@ export default function NewWishModal({ onClose }: { onClose: () => void }) {
       title: title.trim(),
       description: desc.trim(),
       region: region || undefined,
+      address: address || undefined,
       tags: selectedTags,
       priority,
-      proposedBy: currentUser?.username === "Remus" ? "me" : "gf",
+      proposedBy: currentUser?.username === "Remus" ? "Remus" : "Nicole",
       assignedTo: "both",
       deadline: deadline || null,
       status: "open",
@@ -121,6 +123,17 @@ export default function NewWishModal({ onClose }: { onClose: () => void }) {
               value={region}
               onChange={(e) => setRegion(e.target.value)}
               placeholder="例如：尖沙咀、沙田、銅鑼灣"
+              className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 dark:text-white"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">地址（可以唔填）</label>
+            <input
+              type="text"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="例如：尖沙咀海港城"
               className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 dark:text-white"
             />
           </div>

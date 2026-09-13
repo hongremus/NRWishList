@@ -9,58 +9,75 @@ NR Wish List 係 Remus 同 Nicole 共用嘅願望清單 app，主要功能包括
 - Tag 分類：用 Tag 整理不同類型願望，方便按分類篩選清單。
 - 優先度管理：以高、中、低三個級別標記願望重要程度，亦可以按優先度排序。
 - 清單篩選排序：可以按未搞掂、已完成、Tag 篩選，並按建立日期、優先度、截止日、完成次數或地區排序。
-- 共享同步：資料會保存到 Supabase，兩個人可以共享同一份願望清單，並同步最新變更。
-- 手機支援：針對 iPhone 同手機瀏覽器調整版面、輸入框、Modal 同滑動操作，方便隨時使用。
+- 統計分析：顯示願望總數、完成率、提出者、Top 5 完成排行及評分資料。
+- 共用日曆：Remus 同 Nicole 可以新增、編輯及刪除活動，並透過 Supabase Realtime 同步。
+- 日曆功能：支援香港假期、紀念日、浪漫約會活動、跨日活動及日期／時間驗證。
+- 活動重覆及跳轉：單日活動可以揀年份、月份及多個日子重覆，日曆亦可以直接跳轉指定年月。
+- 權限管理：普通活動只限建立者操作；用戶建立嘅約會活動可由兩人共同管理，固定紀念日保持唯讀。
+- 手機支援：針對 iPhone 同手機瀏覽器調整願望清單、日曆、輸入框、Modal 同滑動操作。
+- 共享同步：資料會保存到 Supabase，願望及日曆活動會同步最新變更。
 
 NR Wish List Version History
 
-v1.0.0
+v1.0.0 — The Wish Awakens
 - 初版 NR Wish List。
 - 支援新增、完成、重做、刪除願望，以及優先度、負責人、截止日、Tag、備註同完成紀錄。
 - 接駁 Supabase，支援兩個人共享願望資料。
 
-v1.0.1
-- 集中改善手機版 responsive layout，優化 header、願望卡片、操作按鈕同列表間距。
-- 修正 iPhone logout icon、Wish modal viewport、高度、安全區域同完成按鈕換行問題。
-- Login page 顯示版本，並加入 NR Wish List app icon 同 favicon。
+v1.0.1 — Pocket Rocket
+- 集中改善手機版 responsive layout，包括 header、願望卡片、操作按鈕及 modal。
+- Login page 加入版本顯示、NR Wish List app icon 同 favicon。
 
-v1.0.2
+v1.0.2 — Wish Upon Details
 - 重整願望詳情、評分、重做同刪除操作流程，成張願望卡可以撳入詳情頁。
 - 按登入使用者限制評分操作，只顯示自己可以俾嘅分。
-- 修正 Wish detail 同 Confirm modal 嘅 click bubbling，避免關閉或取消後重新打開頁面。
 
-v1.0.3
-- 將主要 UI 同評分用字本地化成自然廣東話，例如「俾分」。
-- Wish detail modal 開啟時鎖定背景 scroll，改善 iPhone 使用體驗。
+v1.0.3 — Canto-lish
+- 將主要 UI 同評分用字本地化成自然廣東話。
+- Wish detail modal 加入背景 scroll lock，改善 iPhone 使用體驗。
 
-v1.0.4
+v1.0.4 — Sync and the City
 - 改善 dark mode 嘅背景、卡片同 modal 顏色層次。
-- 完善 Supabase shared data sync、Realtime 同 mutation error handling。
-- 完成 GitHub、Vercel production deployment workflow。
+- 完善 Supabase shared data sync、Realtime 同 mutation error handling，並建立 production deployment workflow。
 
-v1.0.5
+v1.0.5 — Zoom? No Thanks
 - 移除 dark mode toggle，統一使用 light mode，Wish cards 還原為白色外觀。
-- 所有 modal 加入 iPhone body scroll lock，支援巢狀 confirmation modal。
-- 修正 iPhone Safari focus input 自動放大，手機輸入框統一最少 16px。
+- 所有 modal 加入 iPhone body scroll lock，並改善手機輸入框體驗。
 
-v1.0.6
-- 設計並加入 NR monogram app logo，統一 browser favicon、PWA icon 同 login page。
+v1.0.6 — NR Goes Brrr
+- 設計並加入 NR monogram app logo、browser favicon、PWA icon 同 login page branding。
 - Tag 改為新增願望時必填，未揀 Tag 唔可以提交。
 
-v1.0.7
-- Subpage/modal 開啟時隱藏「加願望」FAB，並提升 modal overlay 層級。
-- 修正評分頁仍顯示 FAB，以及 completed item modal 被 card 透明層級壓住嘅問題。
-- 將 Wish detail 同確認 modal portal 到 body，避免受 card stacking context 影響。
+v1.0.7 — Modal Kombat
+- 重整 subpage、modal、FAB 及完成願望詳情嘅層級和開關行為。
 
-v1.0.8
-- 移除右上角加願望按鈕，只保留下方 FAB，按鈕及新增版面統一改做「許願」。
-- 移除 password，改為只輸入 Account Name 登入，並支援按 Enter 登入。
+v1.0.8 — Password? Bye
+- 登入改為只輸入 Account Name，並支援按 Enter 登入。
+- 整理「許願」入口及新增版面，保留下方 FAB 作主要入口。
 
-v1.0.9
-- 許願時加入選填地區文字欄位，可以輸入香港任何地區。
-- 地區會保存到 Supabase，並於願望卡及詳情頁顯示，亦可以編輯。
-- 排序選單加入按地區排列功能，未指定地區會排最後。
-- 截止日可以清除，方便 iPhone 唔揀日期；編輯願望時亦可以修改或清除截止日。
-- 將願望轉為完成前會先顯示確認訊息。
-- 更新輸入框提示文字，改用更自然嘅香港廣東話。
+v1.0.9 — Location, Location, Location
+- 新增地區欄位，支援保存、編輯、顯示及按地區排序。
+- 加入地區／附近願望搜尋，並改善截止日清除及完成前確認流程。
 
+v1.0.10 — History Repeating
+- 編輯願望時可以修改優先度同 Tag。
+- 完成紀錄改為時間線顯示，地區加入 Google Maps 搜尋入口。
+- 清單加入地區／附近願望搜尋。
+
+v1.0.11 — Moments, Actually
+- 改善登入及表單文字可讀性，加入由 Day 1 起計嘅相處日數。
+- Remark、願望詳情及完成紀錄支援換行顯示，常用網站連結會自動變成超連結。
+
+v1.0.12 — Stats McGee
+- 重整統計頁，加入願望總數、完成率及 Top 5 完成排行。
+- 顯示願望提出者、完成次數及平均評分，方便比較共同完成紀錄。
+
+v1.1.0 — Calendar? We Ball
+- 新增 Remus 同 Nicole 共用行事曆，活動會透過 Supabase Realtime 同步。
+- 加入香港公眾假期、浪漫紀念日提示、建立者 marker 顏色及活動 CRUD。
+- 活動支援日期／時間驗證、自動結束時間，以及跨日全日活動。
+- 單日活動支援揀年份、月份及多個日子一次過重覆。
+- 年份／月份可以直接跳轉，並支援由 2026 年開始嘅逐年選擇。
+- 固定紀念日按年份顯示「我哋紀念日」、「1周年紀念」等名稱，並保持唯讀。
+- 約會活動開放 Remus 同 Nicole 共同重覆、編輯及刪除；普通活動仍只限建立者操作。
+- 2026 年 7 月 1 日改名為「港殤日」，10 月 1 日改名為「鄰近國家國慶日」。

@@ -1,6 +1,52 @@
 import React, { useState } from "react";
 import { useStore } from "../store";
 
+const relationshipStart = new Date(2026, 8, 12);
+
+function getRelationshipDuration() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  today.setDate(today.getDate() + 1);
+  let years = today.getFullYear() - relationshipStart.getFullYear();
+  let anniversary = new Date(
+    relationshipStart.getFullYear() + years,
+    relationshipStart.getMonth(),
+    relationshipStart.getDate(),
+  );
+
+  if (anniversary > today) {
+    years -= 1;
+    anniversary = new Date(
+      relationshipStart.getFullYear() + years,
+      relationshipStart.getMonth(),
+      relationshipStart.getDate(),
+    );
+  }
+
+  let months = today.getMonth() - anniversary.getMonth();
+  if (today.getDate() < anniversary.getDate()) {
+    months -= 1;
+  }
+  if (months < 0) {
+    months += 12;
+  }
+
+  const monthStart = new Date(
+    anniversary.getFullYear(),
+    anniversary.getMonth() + months,
+    anniversary.getDate(),
+  );
+  const days = Math.floor((today.getTime() - monthStart.getTime()) / (1000 * 60 * 60 * 24));
+
+  if (years > 0) {
+    return `${years}年${months}個月${days}日`;
+  }
+  if (months > 0) {
+    return `${months}個月${days}日`;
+  }
+  return `${days}日`;
+}
+
 export default function LoginPage() {
   const users = useStore((s) => s.users);
   const setCurrentUser = useStore((s) => s.setCurrentUser);
@@ -19,7 +65,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50 p-4 sm:p-6">
+    <div className="login-page min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50 p-4 sm:p-6">
       <div className="w-full max-w-sm sm:max-w-md bg-white/90 backdrop-blur-md rounded-3xl p-6 sm:p-8 shadow-xl border border-white/50">
         <div className="text-center mb-6">
           <img
@@ -38,7 +84,7 @@ export default function LoginPage() {
           <div>
             <label className="block text-sm font-medium text-gray-600 mb-1">帳號</label>
             <input
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-purple-400 focus:bg-white transition-all"
+              className="w-full px-4 py-3 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-purple-400 focus:bg-white transition-all"
               placeholder="輸入你個帳號"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
@@ -55,7 +101,10 @@ export default function LoginPage() {
           </button>
         </div>
 
-        <div className="mt-5 text-center text-[11px] text-gray-400">v1.0.9</div>
+        <div className="mt-5 text-center text-[11px] text-gray-400">
+          <div>v1.1.0</div>
+          <div>Since 2026.9.12 · 我哋已經一齊咗 {getRelationshipDuration()}啦🥰</div>
+        </div>
       </div>
     </div>
   );

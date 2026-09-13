@@ -8,6 +8,20 @@ export type User = {
   role: UserRole;
 };
 
+export type CalendarEvent = {
+  id: string;
+  title: string;
+  startDate: string;
+  endDate: string;
+  isAllDay: boolean;
+  startTime?: string;
+  endTime?: string;
+  location?: string;
+  createdBy?: UserRole;
+  isRomantic?: boolean;
+  recurring?: boolean;
+};
+
 export type Priority = "high" | "medium" | "low";
 
 export type AssignedTo = "me" | "gf" | "both";
@@ -27,9 +41,10 @@ export type Wish = {
   title: string;
   description?: string;
   region?: string;
+  address?: string;
   tags: string[];
   priority: Priority;
-  proposedBy: "me" | "gf" | "both";
+  proposedBy: "Remus" | "Nicole" | "both";
   assignedTo: AssignedTo;
   deadline?: string | null; // ISO
   status: "open" | "completed";

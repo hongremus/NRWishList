@@ -13,6 +13,7 @@ export default function WishList({ onDetailChange }: { onDetailChange: (isOpen: 
   const [statusFilter, setStatusFilter] = useState<"open" | "completed" | "all">("open");
   const [tagFilter, setTagFilter] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<SortOption>("createdAt");
+  const [regionFilter, setRegionFilter] = useState("");
 
   // 所有願望中出現過的 tags 與 preset tags 的聯集
   const allTags = useMemo(() => {
@@ -26,7 +27,10 @@ export default function WishList({ onDetailChange }: { onDetailChange: (isOpen: 
       const matchStatus =
         statusFilter === "all" ? true : statusFilter === "open" ? w.status === "open" : w.status === "completed";
       const matchTag = tagFilter ? w.tags.includes(tagFilter) : true;
-      return matchStatus && matchTag;
+      const matchRegion = regionFilter.trim()
+        ? (w.region || "").toLocaleLowerCase().includes(regionFilter.trim().toLocaleLowerCase())
+        : true;
+      return matchStatus && matchTag && matchRegion;
     });
 
     result.sort((a, b) => {
@@ -52,7 +56,7 @@ export default function WishList({ onDetailChange }: { onDetailChange: (isOpen: 
     });
 
     return result;
-  }, [wishes, statusFilter, tagFilter, sortBy]);
+  }, [wishes, statusFilter, tagFilter, regionFilter, sortBy]);
 
   const activeStatusClass = isRemus
     ? "bg-blue-500 text-white shadow-md shadow-blue-500/20"
@@ -102,7 +106,7 @@ export default function WishList({ onDetailChange }: { onDetailChange: (isOpen: 
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as SortOption)}
-              className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm sm:w-auto sm:text-xs"
+              className="w-full px-3 py-2.5 bg-gray-50 text-gray-900 dark:bg-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-700 rounded-xl text-sm sm:w-auto sm:text-xs"
             >
               <option value="createdAt">🕒 新增日期（最新）</option>
               <option value="priority">🔥 優先度（高至低）</option>
@@ -111,6 +115,20 @@ export default function WishList({ onDetailChange }: { onDetailChange: (isOpen: 
               <option value="region">📍 地區（A-Z）</option>
             </select>
           </div>
+        </div>
+
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <input
+            value={regionFilter}
+            onChange={(e) => setRegionFilter(e.target.value)}
+            placeholder="📍 搜尋地區／附近願望"
+            className="min-w-0 flex-1 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+          />
+          {regionFilter && (
+            <button onClick={() => setRegionFilter("")} className="rounded-xl bg-gray-100 px-3 py-2.5 text-xs font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-200">
+              清除地區
+            </button>
+          )}
         </div>
 
         {/* Tag 標籤速選列 */}
@@ -158,7 +176,7 @@ export default function WishList({ onDetailChange }: { onDetailChange: (isOpen: 
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
           {filteredAndSorted.map((w) => (
             <WishCard key={w.id} wish={w} onDetailChange={onDetailChange} />
           ))}

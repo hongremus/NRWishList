@@ -1,8 +1,37 @@
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
-import { Wish, WishHistory } from "../types";
+import { Priority, Wish, WishHistory } from "../types";
 import { useStore } from "../store";
 import { useBodyScrollLock } from "../hooks/useBodyScrollLock";
+
+function LinkifiedText({ text }: { text: string }) {
+  const parts = text.split(/(\r?\n|(?:https?:\/\/|www\.)[^\s]+|(?:instagram\.com|threads\.net)\/[^\s]+)/gi);
+
+  return (
+    <>
+      {parts.map((part, index) => {
+        if (/^\r?\n$/.test(part)) return <br key={index} />;
+
+        const match = part.match(/^(.*?)([.,!?;:)]+)?$/);
+        const candidate = match?.[1] || part;
+        const punctuation = match?.[2] || "";
+        const isUrl = /^(?:https?:\/\/|www\.|instagram\.com\/|threads\.net\/)/i.test(candidate);
+
+        if (!isUrl) return <React.Fragment key={index}>{part}</React.Fragment>;
+
+        const href = /^https?:\/\//i.test(candidate) ? candidate : `https://${candidate}`;
+        return (
+          <React.Fragment key={index}>
+            <a href={href} target="_blank" rel="noreferrer" className="break-all text-blue-600 hover:underline dark:text-blue-300">
+              {candidate}
+            </a>
+            {punctuation}
+          </React.Fragment>
+        );
+      })}
+    </>
+  );
+}
 
 export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () => void }) {
   const update = useStore((s) => s.updateWish);
@@ -13,7 +42,11 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
   const [title, setTitle] = useState(wish.title);
   const [desc, setDesc] = useState(wish.description || "");
   const [region, setRegion] = useState(wish.region || "");
+  const [address, setAddress] = useState(wish.address || "");
   const [deadline, setDeadline] = useState(wish.deadline || "");
+  const [priority, setPriority] = useState<Priority>(wish.priority);
+  const [selectedTags, setSelectedTags] = useState<string[]>(wish.tags);
+  const availableTags = useStore((s) => s.availableTags);
 
   // 用於評分介面的 state
   const [activeRatingHistoryId, setActiveRatingHistoryId] = useState<string | null>(null);
@@ -30,7 +63,10 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
       title: title.trim(),
       description: desc.trim(),
       region: region || undefined,
+      address: address || undefined,
       deadline: deadline || null,
+      priority,
+      tags: selectedTags,
     });
     setEditing(false);
   }
@@ -148,6 +184,11 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
                 className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm dark:text-white resize-none"
                 value={desc}
                 onChange={(e) => setDesc(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.stopPropagation();
+                  }
+                }}
               />
             </div>
             <div>
@@ -157,6 +198,16 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
                 value={region}
                 onChange={(e) => setRegion(e.target.value)}
                 placeholder="例如：尖沙咀、沙田、銅鑼灣"
+                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm dark:text-white"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">地址（可以唔填）</label>
+              <input
+                type="text"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder="例如：尖沙咀海港城"
                 className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm dark:text-white"
               />
             </div>
@@ -180,6 +231,40 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
                 )}
               </div>
             </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">優先度</label>
+              <select
+                value={priority}
+                onChange={(e) => setPriority(e.target.value as Priority)}
+                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm dark:text-white"
+              >
+                <option value="high">🔴 高</option>
+                <option value="medium">🟡 中</option>
+                <option value="low">🔵 低</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">Tag</label>
+              <div className="flex flex-wrap gap-2">
+                {availableTags.map((tag) => {
+                  const selected = selectedTags.includes(tag);
+                  return (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => setSelectedTags((current) => selected ? current.filter((item) => item !== tag) : [...current, tag])}
+                      className={`rounded-xl border px-3 py-1.5 text-xs font-medium transition-all ${
+                        selected
+                          ? isRemus ? "border-blue-500 bg-blue-500 text-white" : "border-pink-500 bg-pink-500 text-white"
+                          : "border-gray-200 bg-gray-50 text-gray-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200"
+                      }`}
+                    >
+                      #{tag}{selected ? " ✓" : ""}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
             <div className="flex justify-end gap-2">
               <button
                 onClick={save}
@@ -194,13 +279,26 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
         ) : (
           <div className="space-y-4 mb-6">
             {wish.description && (
-              <p className="text-sm text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 p-3 rounded-2xl">
-                {wish.description}
+              <p className="whitespace-pre-wrap text-sm text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 p-3 rounded-2xl">
+                <LinkifiedText text={wish.description} />
               </p>
             )}
             {wish.region && (
               <p className="text-sm text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 p-3 rounded-2xl">
                 📍 地區：{wish.region}
+              </p>
+            )}
+            {wish.address && (
+              <p className="text-sm text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 p-3 rounded-2xl">
+                🏠 地址：{wish.address}{" "}
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(wish.address)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-semibold text-blue-600 hover:underline"
+                >
+                  開 Google Maps
+                </a>
               </p>
             )}
 
@@ -239,7 +337,7 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
               仲未完成過，搞掂咗之後就會喺呢度有紀錄！
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="relative space-y-4 pl-4 before:absolute before:bottom-4 before:left-1.5 before:top-4 before:w-px before:bg-purple-200 dark:before:bg-purple-800">
               {wish.history.map((h, index) => {
                 const statusInfo = getRatingStatusText(h.completedAt, h.isLocked);
                 const isFormOpen = activeRatingHistoryId === h.id;
@@ -247,7 +345,7 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
                 return (
                   <div
                     key={h.id}
-                    className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-2xl border border-gray-100 dark:border-gray-600 space-y-3"
+                    className="relative p-4 bg-gray-50 dark:bg-gray-700/50 rounded-2xl border border-gray-100 dark:border-gray-600 space-y-3 before:absolute before:-left-[1.25rem] before:top-5 before:h-3 before:w-3 before:rounded-full before:border-2 before:border-white before:bg-purple-500 dark:before:border-gray-900"
                   >
                     <div className="flex flex-wrap justify-between items-center text-xs text-gray-500 dark:text-gray-400 gap-1">
                       <span className="font-semibold text-gray-700 dark:text-gray-200">
@@ -273,8 +371,8 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
                           <span>👦🏻 Remus</span>
                           <span>{h.ratings.me ? `⭐ ${h.ratings.me}` : "未俾分"}</span>
                         </div>
-                        <p className="text-gray-600 dark:text-gray-300 italic">
-                          {h.remarks.me ? `"${h.remarks.me}"` : "未有 Remark"}
+                        <p className="whitespace-pre-wrap break-words text-gray-600 dark:text-gray-300 italic">
+                          {h.remarks.me ? <>"<LinkifiedText text={h.remarks.me} />"</> : "未有 Remark"}
                         </p>
                       </div>
 
@@ -283,8 +381,8 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
                           <span>👧🏻 Nicole</span>
                           <span>{h.ratings.gf ? `⭐ ${h.ratings.gf}` : "未俾分"}</span>
                         </div>
-                        <p className="text-gray-600 dark:text-gray-300 italic">
-                          {h.remarks.gf ? `"${h.remarks.gf}"` : "未有 Remark"}
+                        <p className="whitespace-pre-wrap break-words text-gray-600 dark:text-gray-300 italic">
+                          {h.remarks.gf ? <>"<LinkifiedText text={h.remarks.gf} />"</> : "未有 Remark"}
                         </p>
                       </div>
                     </div>
@@ -353,6 +451,11 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
                                 placeholder="你對今次願望有咩感受或者想講嘅嘢..."
                                 value={remarkText}
                                 onChange={(e) => setRemarkText(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") {
+                                    e.stopPropagation();
+                                  }
+                                }}
                               />
                             </div>
 

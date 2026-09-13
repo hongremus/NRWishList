@@ -1,6 +1,6 @@
 import create from "zustand";
 import { persist } from "zustand/middleware";
-import { User, Wish } from "./types";
+import { CalendarEvent, User, Wish } from "./types";
 import { supabase } from "./supabase";
 
 const COUPLE_ID = "remus-nicole";
@@ -13,6 +13,7 @@ function fromDatabaseWish(row: Record<string, unknown>): Wish {
     title: String(row.title),
     description: typeof row.description === "string" ? row.description : "",
     region: typeof row.region === "string" ? row.region : "",
+    address: typeof row.address === "string" ? row.address : "",
     tags: Array.isArray(row.tags) ? row.tags.map(String) : [],
     priority: row.priority as Wish["priority"],
     proposedBy: row.proposed_by as Wish["proposedBy"],
@@ -32,6 +33,7 @@ function toDatabaseWish(wish: Wish) {
     title: wish.title,
     description: wish.description || null,
     region: wish.region || null,
+    address: wish.address || null,
     tags: wish.tags,
     priority: wish.priority,
     proposed_by: wish.proposedBy,
@@ -44,10 +46,44 @@ function toDatabaseWish(wish: Wish) {
   };
 }
 
+function fromDatabaseCalendarEvent(row: Record<string, unknown>): CalendarEvent {
+  return {
+    id: String(row.id),
+    title: String(row.title),
+    startDate: String(row.start_date),
+    endDate: String(row.end_date),
+    isAllDay: Boolean(row.is_all_day),
+    startTime: typeof row.start_time === "string" ? row.start_time : undefined,
+    endTime: typeof row.end_time === "string" ? row.end_time : undefined,
+    location: typeof row.location === "string" ? row.location : undefined,
+    createdBy: row.created_by === "Nicole" ? "Nicole" : "Remus",
+    isRomantic: Boolean(row.is_romantic),
+    recurring: Boolean(row.recurring),
+  };
+}
+
+function toDatabaseCalendarEvent(event: CalendarEvent) {
+  return {
+    id: event.id,
+    couple_id: COUPLE_ID,
+    title: event.title,
+    start_date: event.startDate,
+    end_date: event.endDate,
+    is_all_day: event.isAllDay,
+    start_time: event.startTime || null,
+    end_time: event.endTime || null,
+    location: event.location || null,
+    created_by: event.createdBy || "Remus",
+    is_romantic: event.isRomantic || false,
+    recurring: event.recurring || false,
+  };
+}
+
 interface AppState {
   users: User[];
   currentUser: User | null;
   wishes: Wish[];
+  calendarEvents: CalendarEvent[];
   availableTags: string[];
   syncError: string | null;
   setCurrentUser: (u: User | null) => void;
@@ -57,6 +93,10 @@ interface AppState {
   addWish: (w: Wish) => void;
   updateWish: (w: Wish) => void;
   deleteWish: (id: string) => void;
+  addCalendarEvent: (event: CalendarEvent) => Promise<boolean>;
+  addCalendarEvents: (events: CalendarEvent[]) => Promise<boolean>;
+  updateCalendarEvent: (event: CalendarEvent) => Promise<boolean>;
+  deleteCalendarEvent: (id: string) => void;
   addTag: (tag: string) => void;
   deleteTag: (tag: string) => void;
   lockExpiredHistories: () => void;
@@ -71,6 +111,7 @@ export const useStore = create<AppState>()(
       ],
       currentUser: null,
       wishes: [],
+      calendarEvents: [],
       availableTags: defaultTags,
       syncError: null,
       setCurrentUser: (u) => set({ currentUser: u }),
@@ -78,9 +119,10 @@ export const useStore = create<AppState>()(
       loadRemoteData: async () => {
         if (!supabase) return;
 
-        const [{ data: wishRows, error: wishError }, { data: tagRows, error: tagError }] = await Promise.all([
+        const [{ data: wishRows, error: wishError }, { data: tagRows, error: tagError }, { data: calendarRows, error: calendarError }] = await Promise.all([
           supabase.from("wishes").select("*").eq("couple_id", COUPLE_ID).order("created_at", { ascending: false }),
           supabase.from("wish_tags").select("name").eq("couple_id", COUPLE_ID).order("name"),
+          supabase.from("calendar_events").select("*").eq("couple_id", COUPLE_ID).order("start_date").order("start_time"),
         ]);
 
         if (wishError) {
@@ -91,10 +133,15 @@ export const useStore = create<AppState>()(
           set({ syncError: `讀取 Tag 失敗：${tagError.message}` });
           throw tagError;
         }
+        if (calendarError) {
+          set({ syncError: `讀取行事曆失敗：${calendarError.message}` });
+          throw calendarError;
+        }
 
         set({
           wishes: (wishRows ?? []).map((row) => fromDatabaseWish(row as Record<string, unknown>)),
           availableTags: tagRows?.length ? tagRows.map((row) => row.name) : defaultTags,
+          calendarEvents: (calendarRows ?? []).map((row) => fromDatabaseCalendarEvent(row as Record<string, unknown>)),
           syncError: null,
         });
       },
@@ -107,6 +154,9 @@ export const useStore = create<AppState>()(
             void get().loadRemoteData();
           })
           .on("postgres_changes", { event: "*", schema: "public", table: "wish_tags", filter: `couple_id=eq.${COUPLE_ID}` }, () => {
+            void get().loadRemoteData();
+          })
+          .on("postgres_changes", { event: "*", schema: "public", table: "calendar_events", filter: `couple_id=eq.${COUPLE_ID}` }, () => {
             void get().loadRemoteData();
           })
           .subscribe();
@@ -141,6 +191,85 @@ export const useStore = create<AppState>()(
         const { error } = await supabase.from("wishes").delete().eq("id", id).eq("couple_id", COUPLE_ID);
         if (error) {
           set({ syncError: `刪除願望失敗：${error.message}` });
+          return;
+        }
+        await get().loadRemoteData();
+      },
+      addCalendarEvent: async (event) => {
+        set((state) => ({ calendarEvents: [...state.calendarEvents, event] }));
+        if (!supabase) return true;
+        const { error } = await supabase.from("calendar_events").insert(toDatabaseCalendarEvent(event));
+        if (error) {
+          set((state) => ({
+            calendarEvents: state.calendarEvents.filter((item) => item.id !== event.id),
+            syncError: `新增活動失敗：${error.message}`,
+          }));
+          return false;
+        }
+        try {
+          await get().loadRemoteData();
+        } catch {
+          set((state) => ({
+            calendarEvents: state.calendarEvents.filter((item) => item.id !== event.id),
+          }));
+          return false;
+        }
+        return true;
+      },
+      addCalendarEvents: async (events) => {
+        if (events.length === 0) return true;
+        set((state) => ({ calendarEvents: [...state.calendarEvents, ...events] }));
+        if (!supabase) return true;
+        const { error } = await supabase
+          .from("calendar_events")
+          .insert(events.map(toDatabaseCalendarEvent));
+        if (error) {
+          set((state) => ({
+            calendarEvents: state.calendarEvents.filter(
+              (item) => !events.some((event) => event.id === item.id),
+            ),
+            syncError: `新增重覆活動失敗：${error.message}`,
+          }));
+          return false;
+        }
+        try {
+          await get().loadRemoteData();
+        } catch {
+          set((state) => ({
+            calendarEvents: state.calendarEvents.filter(
+              (item) => !events.some((event) => event.id === item.id),
+            ),
+          }));
+          return false;
+        }
+        return true;
+      },
+      updateCalendarEvent: async (event) => {
+        set((state) => ({
+          calendarEvents: state.calendarEvents.map((item) =>
+            item.id === event.id ? event : item,
+          ),
+        }));
+        if (!supabase) return true;
+        const { error } = await supabase
+          .from("calendar_events")
+          .update(toDatabaseCalendarEvent(event))
+          .eq("id", event.id)
+          .eq("couple_id", COUPLE_ID);
+        if (error) {
+          set({ syncError: `更新活動失敗：${error.message}` });
+          await get().loadRemoteData();
+          return false;
+        }
+        await get().loadRemoteData();
+        return true;
+      },
+      deleteCalendarEvent: async (id) => {
+        set((state) => ({ calendarEvents: state.calendarEvents.filter((event) => event.id !== id) }));
+        if (!supabase) return;
+        const { error } = await supabase.from("calendar_events").delete().eq("id", id).eq("couple_id", COUPLE_ID);
+        if (error) {
+          set({ syncError: `刪除活動失敗：${error.message}` });
           return;
         }
         await get().loadRemoteData();
