@@ -67,17 +67,19 @@ export default function HomePage() {
           {/* 右側操作按鈕 */}
           <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
             <button
+              onClick={() => setShowTagManager(true)}
+              className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 text-white backdrop-blur-sm transition-all hover:bg-white/25 active:scale-95 sm:h-11 sm:w-11"
+              title="管理 Tag"
+              aria-label="管理 Tag"
+            >
+              🏷️
+            </button>
+            <button
               onClick={() => setShowStats(true)}
               className="flex h-10 w-10 items-center justify-center bg-white/15 hover:bg-white/25 active:scale-95 text-white rounded-xl backdrop-blur-sm transition-all sm:h-11 sm:w-11"
               title="睇統計"
             >
               📊
-            </button>
-            <button
-              onClick={() => setShowTagManager(true)}
-              className="hidden p-2.5 bg-white/15 hover:bg-white/25 active:scale-95 text-white rounded-xl backdrop-blur-sm transition-all text-xs font-semibold sm:inline-flex sm:items-center sm:gap-1"
-            >
-              🏷️ 管理 Tag
             </button>
             <button
               onClick={logout}
@@ -105,16 +107,6 @@ export default function HomePage() {
             </button>
           </div>
         )}
-
-        {/* 手機版頂部快捷功能區 */}
-        <div className="flex flex-wrap items-center justify-between gap-2 mb-3 sm:hidden">
-          <button
-            onClick={() => setShowTagManager(true)}
-              className="px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-200 shadow-xs"
-          >
-            🏷️ 管理 Tag
-          </button>
-        </div>
 
         <div className="mb-3 flex gap-1 rounded-2xl bg-gray-100 p-1 dark:bg-gray-800">
           <button

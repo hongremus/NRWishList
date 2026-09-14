@@ -39,6 +39,7 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
   const isRemus = currentUser?.username === "Remus";
 
   const [editing, setEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [title, setTitle] = useState(wish.title);
   const [desc, setDesc] = useState(wish.description || "");
   const [region, setRegion] = useState(wish.region || "");
@@ -56,19 +57,24 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
 
   useBodyScrollLock();
 
-  function save() {
+  async function save() {
     if (!title.trim()) return;
-    update({
-      ...wish,
-      title: title.trim(),
-      description: desc.trim(),
-      region: region || undefined,
-      address: address || undefined,
-      deadline: deadline || null,
-      priority,
-      tags: selectedTags,
-    });
-    setEditing(false);
+    setIsSaving(true);
+    try {
+      await update({
+        ...wish,
+        title: title.trim(),
+        description: desc.trim(),
+        region: region || undefined,
+        address: address || undefined,
+        deadline: deadline || null,
+        priority,
+        tags: selectedTags,
+      });
+      setEditing(false);
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   function lockHistoryItem(hId: string) {
@@ -131,7 +137,7 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
 
   return createPortal(
     (
-    <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-xs animate-fadeIn">
+    <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-xs animate-fadeIn">
       <div
         className="bg-white dark:bg-gray-900 rounded-t-3xl sm:rounded-3xl p-4 sm:p-6 w-full max-w-2xl shadow-2xl border border-gray-100 dark:border-gray-800 max-h-[90vh] overflow-y-auto"
         onClick={(event) => event.stopPropagation()}
@@ -268,11 +274,14 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
             <div className="flex justify-end gap-2">
               <button
                 onClick={save}
+                disabled={isSaving}
                 className={`px-5 py-2 text-white font-medium text-sm rounded-xl active:scale-95 transition-all shadow-md ${
-                  isRemus ? "bg-blue-500 hover:bg-blue-600" : "bg-pink-500 hover:bg-pink-600"
+                  isSaving
+                    ? "cursor-wait bg-gray-400"
+                    : isRemus ? "bg-blue-500 hover:bg-blue-600" : "bg-pink-500 hover:bg-pink-600"
                 }`}
               >
-                儲存
+                {isSaving ? "同步中…" : "儲存"}
               </button>
             </div>
           </div>

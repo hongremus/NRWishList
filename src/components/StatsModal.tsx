@@ -31,8 +31,8 @@ export default function StatsModal({ onClose }: { onClose: () => void }) {
   }, [wishes]);
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-xs">
-      <div className="bg-white dark:bg-gray-900 rounded-t-3xl sm:rounded-3xl p-4 sm:p-6 w-full max-w-md shadow-2xl border border-gray-100 dark:border-gray-800 max-h-[85vh] overflow-y-auto">
+    <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center bg-black/40 p-0 backdrop-blur-xs sm:p-4">
+      <div className="relative z-10 max-h-[85vh] w-full max-w-md overflow-y-auto rounded-t-3xl border border-gray-100 bg-white p-4 shadow-2xl dark:border-gray-800 dark:bg-gray-900 sm:rounded-3xl sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
           <div className="flex min-w-0 items-center gap-2">
             <span className="text-2xl">📊</span>

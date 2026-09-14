@@ -6,7 +6,6 @@ const relationshipStart = new Date(2026, 8, 12);
 function getRelationshipDuration() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  today.setDate(today.getDate() + 1);
   let years = today.getFullYear() - relationshipStart.getFullYear();
   let anniversary = new Date(
     relationshipStart.getFullYear() + years,
@@ -36,15 +35,20 @@ function getRelationshipDuration() {
     anniversary.getMonth() + months,
     anniversary.getDate(),
   );
-  const days = Math.floor((today.getTime() - monthStart.getTime()) / (1000 * 60 * 60 * 24));
+  const toDateNumber = (date: Date) =>
+    Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+  const elapsedDays = Math.floor(
+    (toDateNumber(today) - toDateNumber(monthStart)) / (1000 * 60 * 60 * 24),
+  );
+  const days = years === 0 && months === 0 ? elapsedDays + 1 : elapsedDays;
 
-  if (years > 0) {
-    return `${years}年${months}個月${days}日`;
-  }
-  if (months > 0) {
-    return `${months}個月${days}日`;
-  }
-  return `${days}日`;
+  return [
+    years > 0 ? `${years}年` : "",
+    months > 0 ? `${months}個月` : "",
+    days > 0 ? `${days}日` : "",
+  ]
+    .filter(Boolean)
+    .join("");
 }
 
 export default function LoginPage() {
@@ -102,7 +106,7 @@ export default function LoginPage() {
         </div>
 
         <div className="mt-5 text-center text-[11px] text-gray-400">
-          <div>v1.1.0</div>
+          <div>v1.1.1</div>
           <div>Since 2026.9.12 · 我哋已經一齊咗 {getRelationshipDuration()}啦🥰</div>
         </div>
       </div>
