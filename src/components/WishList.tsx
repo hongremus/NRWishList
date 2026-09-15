@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import { useStore } from "../store";
 import WishCard from "./WishCard";
 
-type SortOption = "createdAt" | "priority" | "deadline" | "completedCount" | "region";
+type SortOption = "createdAt" | "createdAtOldest" | "priority" | "deadline" | "completedCount" | "region";
 
 export default function WishList({ onDetailChange }: { onDetailChange: (isOpen: boolean) => void }) {
   const wishes = useStore((s) => s.wishes);
@@ -50,6 +50,9 @@ export default function WishList({ onDetailChange }: { onDetailChange: (isOpen: 
         if (!a.region) return 1;
         if (!b.region) return -1;
         return a.region.localeCompare(b.region, "zh-Hant");
+      }
+      if (sortBy === "createdAtOldest") {
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
       }
       // createdAt 預設由新到舊
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
@@ -109,6 +112,7 @@ export default function WishList({ onDetailChange }: { onDetailChange: (isOpen: 
               className="w-full px-3 py-2.5 bg-gray-50 text-gray-900 dark:bg-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-700 rounded-xl text-sm sm:w-auto sm:text-xs"
             >
               <option value="createdAt">🕒 新增日期（最新）</option>
+              <option value="createdAtOldest">🕒 新增日期（最舊）</option>
               <option value="priority">🔥 優先度（高至低）</option>
               <option value="completedCount">🎉 完成咗幾多次</option>
               <option value="deadline">📅 截止日（最近）</option>

@@ -346,6 +346,18 @@ export default function CalendarPage() {
 
   function selectDate(date: Date) {
     const dateKey = toDateKey(date);
+    const selectedMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+    const firstMonth = new Date(calendarStartYear, 0, 1);
+    const lastMonth = new Date(calendarEndYear, 11, 1);
+    if (selectedMonth < firstMonth || selectedMonth > lastMonth) return;
+    if (
+      selectedMonth.getFullYear() !== month.getFullYear() ||
+      selectedMonth.getMonth() !== month.getMonth()
+    ) {
+      setMonth(selectedMonth);
+      setJumpYear(selectedMonth.getFullYear());
+      setJumpMonth(selectedMonth.getMonth());
+    }
     setSelectedDate(dateKey);
     setForm((current) => ({
       ...current,
