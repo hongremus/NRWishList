@@ -4,6 +4,8 @@ import { Priority, Wish, WishHistory } from "../types";
 import { useStore } from "../store";
 import { useBodyScrollLock } from "../hooks/useBodyScrollLock";
 
+const MAX_RATING = 10;
+
 function LinkifiedText({ text }: { text: string }) {
   const parts = text.split(/(\r?\n|(?:https?:\/\/|www\.)[^\s]+|(?:instagram\.com|threads\.net)\/[^\s]+)/gi);
 
@@ -52,7 +54,7 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
   // 用於評分介面的 state
   const [activeRatingHistoryId, setActiveRatingHistoryId] = useState<string | null>(null);
   const [ratingRole, setRatingRole] = useState<"me" | "gf">(isRemus ? "me" : "gf");
-  const [ratingVal, setRatingVal] = useState<number>(5);
+  const [ratingVal, setRatingVal] = useState<number>(MAX_RATING);
   const [remarkText, setRemarkText] = useState<string>("");
 
   useBodyScrollLock();
@@ -112,7 +114,7 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
   function openRatingForm(h: WishHistory, role: "me" | "gf") {
     setActiveRatingHistoryId(h.id);
     setRatingRole(role);
-    setRatingVal(h.ratings[role] || 5);
+    setRatingVal(h.ratings[role] || MAX_RATING);
     setRemarkText(h.remarks[role] || "");
   }
 
@@ -367,7 +369,7 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
                       <span className="text-gray-600 dark:text-gray-300">
                         平均分：{" "}
                         <span className="font-bold text-amber-500 text-sm">
-                          {h.averageRating ? `⭐ ${h.averageRating}` : "暫無"}
+                          {h.averageRating ? `⭐ ${h.averageRating}/10` : "暫無"}
                         </span>
                       </span>
                       <span className="text-gray-400 font-medium">{statusInfo.text}</span>
@@ -378,7 +380,7 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
                       <div className="p-2.5 bg-blue-50/60 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-900/30">
                         <div className="font-semibold text-blue-700 dark:text-blue-300 mb-1 flex items-center justify-between">
                           <span>👦🏻 Remus</span>
-                          <span>{h.ratings.me ? `⭐ ${h.ratings.me}` : "未俾分"}</span>
+                          <span>{h.ratings.me ? `⭐ ${h.ratings.me}/10` : "未俾分"}</span>
                         </div>
                         <p className="whitespace-pre-wrap break-words text-gray-600 dark:text-gray-300 italic">
                           {h.remarks.me ? <>"<LinkifiedText text={h.remarks.me} />"</> : "未有 Remark"}
@@ -388,7 +390,7 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
                       <div className="p-2.5 bg-pink-50/60 dark:bg-pink-900/20 rounded-xl border border-pink-100 dark:border-pink-900/30">
                         <div className="font-semibold text-pink-700 dark:text-pink-300 mb-1 flex items-center justify-between">
                           <span>👧🏻 Nicole</span>
-                          <span>{h.ratings.gf ? `⭐ ${h.ratings.gf}` : "未俾分"}</span>
+                          <span>{h.ratings.gf ? `⭐ ${h.ratings.gf}/10` : "未俾分"}</span>
                         </div>
                         <p className="whitespace-pre-wrap break-words text-gray-600 dark:text-gray-300 italic">
                           {h.remarks.gf ? <>"<LinkifiedText text={h.remarks.gf} />"</> : "未有 Remark"}
@@ -437,19 +439,19 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
                             </div>
 
                             {/* 星星點選 */}
-                            <div className="flex items-center gap-1">
+                            <div className="flex flex-wrap items-center gap-1">
                               <span className="text-xs text-gray-500 mr-2">星星：</span>
-                              {[1, 2, 3, 4, 5].map((star) => (
+                              {Array.from({ length: MAX_RATING }, (_, index) => index + 1).map((star) => (
                                 <button
                                   key={star}
                                   type="button"
                                   onClick={() => setRatingVal(star)}
-                                  className="text-xl active:scale-125 transition-all"
+                                  className="text-lg active:scale-125 transition-all"
                                 >
                                   {star <= ratingVal ? "⭐" : "☆"}
                                 </button>
                               ))}
-                              <span className="text-xs font-bold text-amber-500 ml-2">{ratingVal} 分</span>
+                              <span className="text-xs font-bold text-amber-500 ml-2">{ratingVal}/10 分</span>
                             </div>
 
                             {/* Remark TextArea */}

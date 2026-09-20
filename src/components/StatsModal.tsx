@@ -103,7 +103,7 @@ export default function StatsModal({ onClose }: { onClose: () => void }) {
                       <div className="min-w-0 flex-1">
                         <div className="truncate font-bold text-gray-800 dark:text-gray-200">{wish.title}</div>
                         <div className="mt-0.5 text-gray-500 dark:text-gray-400">
-                          {proposer}{averageRating ? ` · 平均 ${averageRating} 分` : ""}
+                          {proposer}{averageRating ? ` · 平均 ${averageRating}/10 分` : ""}
                         </div>
                       </div>
                       <span className="flex-shrink-0 font-bold text-purple-700 dark:text-purple-300">
