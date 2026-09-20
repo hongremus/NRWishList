@@ -106,7 +106,7 @@ export default function LoginPage() {
         </div>
 
         <div className="mt-5 text-center text-[11px] text-gray-400">
-          <div>v1.1.2</div>
+          <div>v1.1.3</div>
           <div>Since 2026.9.12 · 我哋已經一齊咗 {getRelationshipDuration()}啦🥰</div>
         </div>
       </div>

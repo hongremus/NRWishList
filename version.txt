@@ -96,3 +96,7 @@ v1.1.1 — Calendar, Clearly
 v1.1.2 — Small Moves, Better Days
 - 願望排序 dropdown 加入「新增日期（最舊）」。
 - 點擊日曆上／下個月日期時，自動跳到該日期所屬月份並選取該日。
+
+v1.1.3 — Room To Say More
+- 評分改為 10 分滿分，現有 1–5 分可透過 Supabase migration 轉換為 10 分制。
+- 評分 Remark 輸入框加高至 10 行，方便輸入較長評論。
