@@ -9,17 +9,35 @@ set history = coalesce((
         jsonb_set_lax(
           item,
           '{ratings,me}',
-          to_jsonb(least(((item #>> '{ratings,me}')::numeric) * 2, 10)),
+          to_jsonb(least(
+            case when (item #>> '{ratings,me}')::numeric <= 5
+              then (item #>> '{ratings,me}')::numeric * 2
+              else (item #>> '{ratings,me}')::numeric
+            end,
+            10
+          )),
           true,
           'return_target'
         ),
         '{ratings,gf}',
-        to_jsonb(least(((item #>> '{ratings,gf}')::numeric) * 2, 10)),
+        to_jsonb(least(
+          case when (item #>> '{ratings,gf}')::numeric <= 5
+            then (item #>> '{ratings,gf}')::numeric * 2
+            else (item #>> '{ratings,gf}')::numeric
+          end,
+          10
+        )),
         true,
         'return_target'
       ),
       '{averageRating}',
-      to_jsonb(least(((item->>'averageRating')::numeric) * 2, 10)),
+      to_jsonb(least(
+        case when (item->>'averageRating')::numeric <= 5
+          then (item->>'averageRating')::numeric * 2
+          else (item->>'averageRating')::numeric
+        end,
+        10
+      )),
       true,
       'return_target'
     )
