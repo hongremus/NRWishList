@@ -440,7 +440,6 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
 
                             {/* 星星點選 */}
                             <div className="flex flex-wrap items-center gap-1">
-                              <span className="text-xs text-gray-500 mr-2">星星：</span>
                               {Array.from({ length: MAX_RATING }, (_, index) => index + 1).map((star) => (
                                 <button
                                   key={star}
