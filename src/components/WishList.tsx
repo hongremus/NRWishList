@@ -1,8 +1,17 @@
 import React, { useMemo, useState } from "react";
 import { useStore } from "../store";
 import WishCard from "./WishCard";
+import { Wish } from "../types";
 
-type SortOption = "createdAt" | "createdAtOldest" | "priority" | "deadline" | "completedCount" | "region";
+type OpenSortOption = "createdAt" | "createdAtOldest" | "priority" | "deadline" | "region";
+type CompletedSortOption = "completedAt" | "completedAtOldest" | "completedCount" | "region";
+
+function getLatestCompletionTime(wish: Wish) {
+  return wish.history.reduce(
+    (latest, history) => Math.max(latest, new Date(history.completedAt).getTime() || 0),
+    0,
+  );
+}
 
 export default function WishList({ onDetailChange }: { onDetailChange: (isOpen: boolean) => void }) {
   const wishes = useStore((s) => s.wishes);
@@ -10,9 +19,10 @@ export default function WishList({ onDetailChange }: { onDetailChange: (isOpen: 
   const currentUser = useStore((s) => s.currentUser);
   const isRemus = currentUser?.username === "Remus";
 
-  const [statusFilter, setStatusFilter] = useState<"open" | "completed" | "all">("open");
+  const [statusFilter, setStatusFilter] = useState<"open" | "completed">("open");
   const [tagFilter, setTagFilter] = useState<string | null>(null);
-  const [sortBy, setSortBy] = useState<SortOption>("createdAt");
+  const [openSortBy, setOpenSortBy] = useState<OpenSortOption>("createdAt");
+  const [completedSortBy, setCompletedSortBy] = useState<CompletedSortOption>("completedAt");
   const [regionFilter, setRegionFilter] = useState("");
 
   // 所有願望中出現過的 tags 與 preset tags 的聯集
@@ -24,8 +34,7 @@ export default function WishList({ onDetailChange }: { onDetailChange: (isOpen: 
   // 過濾與排序邏輯
   const filteredAndSorted = useMemo(() => {
     let result = wishes.filter((w) => {
-      const matchStatus =
-        statusFilter === "all" ? true : statusFilter === "open" ? w.status === "open" : w.status === "completed";
+      const matchStatus = w.status === statusFilter;
       const matchTag = tagFilter ? w.tags.includes(tagFilter) : true;
       const matchRegion = regionFilter.trim()
         ? (w.region || "").toLocaleLowerCase().includes(regionFilter.trim().toLocaleLowerCase())
@@ -34,6 +43,7 @@ export default function WishList({ onDetailChange }: { onDetailChange: (isOpen: 
     });
 
     result.sort((a, b) => {
+      const sortBy = statusFilter === "open" ? openSortBy : completedSortBy;
       if (sortBy === "priority") {
         const pMap = { high: 3, medium: 2, low: 1 };
         return pMap[b.priority] - pMap[a.priority];
@@ -54,12 +64,18 @@ export default function WishList({ onDetailChange }: { onDetailChange: (isOpen: 
       if (sortBy === "createdAtOldest") {
         return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
       }
+      if (sortBy === "completedAt") {
+        return getLatestCompletionTime(b) - getLatestCompletionTime(a);
+      }
+      if (sortBy === "completedAtOldest") {
+        return getLatestCompletionTime(a) - getLatestCompletionTime(b);
+      }
       // createdAt 預設由新到舊
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
 
     return result;
-  }, [wishes, statusFilter, tagFilter, regionFilter, sortBy]);
+  }, [wishes, statusFilter, tagFilter, regionFilter, openSortBy, completedSortBy]);
 
   const activeStatusClass = isRemus
     ? "bg-blue-500 text-white shadow-md shadow-blue-500/20"
@@ -92,31 +108,37 @@ export default function WishList({ onDetailChange }: { onDetailChange: (isOpen: 
             >
               搞掂咗 ({wishes.filter((w) => w.status === "completed").length})
             </button>
-            <button
-              className={`px-3.5 py-2 rounded-xl text-sm sm:text-xs font-semibold transition-all ${
-                statusFilter === "all"
-                  ? activeStatusClass
-                  : "text-gray-600 dark:text-gray-300 hover:text-gray-900"
-              }`}
-              onClick={() => setStatusFilter("all")}
-            >
-              全部 ({wishes.length})
-            </button>
           </div>
 
           {/* 排序選單 */}
           <div className="w-full flex-shrink-0 sm:w-auto">
             <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as SortOption)}
+              value={statusFilter === "open" ? openSortBy : completedSortBy}
+              onChange={(e) => {
+                if (statusFilter === "open") {
+                  setOpenSortBy(e.target.value as OpenSortOption);
+                } else {
+                  setCompletedSortBy(e.target.value as CompletedSortOption);
+                }
+              }}
               className="w-full px-3 py-2.5 bg-gray-50 text-gray-900 dark:bg-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-700 rounded-xl text-sm sm:w-auto sm:text-xs"
             >
-              <option value="createdAt">🕒 新增日期（最新）</option>
-              <option value="createdAtOldest">🕒 新增日期（最舊）</option>
-              <option value="priority">🔥 優先度（高至低）</option>
-              <option value="completedCount">🎉 完成咗幾多次</option>
-              <option value="deadline">📅 截止日（最近）</option>
-              <option value="region">📍 地區（A-Z）</option>
+              {statusFilter === "open" ? (
+                <>
+                  <option value="createdAt">🕒 新增日期（最新）</option>
+                  <option value="createdAtOldest">🕒 新增日期（最舊）</option>
+                  <option value="priority">🔥 優先度（高至低）</option>
+                  <option value="deadline">📅 截止日（最近）</option>
+                  <option value="region">📍 地區（A-Z）</option>
+                </>
+              ) : (
+                <>
+                  <option value="completedAt">✅ 完成時間（最新）</option>
+                  <option value="completedAtOldest">✅ 完成時間（最舊）</option>
+                  <option value="completedCount">🎉 完成咗幾多次</option>
+                  <option value="region">📍 地區（A-Z）</option>
+                </>
+              )}
             </select>
           </div>
         </div>
