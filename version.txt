@@ -100,3 +100,8 @@ v1.1.2 — Small Moves, Better Days
 v1.1.3 — Room To Say More
 - 評分改為 10 分滿分，現有 1–5 分可透過 Supabase migration 轉換為 10 分制。
 - 評分 Remark 輸入框加高至 10 行，方便輸入較長評論。
+
+v1.1.4 — Sort It Out
+- 未搞掂及已完成願望使用各自嘅排序選項，並移除「全部」分類。
+- 已完成願望支援按最新／最舊完成時間及完成次數排序，多次完成會以最新完成時間計算。
+- 修正超長 description 及網站連結穿出願望卡片嘅問題。
