@@ -87,7 +87,7 @@ export default function WishCard({ wish, onDetailChange }: { wish: Wish; onDetai
       }}
     >
       <div className="flex justify-between items-start gap-2 mb-2">
-        <div className="flex-1">
+        <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2 mb-1">
             <h3
               className={`font-bold text-base sm:text-lg ${
@@ -104,7 +104,7 @@ export default function WishCard({ wish, onDetailChange }: { wish: Wish; onDetai
           </div>
 
           {wish.description && (
-            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-2">
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 line-clamp-2 break-words mb-2">
               {wish.description}
             </p>
           )}
