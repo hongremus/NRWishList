@@ -4,6 +4,17 @@ import { useStore } from "../store";
 import WishModal from "./WishModal";
 import ConfirmModal from "./ConfirmModal";
 
+function createHistoryId() {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (char) => {
+    const random = Math.floor(Math.random() * 16);
+    const value = char === "x" ? random : (random & 0x3) | 0x8;
+    return value.toString(16);
+  });
+}
+
 export default function WishCard({ wish, onDetailChange }: { wish: Wish; onDetailChange: (isOpen: boolean) => void }) {
   const update = useStore((s) => s.updateWish);
   const deleteWish = useStore((s) => s.deleteWish);
@@ -28,7 +39,7 @@ export default function WishCard({ wish, onDetailChange }: { wish: Wish; onDetai
   function handleConfirmComplete() {
     if (wish.status === "open") {
       const h = {
-        id: crypto.randomUUID(),
+        id: createHistoryId(),
         completedAt: new Date().toISOString(),
         completedBy: currentUser?.displayName || currentUser?.username || "未知",
         ratings: {},
