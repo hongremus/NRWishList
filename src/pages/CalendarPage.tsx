@@ -196,6 +196,38 @@ function formatEventTime(event: CalendarEvent) {
   return `${formatShortTime(event.startTime) || "未定"}${event.endTime ? ` - ${formatShortTime(event.endTime)}` : ""}`;
 }
 
+function addDaysToDateKey(dateKey: string, days: number) {
+  const date = parseDate(dateKey);
+  date.setDate(date.getDate() + days);
+  return toDateKey(date);
+}
+
+function getGoogleCalendarUrl(event: CalendarEvent, selectedDate: string) {
+  const eventTitle = getCalendarEventTitle(event, selectedDate);
+  const startDate = event.recurring ? selectedDate : event.startDate;
+  const endDate = event.recurring ? selectedDate : event.endDate;
+  const params = new URLSearchParams({
+    action: "TEMPLATE",
+    text: eventTitle,
+    details: "由 NR Wish List 加入",
+  });
+
+  if (event.isAllDay) {
+    params.set("dates", `${startDate.replaceAll("-", "")}/${addDaysToDateKey(endDate, 1).replaceAll("-", "")}`);
+  } else {
+    const startTime = event.startTime || "00:00";
+    const endTime = event.endTime || addOneHour(startTime);
+    params.set(
+      "dates",
+      `${startDate.replaceAll("-", "")}T${startTime.replace(":", "")}00/${endDate.replaceAll("-", "")}T${endTime.replace(":", "")}00`,
+    );
+    params.set("ctz", "Asia/Hong_Kong");
+  }
+
+  if (event.location) params.set("location", event.location);
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
+
 function initialEvents(): CalendarEvent[] {
   return [
     {
@@ -806,6 +838,17 @@ export default function CalendarPage() {
                       : ""}
                   </div>
                 </div>
+                <button
+                  onClick={(clickEvent) => {
+                    clickEvent.stopPropagation();
+                    window.open(getGoogleCalendarUrl(event, selectedDate), "_blank", "noopener,noreferrer");
+                  }}
+                  className="shrink-0 rounded-lg px-1.5 py-1 text-xs font-semibold text-gray-600 transition-colors hover:bg-white/60 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-black/20 dark:hover:text-white"
+                  title="加入我嘅 Google 日曆"
+                  aria-label={`將${getCalendarEventTitle(event, selectedDate)}加入我嘅 Google 日曆`}
+                >
+                  📅
+                </button>
                 {canManageEvent(event) && (
                   <div className="flex shrink-0 items-center gap-2 text-xs">
                     {event.startDate === event.endDate && (

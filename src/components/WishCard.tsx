@@ -59,6 +59,20 @@ export default function WishCard({ wish, onDetailChange }: { wish: Wish; onDetai
 
   // 最新歷史紀錄的評分
   const latestHistory = wish.history[0];
+  const ratingRole = isRemus ? "me" : "gf";
+  const latestCompletionTime = latestHistory ? new Date(latestHistory.completedAt).getTime() : NaN;
+  const isWithinReviewWindow =
+    Number.isFinite(latestCompletionTime) &&
+    latestCompletionTime <= Date.now() &&
+    Date.now() - latestCompletionTime < 2 * 24 * 60 * 60 * 1000;
+  const hasPendingReview = Boolean(
+    wish.status === "completed" &&
+      latestHistory &&
+      !latestHistory.isLocked &&
+      isWithinReviewWindow &&
+      latestHistory.ratings[ratingRole] == null &&
+      !latestHistory.remarks[ratingRole]?.trim(),
+  );
 
   const priorityColor =
     wish.priority === "high"
@@ -119,6 +133,19 @@ export default function WishCard({ wish, onDetailChange }: { wish: Wish; onDetai
           <span className="inline-block px-2.5 py-1 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 font-bold rounded-xl text-xs">
             🎉 {wish.completedCount} 次
           </span>
+          {hasPendingReview && (
+            <button
+              onClick={(event) => {
+                event.stopPropagation();
+                openDetail();
+              }}
+              className="ml-1 inline-flex h-7 w-7 items-center justify-center rounded-lg bg-amber-100 text-sm transition-colors hover:bg-amber-200 dark:bg-amber-900/40 dark:hover:bg-amber-900/60"
+              title="仲未評分及留言"
+              aria-label="仲未評分及留言"
+            >
+              💬
+            </button>
+          )}
         </div>
       </div>
 
