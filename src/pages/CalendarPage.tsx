@@ -209,7 +209,7 @@ function getGoogleCalendarUrl(event: CalendarEvent, selectedDate: string) {
   const params = new URLSearchParams({
     action: "TEMPLATE",
     text: eventTitle,
-    details: "由 NR Wish List 加入",
+    details: `活動由 ${event.createdBy || "系統"} 建立`,
   });
 
   if (event.isAllDay) {
@@ -837,15 +837,12 @@ export default function CalendarPage() {
                       ? ` · ${formatDate(event.startDate)} 至 ${formatDate(event.endDate)}`
                       : ""}
                   </div>
-                  <div className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
-                    活動由 {event.createdBy || "系統"} 建立
-                  </div>
                   <button
                     onClick={(clickEvent) => {
                       clickEvent.stopPropagation();
                       window.open(getGoogleCalendarUrl(event, selectedDate), "_blank", "noopener,noreferrer");
                     }}
-                    className="mt-1 font-semibold text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+                    className="mt-1 text-xs font-semibold text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
                     title="加入我嘅 Google 日曆"
                     aria-label={`將${getCalendarEventTitle(event, selectedDate)}加入我嘅 Google 日曆`}
                   >
