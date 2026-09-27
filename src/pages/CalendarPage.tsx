@@ -843,11 +843,11 @@ export default function CalendarPage() {
                     clickEvent.stopPropagation();
                     window.open(getGoogleCalendarUrl(event, selectedDate), "_blank", "noopener,noreferrer");
                   }}
-                  className="shrink-0 rounded-lg px-1.5 py-1 text-xs font-semibold text-gray-600 transition-colors hover:bg-white/60 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-black/20 dark:hover:text-white"
+                  className="shrink-0 text-xs font-semibold text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
                   title="加入我嘅 Google 日曆"
                   aria-label={`將${getCalendarEventTitle(event, selectedDate)}加入我嘅 Google 日曆`}
                 >
-                  📅
+                  加入日曆
                 </button>
                 {canManageEvent(event) && (
                   <div className="flex shrink-0 items-center gap-2 text-xs">
