@@ -111,3 +111,5 @@ v1.1.5 — Calendar Lanes, Clearly
 - 手機日曆跨日全日活動按月份統一分配 lane，重疊活動會自動新增一行，並保持長條位置一致。
 - 日曆格高度按每星期實際需要調整，只有受影響嘅星期行會拉高。
 - 「加入日曆」更新為「加入 Google 日曆」，並以外部連結開啟 Google Calendar，保留原本 web app 畫面。
+- Header 加入 pending review 數字提示，只有存在未評分及留言嘅近期完成願望時顯示。
+- Pending review 提示改用深酒紅圓形按鈕，點擊後會直接開啟已完成願望清單。

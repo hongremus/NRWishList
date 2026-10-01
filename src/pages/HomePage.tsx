@@ -8,6 +8,7 @@ import CalendarPage from "./CalendarPage";
 
 export default function HomePage() {
   const currentUser = useStore((s) => s.currentUser);
+  const wishes = useStore((s) => s.wishes);
   const syncError = useStore((s) => s.syncError);
   const clearSyncError = useStore((s) => s.clearSyncError);
   const setCurrentUser = useStore((s) => s.setCurrentUser);
@@ -21,8 +22,29 @@ export default function HomePage() {
   const [showStats, setShowStats] = useState(false);
   const [showWishDetail, setShowWishDetail] = useState(false);
   const [activePage, setActivePage] = useState<"wishes" | "calendar">("wishes");
+  const [completedViewRequest, setCompletedViewRequest] = useState(0);
 
   const isRemus = currentUser?.username === "Remus";
+  const pendingReviewCount = wishes.filter((wish) => {
+    const latestHistory = wish.history[0];
+    const ratingRole = isRemus ? "me" : "gf";
+    const latestCompletionTime = latestHistory
+      ? new Date(latestHistory.completedAt).getTime()
+      : NaN;
+    const isWithinReviewWindow =
+      Number.isFinite(latestCompletionTime) &&
+      latestCompletionTime <= Date.now() &&
+      Date.now() - latestCompletionTime < 2 * 24 * 60 * 60 * 1000;
+
+    return Boolean(
+      wish.status === "completed" &&
+        latestHistory &&
+        !latestHistory.isLocked &&
+        isWithinReviewWindow &&
+        latestHistory.ratings[ratingRole] == null &&
+        !latestHistory.remarks[ratingRole]?.trim(),
+    );
+  }).length;
 
   useEffect(() => {
     // 檢查是否有儲存登入狀態
@@ -80,6 +102,20 @@ export default function HomePage() {
 
           {/* 右側操作按鈕 */}
           <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
+            {pendingReviewCount > 0 && (
+              <button
+                type="button"
+                onClick={() => {
+                  setActivePage("wishes");
+                  setCompletedViewRequest((request) => request + 1);
+                }}
+                className="flex h-8 min-w-8 items-center justify-center rounded-full bg-rose-800 px-2 text-sm font-black leading-none text-white shadow-sm sm:h-9 sm:min-w-9"
+                title={`${pendingReviewCount} 個願望等你評分及留言`}
+                aria-label={`${pendingReviewCount} 個願望等你評分及留言`}
+              >
+                {pendingReviewCount}
+              </button>
+            )}
             <button
               onClick={() => setShowTagManager(true)}
               className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 text-white backdrop-blur-sm transition-all hover:bg-white/25 active:scale-95 sm:h-11 sm:w-11"
@@ -147,7 +183,13 @@ export default function HomePage() {
           </button>
         </div>
 
-        {activePage === "wishes" ? <WishList onDetailChange={setShowWishDetail} /> : <CalendarPage />}
+        {activePage === "wishes" ? (
+          <WishList
+            key={completedViewRequest}
+            initialStatusFilter={completedViewRequest > 0 ? "completed" : "open"}
+            onDetailChange={setShowWishDetail}
+          />
+        ) : <CalendarPage />}
       </main>
 
       {/* 手機版右下角 Floating Action Button (新增願望) */}

@@ -13,13 +13,19 @@ function getLatestCompletionTime(wish: Wish) {
   );
 }
 
-export default function WishList({ onDetailChange }: { onDetailChange: (isOpen: boolean) => void }) {
+export default function WishList({
+  onDetailChange,
+  initialStatusFilter = "open",
+}: {
+  onDetailChange: (isOpen: boolean) => void;
+  initialStatusFilter?: "open" | "completed";
+}) {
   const wishes = useStore((s) => s.wishes);
   const availableTags = useStore((s) => s.availableTags);
   const currentUser = useStore((s) => s.currentUser);
   const isRemus = currentUser?.username === "Remus";
 
-  const [statusFilter, setStatusFilter] = useState<"open" | "completed">("open");
+  const [statusFilter, setStatusFilter] = useState<"open" | "completed">(initialStatusFilter);
   const [tagFilter, setTagFilter] = useState<string | null>(null);
   const [openSortBy, setOpenSortBy] = useState<OpenSortOption>("createdAt");
   const [completedSortBy, setCompletedSortBy] = useState<CompletedSortOption>("completedAt");
