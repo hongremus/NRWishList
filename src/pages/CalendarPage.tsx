@@ -368,6 +368,7 @@ export default function CalendarPage() {
   const [editingEventId, setEditingEventId] = useState<string | null>(null);
   const [pendingDeleteEvent, setPendingDeleteEvent] =
     useState<CalendarEvent | null>(null);
+  const [deletedFeatureEventIds, setDeletedFeatureEventIds] = useState<string[]>([]);
   const [repeatTarget, setRepeatTarget] = useState<CalendarEvent | null>(null);
   const [repeatYear, setRepeatYear] = useState("");
   const [repeatMonth, setRepeatMonth] = useState("");
@@ -393,8 +394,13 @@ export default function CalendarPage() {
 
   const days = useMemo(() => getMonthDays(month), [month]);
   const events = useMemo(
-    () => [...initialEvents(isCalendarFeatureTest), ...remoteEvents],
-    [isCalendarFeatureTest, remoteEvents],
+    () => [
+      ...initialEvents(isCalendarFeatureTest).filter(
+        (event) => !deletedFeatureEventIds.includes(event.id),
+      ),
+      ...remoteEvents,
+    ],
+    [deletedFeatureEventIds, isCalendarFeatureTest, remoteEvents],
   );
   const holidays = month.getFullYear() === 2026 ? holidays2026 : [];
   const selectedEvents = events.filter((event) =>
@@ -517,6 +523,7 @@ export default function CalendarPage() {
 
   function canManageEvent(event: CalendarEvent) {
     return (
+      (isCalendarFeatureTest && event.id.startsWith("calendar-test-")) ||
       event.createdBy === currentUser?.role ||
       (event.isRomantic && Boolean(event.createdBy))
     );
@@ -673,7 +680,17 @@ export default function CalendarPage() {
 
   function confirmDeleteEvent() {
     if (!pendingDeleteEvent) return;
-    void deleteCalendarEvent(pendingDeleteEvent.id);
+    if (
+      isCalendarFeatureTest &&
+      pendingDeleteEvent.id.startsWith("calendar-test-")
+    ) {
+      setDeletedFeatureEventIds((current) => [
+        ...current,
+        pendingDeleteEvent.id,
+      ]);
+    } else {
+      void deleteCalendarEvent(pendingDeleteEvent.id);
+    }
     setPendingDeleteEvent(null);
   }
 
