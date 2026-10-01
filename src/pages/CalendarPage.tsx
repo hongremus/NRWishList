@@ -735,6 +735,10 @@ export default function CalendarPage() {
               .map((laneEvents) =>
                 laneEvents.find((event) => eventOccursOn(event, dateKey)),
               );
+            const lastActiveLaneIndex = mobileMultiDayEventsForDate.reduce(
+              (lastIndex, event, index) => (event ? index : lastIndex),
+              -1,
+            );
             const mobileSingleDayEvents = dayEvents.filter(
               (event) =>
                 event.startDate === event.endDate &&
@@ -751,7 +755,8 @@ export default function CalendarPage() {
             );
             const hasRomanticEvent = dayEvents.some((event) => event.isRomantic);
             const mobileActivityRows =
-              mobileMultiDayEventsForDate.length +
+              lastActiveLaneIndex +
+              1 +
               (mobileSingleDayDotEvents.length > 0 ? 1 : 0);
             const mobileActivityHeight = mobileActivityRows * 8 + Math.max(0, mobileActivityRows - 1) * 2;
             const holiday = holidays.find((item) => item.date === dateKey);
