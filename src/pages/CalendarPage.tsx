@@ -269,9 +269,12 @@ export default function CalendarPage() {
   const updateCalendarEvent = useStore((state) => state.updateCalendarEvent);
   const deleteCalendarEvent = useStore((state) => state.deleteCalendarEvent);
   const defaultEventTimes = getDefaultEventTimes();
-  const [month, setMonth] = useState(new Date(2026, 8, 1));
-  const [jumpYear, setJumpYear] = useState(2026);
-  const [jumpMonth, setJumpMonth] = useState(8);
+  const [month, setMonth] = useState(() => {
+    const today = new Date();
+    return new Date(today.getFullYear(), today.getMonth(), 1);
+  });
+  const [jumpYear, setJumpYear] = useState(() => new Date().getFullYear());
+  const [jumpMonth, setJumpMonth] = useState(() => new Date().getMonth());
   const [showForm, setShowForm] = useState(false);
   const [editingEventId, setEditingEventId] = useState<string | null>(null);
   const [pendingDeleteEvent, setPendingDeleteEvent] =
