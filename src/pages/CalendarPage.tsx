@@ -235,58 +235,7 @@ function getGoogleCalendarUrl(event: CalendarEvent, selectedDate: string) {
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
 
-function initialEvents(includeFeatureTests = false): CalendarEvent[] {
-  const featureTestEvents: CalendarEvent[] = includeFeatureTests
-    ? [
-        {
-          id: "calendar-test-remus-dot-1",
-          title: "測試：Remus 點 1",
-          startDate: "2027-02-07",
-          endDate: "2027-02-07",
-          isAllDay: false,
-          startTime: "10:00",
-          endTime: "11:00",
-          createdBy: "Remus",
-        },
-        {
-          id: "calendar-test-remus-dot-2",
-          title: "測試：Remus 點 2",
-          startDate: "2027-02-07",
-          endDate: "2027-02-07",
-          isAllDay: false,
-          startTime: "14:00",
-          endTime: "15:00",
-          createdBy: "Remus",
-        },
-        {
-          id: "calendar-test-nicole-dot-1",
-          title: "測試：Nicole 點 1",
-          startDate: "2027-02-07",
-          endDate: "2027-02-07",
-          isAllDay: false,
-          startTime: "12:00",
-          endTime: "13:00",
-          createdBy: "Nicole",
-        },
-        {
-          id: "calendar-test-remus-bar",
-          title: "測試：Remus 長條",
-          startDate: "2027-02-06",
-          endDate: "2027-02-09",
-          isAllDay: true,
-          createdBy: "Remus",
-        },
-        {
-          id: "calendar-test-nicole-bar",
-          title: "測試：Nicole 長條",
-          startDate: "2027-02-07",
-          endDate: "2027-02-10",
-          isAllDay: true,
-          createdBy: "Nicole",
-        },
-      ]
-    : [];
-
+function initialEvents(): CalendarEvent[] {
   return [
     {
       id: "anniversary",
@@ -313,7 +262,6 @@ function initialEvents(includeFeatureTests = false): CalendarEvent[] {
       isAllDay: true,
       isRomantic: true,
     },
-    ...featureTestEvents,
   ];
 }
 
@@ -355,9 +303,6 @@ export default function CalendarPage() {
   const updateCalendarEvent = useStore((state) => state.updateCalendarEvent);
   const deleteCalendarEvent = useStore((state) => state.deleteCalendarEvent);
   const defaultEventTimes = getDefaultEventTimes();
-  const isCalendarFeatureTest =
-    new URLSearchParams(window.location.search).get("calendarFix") ===
-    "feature-test";
   const [month, setMonth] = useState(() => {
     const today = new Date();
     return new Date(today.getFullYear(), today.getMonth(), 1);
@@ -368,7 +313,6 @@ export default function CalendarPage() {
   const [editingEventId, setEditingEventId] = useState<string | null>(null);
   const [pendingDeleteEvent, setPendingDeleteEvent] =
     useState<CalendarEvent | null>(null);
-  const [deletedFeatureEventIds, setDeletedFeatureEventIds] = useState<string[]>([]);
   const [repeatTarget, setRepeatTarget] = useState<CalendarEvent | null>(null);
   const [repeatYear, setRepeatYear] = useState("");
   const [repeatMonth, setRepeatMonth] = useState("");
@@ -394,13 +338,8 @@ export default function CalendarPage() {
 
   const days = useMemo(() => getMonthDays(month), [month]);
   const events = useMemo(
-    () => [
-      ...initialEvents(isCalendarFeatureTest).filter(
-        (event) => !deletedFeatureEventIds.includes(event.id),
-      ),
-      ...remoteEvents,
-    ],
-    [deletedFeatureEventIds, isCalendarFeatureTest, remoteEvents],
+    () => [...initialEvents(), ...remoteEvents],
+    [remoteEvents],
   );
   const holidays = month.getFullYear() === 2026 ? holidays2026 : [];
   const selectedEvents = events.filter((event) =>
@@ -523,7 +462,6 @@ export default function CalendarPage() {
 
   function canManageEvent(event: CalendarEvent) {
     return (
-      (isCalendarFeatureTest && event.id.startsWith("calendar-test-")) ||
       event.createdBy === currentUser?.role ||
       (event.isRomantic && Boolean(event.createdBy))
     );
@@ -680,17 +618,7 @@ export default function CalendarPage() {
 
   function confirmDeleteEvent() {
     if (!pendingDeleteEvent) return;
-    if (
-      isCalendarFeatureTest &&
-      pendingDeleteEvent.id.startsWith("calendar-test-")
-    ) {
-      setDeletedFeatureEventIds((current) => [
-        ...current,
-        pendingDeleteEvent.id,
-      ]);
-    } else {
-      void deleteCalendarEvent(pendingDeleteEvent.id);
-    }
+    void deleteCalendarEvent(pendingDeleteEvent.id);
     setPendingDeleteEvent(null);
   }
 
