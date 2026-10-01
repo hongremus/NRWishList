@@ -699,7 +699,15 @@ export default function CalendarPage() {
                 return rank(left) - rank(right);
               });
             const mobileSingleDayEvents = dayEvents.filter(
-              (event) => event.startDate === event.endDate && !event.isRomantic,
+              (event) =>
+                event.startDate === event.endDate &&
+                !event.isAllDay &&
+                !event.isRomantic,
+            );
+            const mobileSingleDayDotEvents = Array.from(
+              new Map(
+                mobileSingleDayEvents.map((event) => [getEventDotStyle(event), event]),
+              ).values(),
             );
             const hasMultiDayEvent = dayEvents.some(
               (event) => event.startDate !== event.endDate,
@@ -779,7 +787,7 @@ export default function CalendarPage() {
                       ),
                     )}
                     <div className="flex h-2 w-full items-center gap-1">
-                      {mobileSingleDayEvents.map((event) => (
+                      {mobileSingleDayDotEvents.map((event) => (
                         <span
                           key={event.id}
                           aria-label={`${getCalendarEventTitle(event, dateKey)}${!event.isAllDay && event.startTime ? ` ${formatShortTime(event.startTime)}` : ""}`}
