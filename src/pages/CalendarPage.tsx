@@ -677,6 +677,19 @@ export default function CalendarPage() {
     setPendingDeleteEvent(null);
   }
 
+  const mobileMultiDayLanes = useMemo(
+    () =>
+      getMobileMultiDayLanes(
+        events.filter(
+          (event) =>
+            event.startDate !== event.endDate &&
+            event.isAllDay &&
+            !event.isRomantic,
+        ),
+      ),
+    [events],
+  );
+
   return (
     <div className="space-y-3 sm:space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-gray-100 p-3 dark:bg-gray-800">
@@ -773,13 +786,6 @@ export default function CalendarPage() {
             const dayEvents = events.filter((event) =>
               eventOccursOn(event, dateKey),
             );
-            const mobileMultiDayEvents = dayEvents.filter(
-              (event) =>
-                event.startDate !== event.endDate &&
-                event.isAllDay &&
-                !event.isRomantic,
-            );
-            const mobileMultiDayLanes = getMobileMultiDayLanes(mobileMultiDayEvents);
             const mobileMultiDayEventsForDate = mobileMultiDayLanes
               .map((laneEvents) =>
                 laneEvents.find((event) => eventOccursOn(event, dateKey)),
