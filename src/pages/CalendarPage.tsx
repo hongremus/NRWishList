@@ -10,38 +10,42 @@ type Holiday = {
   title: string;
 };
 
-const holidaysByYear: Record<number, Holiday[]> = {
-  2026: [
-  { date: "2026-01-01", title: "一月一日" },
-  { date: "2026-02-17", title: "農曆年初一" },
-  { date: "2026-02-18", title: "農曆年初二" },
-  { date: "2026-02-19", title: "農曆年初三" },
-  { date: "2026-04-03", title: "耶穌受難節" },
-  { date: "2026-04-04", title: "耶穌受難節翌日" },
-  { date: "2026-04-06", title: "復活節星期一" },
-  { date: "2026-04-07", title: "清明節翌日" },
-  { date: "2026-05-01", title: "勞動節" },
-  { date: "2026-05-25", title: "佛誕翌日" },
-  { date: "2026-06-20", title: "端午節" },
-  { date: "2026-09-26", title: "中秋節翌日" },
-  { date: "2026-10-19", title: "重陽節" },
-  { date: "2026-12-25", title: "聖誕節" },
-  { date: "2026-12-26", title: "聖誕節後第一個周日" },
-  ],
-};
-
 const annualSpecialHolidays = [
   { month: "07", day: "01", title: "港殤日" },
   { month: "10", day: "01", title: "總之係紅日" },
 ];
 
-function getHolidays(year: number) {
-  const yearHolidays = holidaysByYear[year] ?? [];
-  const specialHolidays = annualSpecialHolidays.map(({ month, day, title }) => ({
-    date: `${year}-${month}-${day}`,
-    title,
-  }));
-  return [...yearHolidays, ...specialHolidays].sort((left, right) =>
+function getHolidays(
+  holidayProvider: {
+    getHolidays: (
+      year: number,
+      language?: string,
+    ) => Array<{ date: string; name: string; type: string }>;
+  },
+  year: number,
+) {
+  const annualSpecialHolidayTitles = new Map(
+    annualSpecialHolidays.map(({ month, day, title }) => [
+      `${year}-${month}-${day}`,
+      title,
+    ]),
+  );
+  const holidays = holidayProvider
+    .getHolidays(year, "zh")
+    .filter((holiday) => holiday.type === "public")
+    .map((holiday) => {
+      const date = holiday.date.slice(0, 10);
+      return {
+        date,
+        title: annualSpecialHolidayTitles.get(date) ?? holiday.name,
+      };
+    });
+  const knownDates = new Set(holidays.map((holiday) => holiday.date));
+  for (const { month, day, title } of annualSpecialHolidays) {
+    const date = `${year}-${month}-${day}`;
+    if (!knownDates.has(date)) holidays.push({ date, title });
+  }
+  return holidays.sort((left, right) =>
     left.date.localeCompare(right.date),
   );
 }
@@ -345,6 +349,7 @@ export default function CalendarPage() {
   const [formError, setFormError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedDate, setSelectedDate] = useState(toDateKey(new Date()));
+  const [holidays, setHolidays] = useState<Holiday[]>([]);
   const initialSelectedDate = toDateKey(new Date());
   const touchStartX = useRef<number | null>(null);
   const [form, setForm] = useState({
@@ -366,6 +371,17 @@ export default function CalendarPage() {
     });
   }, [calendarMonthKey, ensureCalendarMonths]);
 
+  useEffect(() => {
+    let cancelled = false;
+    void import("date-holidays").then(({ default: Holidays }) => {
+      if (cancelled) return;
+      setHolidays(getHolidays(new Holidays("HK"), month.getFullYear()));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [month]);
+
   useBodyScrollLock(showForm || Boolean(repeatTarget));
 
   const days = useMemo(() => getMonthDays(month), [month]);
@@ -373,7 +389,6 @@ export default function CalendarPage() {
     () => [...initialEvents(), ...remoteEvents],
     [remoteEvents],
   );
-  const holidays = getHolidays(month.getFullYear());
   const selectedEvents = events.filter((event) =>
     eventOccursOn(event, selectedDate),
   );
