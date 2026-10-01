@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useStore } from "../store";
 import { CalendarEvent } from "../types";
 import { useBodyScrollLock } from "../hooks/useBodyScrollLock";
@@ -298,6 +298,7 @@ export default function CalendarPage() {
   const calendarEndYear = currentYear + 1;
   const currentUser = useStore((state) => state.currentUser);
   const remoteEvents = useStore((state) => state.calendarEvents);
+  const ensureCalendarMonths = useStore((state) => state.ensureCalendarMonths);
   const addCalendarEvent = useStore((state) => state.addCalendarEvent);
   const addCalendarEvents = useStore((state) => state.addCalendarEvents);
   const updateCalendarEvent = useStore((state) => state.updateCalendarEvent);
@@ -333,6 +334,14 @@ export default function CalendarPage() {
     endTime: defaultEventTimes.endTime,
     location: "",
   });
+
+  const calendarMonthKey = `${month.getFullYear()}-${String(month.getMonth() + 1).padStart(2, "0")}`;
+
+  useEffect(() => {
+    void ensureCalendarMonths(calendarMonthKey).catch((error) => {
+      console.error("Unable to load calendar month", error);
+    });
+  }, [calendarMonthKey, ensureCalendarMonths]);
 
   useBodyScrollLock(showForm || Boolean(repeatTarget));
 

@@ -7,6 +7,55 @@ const COUPLE_ID = "remus-nicole";
 
 const defaultTags = ["約會", "禮物", "旅行", "日常生活", "驚喜", "美食", "浪漫"];
 let visibleRemoteLoadCount = 0;
+const calendarLoadPromises = new Map<string, Promise<void>>();
+
+function toDateKey(date: Date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function toMonthKey(date: Date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function getCalendarWindow(monthKey: string) {
+  const [year, month] = monthKey.split("-").map(Number);
+  const firstMonth = new Date(year, month - 2, 1);
+  const lastMonth = new Date(year, month + 1, 1);
+  const months = Array.from({ length: 3 }, (_, index) => {
+    const date = new Date(year, month - 2 + index, 1);
+    return toMonthKey(date);
+  });
+
+  return {
+    months,
+    startDate: toDateKey(firstMonth),
+    endDate: toDateKey(new Date(lastMonth.getFullYear(), lastMonth.getMonth() + 1, 0)),
+  };
+}
+
+function getLoadedCalendarRange(months: string[]) {
+  const sortedMonths = [...months].sort();
+  const [lastYear, lastMonth] = sortedMonths[sortedMonths.length - 1].split("-").map(Number);
+  return {
+    startDate: `${sortedMonths[0]}-01`,
+    endDate: toDateKey(new Date(lastYear, lastMonth, 0)),
+  };
+}
+
+async function fetchCalendarEvents(startDate: string, endDate: string) {
+  if (!supabase) return [] as CalendarEvent[];
+
+  const { data, error } = await supabase
+    .from("calendar_events")
+    .select("*")
+    .eq("couple_id", COUPLE_ID)
+    .or(`recurring.eq.true,and(start_date.lte.${endDate},end_date.gte.${startDate})`)
+    .order("start_date")
+    .order("start_time");
+
+  if (error) throw error;
+  return (data ?? []).map((row) => fromDatabaseCalendarEvent(row as Record<string, unknown>));
+}
 
 function fromDatabaseWish(row: Record<string, unknown>): Wish {
   return {
@@ -85,12 +134,15 @@ interface AppState {
   currentUser: User | null;
   wishes: Wish[];
   calendarEvents: CalendarEvent[];
+  loadedCalendarMonths: string[];
   availableTags: string[];
   syncError: string | null;
   isLoadingRemote: boolean;
   setCurrentUser: (u: User | null) => void;
   clearSyncError: () => void;
   loadRemoteData: (showLoading?: boolean) => Promise<void>;
+  ensureCalendarMonths: (monthKey: string, showLoading?: boolean) => Promise<void>;
+  refreshCalendarEvents: () => Promise<void>;
   subscribeToRemoteData: () => () => void;
   addWish: (w: Wish) => void;
   updateWish: (w: Wish) => void;
@@ -114,11 +166,81 @@ export const useStore = create<AppState>()(
       currentUser: null,
       wishes: [],
       calendarEvents: [],
+      loadedCalendarMonths: [],
       availableTags: defaultTags,
       syncError: null,
       isLoadingRemote: false,
       setCurrentUser: (u) => set({ currentUser: u }),
       clearSyncError: () => set({ syncError: null }),
+      ensureCalendarMonths: async (monthKey, showLoading = true) => {
+        if (!supabase) return;
+
+        const window = getCalendarWindow(monthKey);
+        const loadedMonths = get().loadedCalendarMonths;
+        if (window.months.every((month) => loadedMonths.includes(month))) return;
+
+        const requestKey = `${window.startDate}:${window.endDate}`;
+        const existingRequest = calendarLoadPromises.get(requestKey);
+        if (existingRequest) {
+          await existingRequest;
+          return;
+        }
+
+        const request = (async () => {
+          if (showLoading) {
+            visibleRemoteLoadCount += 1;
+            set({ isLoadingRemote: true });
+          }
+
+          try {
+            const events = await fetchCalendarEvents(window.startDate, window.endDate);
+            set((state) => {
+              const eventMap = new Map(state.calendarEvents.map((event) => [event.id, event]));
+              events.forEach((event) => eventMap.set(event.id, event));
+              return {
+                calendarEvents: Array.from(eventMap.values()),
+                loadedCalendarMonths: Array.from(new Set([...state.loadedCalendarMonths, ...window.months])).sort(),
+                syncError: null,
+              };
+            });
+          } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            set({ syncError: `讀取行事曆失敗：${message}` });
+            throw error;
+          } finally {
+            if (showLoading) {
+              visibleRemoteLoadCount = Math.max(0, visibleRemoteLoadCount - 1);
+              if (visibleRemoteLoadCount === 0) set({ isLoadingRemote: false });
+            }
+          }
+        })();
+
+        calendarLoadPromises.set(requestKey, request);
+        try {
+          await request;
+        } finally {
+          calendarLoadPromises.delete(requestKey);
+        }
+      },
+      refreshCalendarEvents: async () => {
+        if (!supabase) return;
+
+        const loadedMonths = get().loadedCalendarMonths;
+        if (loadedMonths.length === 0) {
+          await get().ensureCalendarMonths(toMonthKey(new Date()), false);
+          return;
+        }
+
+        const range = getLoadedCalendarRange(loadedMonths);
+        try {
+          const events = await fetchCalendarEvents(range.startDate, range.endDate);
+          set({ calendarEvents: events, syncError: null });
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          set({ syncError: `讀取行事曆失敗：${message}` });
+          throw error;
+        }
+      },
       loadRemoteData: async (showLoading = false) => {
         if (!supabase) return;
 
@@ -128,10 +250,9 @@ export const useStore = create<AppState>()(
         }
 
         try {
-          const [{ data: wishRows, error: wishError }, { data: tagRows, error: tagError }, { data: calendarRows, error: calendarError }] = await Promise.all([
+          const [{ data: wishRows, error: wishError }, { data: tagRows, error: tagError }] = await Promise.all([
             supabase.from("wishes").select("*").eq("couple_id", COUPLE_ID).order("created_at", { ascending: false }),
             supabase.from("wish_tags").select("name").eq("couple_id", COUPLE_ID).order("name"),
-            supabase.from("calendar_events").select("*").eq("couple_id", COUPLE_ID).order("start_date").order("start_time"),
           ]);
 
           if (wishError) {
@@ -142,17 +263,17 @@ export const useStore = create<AppState>()(
             set({ syncError: `讀取 Tag 失敗：${tagError.message}` });
             throw tagError;
           }
-          if (calendarError) {
-            set({ syncError: `讀取行事曆失敗：${calendarError.message}` });
-            throw calendarError;
-          }
-
           set({
             wishes: (wishRows ?? []).map((row) => fromDatabaseWish(row as Record<string, unknown>)),
             availableTags: tagRows?.length ? tagRows.map((row) => row.name) : defaultTags,
-            calendarEvents: (calendarRows ?? []).map((row) => fromDatabaseCalendarEvent(row as Record<string, unknown>)),
             syncError: null,
           });
+
+          if (showLoading) {
+            await get().refreshCalendarEvents();
+          } else {
+            await get().ensureCalendarMonths(toMonthKey(new Date()), false);
+          }
         } finally {
           if (showLoading) {
             visibleRemoteLoadCount = Math.max(0, visibleRemoteLoadCount - 1);
@@ -172,7 +293,9 @@ export const useStore = create<AppState>()(
             void get().loadRemoteData();
           })
           .on("postgres_changes", { event: "*", schema: "public", table: "calendar_events", filter: `couple_id=eq.${COUPLE_ID}` }, () => {
-            void get().loadRemoteData();
+            void get().refreshCalendarEvents().catch((error) => {
+              console.error("Unable to refresh calendar data", error);
+            });
           })
           .subscribe();
 
@@ -222,7 +345,7 @@ export const useStore = create<AppState>()(
           return false;
         }
         try {
-          await get().loadRemoteData();
+          await get().refreshCalendarEvents();
         } catch {
           set((state) => ({
             calendarEvents: state.calendarEvents.filter((item) => item.id !== event.id),
@@ -248,7 +371,7 @@ export const useStore = create<AppState>()(
           return false;
         }
         try {
-          await get().loadRemoteData();
+          await get().refreshCalendarEvents();
         } catch {
           set((state) => ({
             calendarEvents: state.calendarEvents.filter(
@@ -273,10 +396,10 @@ export const useStore = create<AppState>()(
           .eq("couple_id", COUPLE_ID);
         if (error) {
           set({ syncError: `更新活動失敗：${error.message}` });
-          await get().loadRemoteData();
+          await get().refreshCalendarEvents();
           return false;
         }
-        await get().loadRemoteData();
+        await get().refreshCalendarEvents();
         return true;
       },
       deleteCalendarEvent: async (id) => {
@@ -287,7 +410,7 @@ export const useStore = create<AppState>()(
           set({ syncError: `刪除活動失敗：${error.message}` });
           return;
         }
-        await get().loadRemoteData();
+        await get().refreshCalendarEvents();
       },
       addTag: (tag) => {
         const trimmed = tag.trim();
