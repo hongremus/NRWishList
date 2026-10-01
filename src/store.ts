@@ -6,6 +6,7 @@ import { supabase } from "./supabase";
 const COUPLE_ID = "remus-nicole";
 
 const defaultTags = ["約會", "禮物", "旅行", "日常生活", "驚喜", "美食", "浪漫"];
+let visibleRemoteLoadCount = 0;
 
 function fromDatabaseWish(row: Record<string, unknown>): Wish {
   return {
@@ -86,9 +87,10 @@ interface AppState {
   calendarEvents: CalendarEvent[];
   availableTags: string[];
   syncError: string | null;
+  isLoadingRemote: boolean;
   setCurrentUser: (u: User | null) => void;
   clearSyncError: () => void;
-  loadRemoteData: () => Promise<void>;
+  loadRemoteData: (showLoading?: boolean) => Promise<void>;
   subscribeToRemoteData: () => () => void;
   addWish: (w: Wish) => void;
   updateWish: (w: Wish) => void;
@@ -114,36 +116,49 @@ export const useStore = create<AppState>()(
       calendarEvents: [],
       availableTags: defaultTags,
       syncError: null,
+      isLoadingRemote: false,
       setCurrentUser: (u) => set({ currentUser: u }),
       clearSyncError: () => set({ syncError: null }),
-      loadRemoteData: async () => {
+      loadRemoteData: async (showLoading = false) => {
         if (!supabase) return;
 
-        const [{ data: wishRows, error: wishError }, { data: tagRows, error: tagError }, { data: calendarRows, error: calendarError }] = await Promise.all([
-          supabase.from("wishes").select("*").eq("couple_id", COUPLE_ID).order("created_at", { ascending: false }),
-          supabase.from("wish_tags").select("name").eq("couple_id", COUPLE_ID).order("name"),
-          supabase.from("calendar_events").select("*").eq("couple_id", COUPLE_ID).order("start_date").order("start_time"),
-        ]);
-
-        if (wishError) {
-          set({ syncError: `讀取願望失敗：${wishError.message}` });
-          throw wishError;
-        }
-        if (tagError) {
-          set({ syncError: `讀取 Tag 失敗：${tagError.message}` });
-          throw tagError;
-        }
-        if (calendarError) {
-          set({ syncError: `讀取行事曆失敗：${calendarError.message}` });
-          throw calendarError;
+        if (showLoading) {
+          visibleRemoteLoadCount += 1;
+          set({ isLoadingRemote: true });
         }
 
-        set({
-          wishes: (wishRows ?? []).map((row) => fromDatabaseWish(row as Record<string, unknown>)),
-          availableTags: tagRows?.length ? tagRows.map((row) => row.name) : defaultTags,
-          calendarEvents: (calendarRows ?? []).map((row) => fromDatabaseCalendarEvent(row as Record<string, unknown>)),
-          syncError: null,
-        });
+        try {
+          const [{ data: wishRows, error: wishError }, { data: tagRows, error: tagError }, { data: calendarRows, error: calendarError }] = await Promise.all([
+            supabase.from("wishes").select("*").eq("couple_id", COUPLE_ID).order("created_at", { ascending: false }),
+            supabase.from("wish_tags").select("name").eq("couple_id", COUPLE_ID).order("name"),
+            supabase.from("calendar_events").select("*").eq("couple_id", COUPLE_ID).order("start_date").order("start_time"),
+          ]);
+
+          if (wishError) {
+            set({ syncError: `讀取願望失敗：${wishError.message}` });
+            throw wishError;
+          }
+          if (tagError) {
+            set({ syncError: `讀取 Tag 失敗：${tagError.message}` });
+            throw tagError;
+          }
+          if (calendarError) {
+            set({ syncError: `讀取行事曆失敗：${calendarError.message}` });
+            throw calendarError;
+          }
+
+          set({
+            wishes: (wishRows ?? []).map((row) => fromDatabaseWish(row as Record<string, unknown>)),
+            availableTags: tagRows?.length ? tagRows.map((row) => row.name) : defaultTags,
+            calendarEvents: (calendarRows ?? []).map((row) => fromDatabaseCalendarEvent(row as Record<string, unknown>)),
+            syncError: null,
+          });
+        } finally {
+          if (showLoading) {
+            visibleRemoteLoadCount = Math.max(0, visibleRemoteLoadCount - 1);
+            if (visibleRemoteLoadCount === 0) set({ isLoadingRemote: false });
+          }
+        }
       },
       subscribeToRemoteData: () => {
         if (!supabase) return () => undefined;

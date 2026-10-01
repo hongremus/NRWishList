@@ -4,6 +4,17 @@ import { useStore } from "../store";
 import WishModal from "./WishModal";
 import ConfirmModal from "./ConfirmModal";
 
+function createHistoryId() {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (char) => {
+    const random = Math.floor(Math.random() * 16);
+    const value = char === "x" ? random : (random & 0x3) | 0x8;
+    return value.toString(16);
+  });
+}
+
 export default function WishCard({ wish, onDetailChange }: { wish: Wish; onDetailChange: (isOpen: boolean) => void }) {
   const update = useStore((s) => s.updateWish);
   const deleteWish = useStore((s) => s.deleteWish);
@@ -28,7 +39,7 @@ export default function WishCard({ wish, onDetailChange }: { wish: Wish; onDetai
   function handleConfirmComplete() {
     if (wish.status === "open") {
       const h = {
-        id: crypto.randomUUID(),
+        id: createHistoryId(),
         completedAt: new Date().toISOString(),
         completedBy: currentUser?.displayName || currentUser?.username || "未知",
         ratings: {},
@@ -59,6 +70,20 @@ export default function WishCard({ wish, onDetailChange }: { wish: Wish; onDetai
 
   // 最新歷史紀錄的評分
   const latestHistory = wish.history[0];
+  const ratingRole = isRemus ? "me" : "gf";
+  const latestCompletionTime = latestHistory ? new Date(latestHistory.completedAt).getTime() : NaN;
+  const isWithinReviewWindow =
+    Number.isFinite(latestCompletionTime) &&
+    latestCompletionTime <= Date.now() &&
+    Date.now() - latestCompletionTime < 2 * 24 * 60 * 60 * 1000;
+  const hasPendingReview = Boolean(
+    wish.status === "completed" &&
+      latestHistory &&
+      !latestHistory.isLocked &&
+      isWithinReviewWindow &&
+      latestHistory.ratings[ratingRole] == null &&
+      !latestHistory.remarks[ratingRole]?.trim(),
+  );
 
   const priorityColor =
     wish.priority === "high"
@@ -115,7 +140,16 @@ export default function WishCard({ wish, onDetailChange }: { wish: Wish; onDetai
         </div>
 
         {/* 完成次數徽章 */}
-        <div className="text-right flex-shrink-0">
+        <div className="flex flex-shrink-0 items-center gap-1 text-right">
+          {hasPendingReview && (
+            <span
+              className="text-sm leading-none"
+              title="仲未評分及留言"
+              aria-label="仲未評分及留言"
+            >
+              💬
+            </span>
+          )}
           <span className="inline-block px-2.5 py-1 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 font-bold rounded-xl text-xs">
             🎉 {wish.completedCount} 次
           </span>

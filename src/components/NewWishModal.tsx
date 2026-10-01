@@ -3,6 +3,17 @@ import { useStore } from "../store";
 import { Wish, Priority } from "../types";
 import { useBodyScrollLock } from "../hooks/useBodyScrollLock";
 
+function createWishId() {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (char) => {
+    const random = Math.floor(Math.random() * 16);
+    const value = char === "x" ? random : (random & 0x3) | 0x8;
+    return value.toString(16);
+  });
+}
+
 export default function NewWishModal({ onClose }: { onClose: () => void }) {
   useBodyScrollLock();
   const addWish = useStore((s) => s.addWish);
@@ -53,7 +64,7 @@ export default function NewWishModal({ onClose }: { onClose: () => void }) {
     }
 
     const w: Wish = {
-      id: crypto.randomUUID(),
+      id: createWishId(),
       title: title.trim(),
       description: desc.trim(),
       region: region || undefined,

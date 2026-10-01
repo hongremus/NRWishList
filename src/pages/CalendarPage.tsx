@@ -196,6 +196,45 @@ function formatEventTime(event: CalendarEvent) {
   return `${formatShortTime(event.startTime) || "未定"}${event.endTime ? ` - ${formatShortTime(event.endTime)}` : ""}`;
 }
 
+function addDaysToDateKey(dateKey: string, days: number) {
+  const date = parseDate(dateKey);
+  date.setDate(date.getDate() + days);
+  return toDateKey(date);
+}
+
+function toGoogleUtcDateTime(dateKey: string, time: string) {
+  const [year, month, day] = dateKey.split("-").map(Number);
+  const [hours, minutes] = time.split(":").map(Number);
+  const utcDate = new Date(Date.UTC(year, month - 1, day, hours - 8, minutes));
+  const pad = (value: number) => String(value).padStart(2, "0");
+  return `${utcDate.getUTCFullYear()}${pad(utcDate.getUTCMonth() + 1)}${pad(utcDate.getUTCDate())}T${pad(utcDate.getUTCHours())}${pad(utcDate.getUTCMinutes())}00Z`;
+}
+
+function getGoogleCalendarUrl(event: CalendarEvent, selectedDate: string) {
+  const eventTitle = getCalendarEventTitle(event, selectedDate);
+  const startDate = event.recurring ? selectedDate : event.startDate;
+  const endDate = event.recurring ? selectedDate : event.endDate;
+  const params = new URLSearchParams({
+    action: "TEMPLATE",
+    text: eventTitle,
+    details: event.createdBy ? `活動由 ${event.createdBy} 在 NR Wish List 建立` : "由 NR Wish List 建立",
+  });
+
+  if (event.isAllDay) {
+    params.set("dates", `${startDate.replaceAll("-", "")}/${addDaysToDateKey(endDate, 1).replaceAll("-", "")}`);
+  } else {
+    const startTime = event.startTime || "00:00";
+    const endTime = event.endTime || addOneHour(startTime);
+    params.set(
+      "dates",
+      `${toGoogleUtcDateTime(startDate, startTime)}/${toGoogleUtcDateTime(endDate, endTime)}`,
+    );
+  }
+
+  if (event.location) params.set("location", event.location);
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
+
 function initialEvents(): CalendarEvent[] {
   return [
     {
@@ -226,6 +265,33 @@ function initialEvents(): CalendarEvent[] {
   ];
 }
 
+function getMobileMultiDayLanes(events: CalendarEvent[]) {
+  const lanes: CalendarEvent[][] = [];
+  const sortedEvents = [...events].sort((left, right) => {
+    const startDateOrder = left.startDate.localeCompare(right.startDate);
+    if (startDateOrder !== 0) return startDateOrder;
+    const endDateOrder = right.endDate.localeCompare(left.endDate);
+    if (endDateOrder !== 0) return endDateOrder;
+    const creatorRank = (event: CalendarEvent) =>
+      event.createdBy === "Nicole" ? 0 : event.createdBy === "Remus" ? 1 : 2;
+    return creatorRank(left) - creatorRank(right);
+  });
+
+  for (const event of sortedEvents) {
+    const lane = lanes.findIndex((laneEvents) => {
+      const lastEvent = laneEvents[laneEvents.length - 1];
+      return lastEvent.endDate < event.startDate;
+    });
+    if (lane === -1) {
+      lanes.push([event]);
+    } else {
+      lanes[lane].push(event);
+    }
+  }
+
+  return lanes;
+}
+
 export default function CalendarPage() {
   const calendarStartYear = 2026;
   const currentYear = new Date().getFullYear();
@@ -237,9 +303,12 @@ export default function CalendarPage() {
   const updateCalendarEvent = useStore((state) => state.updateCalendarEvent);
   const deleteCalendarEvent = useStore((state) => state.deleteCalendarEvent);
   const defaultEventTimes = getDefaultEventTimes();
-  const [month, setMonth] = useState(new Date(2026, 8, 1));
-  const [jumpYear, setJumpYear] = useState(2026);
-  const [jumpMonth, setJumpMonth] = useState(8);
+  const [month, setMonth] = useState(() => {
+    const today = new Date();
+    return new Date(today.getFullYear(), today.getMonth(), 1);
+  });
+  const [jumpYear, setJumpYear] = useState(() => new Date().getFullYear());
+  const [jumpMonth, setJumpMonth] = useState(() => new Date().getMonth());
   const [showForm, setShowForm] = useState(false);
   const [editingEventId, setEditingEventId] = useState<string | null>(null);
   const [pendingDeleteEvent, setPendingDeleteEvent] =
@@ -553,6 +622,19 @@ export default function CalendarPage() {
     setPendingDeleteEvent(null);
   }
 
+  const mobileMultiDayLanes = useMemo(
+    () =>
+      getMobileMultiDayLanes(
+        events.filter(
+          (event) =>
+            event.startDate !== event.endDate &&
+            event.isAllDay &&
+            !event.isRomantic,
+        ),
+      ),
+    [events],
+  );
+
   return (
     <div className="space-y-3 sm:space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-gray-100 p-3 dark:bg-gray-800">
@@ -639,7 +721,7 @@ export default function CalendarPage() {
           ))}
         </div>
         <div
-          className="grid grid-cols-7 gap-y-1 gap-x-0 sm:gap-1"
+          className="grid grid-cols-7 content-start gap-y-1 gap-x-0 sm:gap-1"
           onTouchStart={handleCalendarTouchStart}
           onTouchEnd={handleCalendarTouchEnd}
         >
@@ -649,38 +731,34 @@ export default function CalendarPage() {
             const dayEvents = events.filter((event) =>
               eventOccursOn(event, dateKey),
             );
-            const mobileMultiDayEvents = dayEvents
-              .filter((event) => event.startDate !== event.endDate && !event.isRomantic)
-              .sort((left, right) => {
-                const rank = (event: CalendarEvent) =>
-                  event.createdBy === "Nicole" ? 0 : event.createdBy === "Remus" ? 1 : 2;
-                return rank(left) - rank(right);
-              });
+            const mobileMultiDayEventsForDate = mobileMultiDayLanes
+              .map((laneEvents) =>
+                laneEvents.find((event) => eventOccursOn(event, dateKey)),
+              );
+            const lastActiveLaneIndex = mobileMultiDayEventsForDate.reduce(
+              (lastIndex, event, index) => (event ? index : lastIndex),
+              -1,
+            );
             const mobileSingleDayEvents = dayEvents.filter(
-              (event) => event.startDate === event.endDate && !event.isRomantic,
+              (event) =>
+                event.startDate === event.endDate &&
+                !event.isAllDay &&
+                !event.isRomantic,
+            );
+            const mobileSingleDayDotEvents = Array.from(
+              new Map(
+                mobileSingleDayEvents.map((event) => [getEventDotStyle(event), event]),
+              ).values(),
             );
             const hasMultiDayEvent = dayEvents.some(
               (event) => event.startDate !== event.endDate,
             );
             const hasRomanticEvent = dayEvents.some((event) => event.isRomantic);
-            const mobileActivityRows = Math.min(
-              3,
-              mobileMultiDayEvents.length + (mobileSingleDayEvents.length > 0 ? 1 : 0),
-            );
-            const mobileCellHeight =
-              mobileActivityRows >= 3
-                ? "min-h-[3.75rem]"
-                : mobileActivityRows === 2
-                  ? "min-h-14"
-                  : "min-h-12";
-            const mobileActivityHeight =
-              mobileActivityRows >= 3
-                ? "h-6"
-                : mobileActivityRows === 2
-                  ? "h-4"
-                  : mobileActivityRows === 1
-                    ? "h-2"
-                    : "h-0";
+            const mobileActivityRows =
+              lastActiveLaneIndex +
+              1 +
+              (mobileSingleDayDotEvents.length > 0 ? 1 : 0);
+            const mobileActivityHeight = mobileActivityRows * 8 + Math.max(0, mobileActivityRows - 1) * 2;
             const holiday = holidays.find((item) => item.date === dateKey);
             const isSelected = selectedDate === dateKey;
             const isToday = toDateKey(new Date()) === dateKey;
@@ -693,7 +771,7 @@ export default function CalendarPage() {
                     ? { zIndex: 100 - (dayIndex % 7) }
                     : undefined
                 }
-                className={`relative ${mobileCellHeight} flex flex-col items-stretch justify-start rounded-xl border p-1 text-left transition-all sm:min-h-16 ${hasMultiDayEvent ? "z-10" : "z-0"} ${
+                className={`relative flex min-h-12 flex-col items-stretch justify-start rounded-xl border p-1 text-left transition-all sm:min-h-16 ${hasMultiDayEvent ? "z-10" : "z-0"} ${
                   isSelected
                     ? "border-gray-900 bg-gray-100 dark:border-gray-100 dark:bg-gray-800"
                     : "border-gray-200 hover:border-gray-400 dark:border-gray-700 dark:hover:border-gray-500"
@@ -711,7 +789,12 @@ export default function CalendarPage() {
                     )}
                   </span>
                 </div>
-                <div className={`mt-1 ${mobileActivityHeight} overflow-visible sm:h-auto sm:min-h-8`}>
+                <div
+                  className="mt-1 overflow-visible sm:h-auto sm:min-h-8"
+                  style={{
+                    minHeight: mobileActivityHeight ? `${mobileActivityHeight}px` : undefined,
+                  }}
+                >
                   <div
                     aria-label={holiday ? `香港假期：${holiday.title}` : undefined}
                     className={`hidden h-4 items-center truncate text-[9px] font-bold text-amber-700 dark:text-amber-200 sm:flex ${holiday ? "sm:rounded sm:bg-amber-100 sm:px-1 dark:sm:bg-amber-900/40" : ""}`}
@@ -722,22 +805,25 @@ export default function CalendarPage() {
                       </>
                     )}
                   </div>
-                  <div className="flex h-full flex-col items-start justify-start gap-0.5 overflow-visible sm:hidden">
-                    {Array.from({ length: 2 }, (_, laneIndex) => mobileMultiDayEvents[laneIndex]).map(
-                      (event, laneIndex) => (
-                        <div key={event?.id ?? `empty-lane-${laneIndex}`} className="flex h-2 w-full items-center">
-                          {event && (
-                            <span
-                              aria-label={`${getCalendarEventTitle(event, dateKey)}（跨日活動）`}
-                              style={{ width: getEventBarWidth(event, dateKey) }}
-                              className={`relative z-50 -mx-1 block h-2 shrink-0 ${getEventBarStyle(event)} ${getEventBarRadius(event, dateKey)}`}
-                            />
-                          )}
-                        </div>
-                      ),
-                    )}
+                  <div className="flex flex-col items-start justify-start gap-0.5 overflow-visible sm:hidden">
+                    {mobileMultiDayEventsForDate
+                      .slice(0, lastActiveLaneIndex + 1)
+                      .map((event, laneIndex) => (
+                      <div
+                        key={event?.id ?? `empty-lane-${laneIndex}`}
+                        className="flex h-2 w-full items-center"
+                      >
+                        {event && (
+                          <span
+                            aria-label={`${getCalendarEventTitle(event, dateKey)}（跨日活動）`}
+                            style={{ width: getEventBarWidth(event, dateKey) }}
+                            className={`relative z-50 -mx-1 block h-2 shrink-0 ${getEventBarStyle(event)} ${getEventBarRadius(event, dateKey)}`}
+                          />
+                        )}
+                      </div>
+                    ))}
                     <div className="flex h-2 w-full items-center gap-1">
-                      {mobileSingleDayEvents.map((event) => (
+                      {mobileSingleDayDotEvents.map((event) => (
                         <span
                           key={event.id}
                           aria-label={`${getCalendarEventTitle(event, dateKey)}${!event.isAllDay && event.startTime ? ` ${formatShortTime(event.startTime)}` : ""}`}
@@ -805,6 +891,17 @@ export default function CalendarPage() {
                       ? ` · ${formatDate(event.startDate)} 至 ${formatDate(event.endDate)}`
                       : ""}
                   </div>
+                  <a
+                    href={getGoogleCalendarUrl(event, selectedDate)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(clickEvent) => clickEvent.stopPropagation()}
+                    className="mt-1 text-xs font-semibold text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+                    title="加入我嘅 Google 日曆"
+                    aria-label={`將${getCalendarEventTitle(event, selectedDate)}加入我嘅 Google 日曆`}
+                  >
+                    加入 Google 日曆
+                  </a>
                 </div>
                 {canManageEvent(event) && (
                   <div className="flex shrink-0 items-center gap-2 text-xs">
