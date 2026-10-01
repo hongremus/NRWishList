@@ -202,6 +202,14 @@ function addDaysToDateKey(dateKey: string, days: number) {
   return toDateKey(date);
 }
 
+function toGoogleUtcDateTime(dateKey: string, time: string) {
+  const [year, month, day] = dateKey.split("-").map(Number);
+  const [hours, minutes] = time.split(":").map(Number);
+  const utcDate = new Date(Date.UTC(year, month - 1, day, hours - 8, minutes));
+  const pad = (value: number) => String(value).padStart(2, "0");
+  return `${utcDate.getUTCFullYear()}${pad(utcDate.getUTCMonth() + 1)}${pad(utcDate.getUTCDate())}T${pad(utcDate.getUTCHours())}${pad(utcDate.getUTCMinutes())}00Z`;
+}
+
 function getGoogleCalendarUrl(event: CalendarEvent, selectedDate: string) {
   const eventTitle = getCalendarEventTitle(event, selectedDate);
   const startDate = event.recurring ? selectedDate : event.startDate;
@@ -219,9 +227,8 @@ function getGoogleCalendarUrl(event: CalendarEvent, selectedDate: string) {
     const endTime = event.endTime || addOneHour(startTime);
     params.set(
       "dates",
-      `${startDate.replaceAll("-", "")}T${startTime.replace(":", "")}00/${endDate.replaceAll("-", "")}T${endTime.replace(":", "")}00`,
+      `${toGoogleUtcDateTime(startDate, startTime)}/${toGoogleUtcDateTime(endDate, endTime)}`,
     );
-    params.set("ctz", "Asia/Hong_Kong");
   }
 
   if (event.location) params.set("location", event.location);
