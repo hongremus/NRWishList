@@ -22,6 +22,7 @@ export default function HomePage() {
   const [showStats, setShowStats] = useState(false);
   const [showWishDetail, setShowWishDetail] = useState(false);
   const [activePage, setActivePage] = useState<"wishes" | "calendar">("wishes");
+  const [completedViewRequest, setCompletedViewRequest] = useState(0);
 
   const isRemus = currentUser?.username === "Remus";
   const pendingReviewCount = wishes.filter((wish) => {
@@ -102,13 +103,18 @@ export default function HomePage() {
           {/* 右側操作按鈕 */}
           <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
             {pendingReviewCount > 0 && (
-              <span
+              <button
+                type="button"
+                onClick={() => {
+                  setActivePage("wishes");
+                  setCompletedViewRequest((request) => request + 1);
+                }}
                 className="flex h-8 min-w-8 items-center justify-center rounded-full bg-rose-800 px-2 text-sm font-black leading-none text-white shadow-sm sm:h-9 sm:min-w-9"
                 title={`${pendingReviewCount} 個願望等你評分及留言`}
                 aria-label={`${pendingReviewCount} 個願望等你評分及留言`}
               >
                 {pendingReviewCount}
-              </span>
+              </button>
             )}
             <button
               onClick={() => setShowTagManager(true)}
@@ -177,7 +183,13 @@ export default function HomePage() {
           </button>
         </div>
 
-        {activePage === "wishes" ? <WishList onDetailChange={setShowWishDetail} /> : <CalendarPage />}
+        {activePage === "wishes" ? (
+          <WishList
+            key={completedViewRequest}
+            initialStatusFilter={completedViewRequest > 0 ? "completed" : "open"}
+            onDetailChange={setShowWishDetail}
+          />
+        ) : <CalendarPage />}
       </main>
 
       {/* 手機版右下角 Floating Action Button (新增願望) */}
