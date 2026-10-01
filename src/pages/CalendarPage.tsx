@@ -783,8 +783,7 @@ export default function CalendarPage() {
             const mobileMultiDayEventsForDate = mobileMultiDayLanes
               .map((laneEvents) =>
                 laneEvents.find((event) => eventOccursOn(event, dateKey)),
-              )
-              .filter((event): event is CalendarEvent => Boolean(event));
+              );
             const mobileSingleDayEvents = dayEvents.filter(
               (event) =>
                 event.startDate === event.endDate &&
@@ -851,13 +850,18 @@ export default function CalendarPage() {
                     )}
                   </div>
                   <div className="flex h-full flex-col items-start justify-start gap-0.5 overflow-visible sm:hidden">
-                    {mobileMultiDayEventsForDate.map((event) => (
-                      <div key={event.id} className="flex h-2 w-full items-center">
-                        <span
-                          aria-label={`${getCalendarEventTitle(event, dateKey)}（跨日活動）`}
-                          style={{ width: getEventBarWidth(event, dateKey) }}
-                          className={`relative z-50 -mx-1 block h-2 shrink-0 ${getEventBarStyle(event)} ${getEventBarRadius(event, dateKey)}`}
-                        />
+                    {mobileMultiDayEventsForDate.map((event, laneIndex) => (
+                      <div
+                        key={event?.id ?? `empty-lane-${laneIndex}`}
+                        className="flex h-2 w-full items-center"
+                      >
+                        {event && (
+                          <span
+                            aria-label={`${getCalendarEventTitle(event, dateKey)}（跨日活動）`}
+                            style={{ width: getEventBarWidth(event, dateKey) }}
+                            className={`relative z-50 -mx-1 block h-2 shrink-0 ${getEventBarStyle(event)} ${getEventBarRadius(event, dateKey)}`}
+                          />
+                        )}
                       </div>
                     ))}
                     <div className="flex h-2 w-full items-center gap-1">
