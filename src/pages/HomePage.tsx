@@ -103,7 +103,7 @@ export default function HomePage() {
           <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
             {pendingReviewCount > 0 && (
               <span
-                className="flex h-8 min-w-8 items-center justify-center rounded-full bg-red-500 px-2 text-sm font-black leading-none text-white shadow-sm sm:h-9 sm:min-w-9"
+                className="flex h-8 min-w-8 items-center justify-center rounded-full bg-rose-800 px-2 text-sm font-black leading-none text-white shadow-sm sm:h-9 sm:min-w-9"
                 title={`${pendingReviewCount} 個願望等你評分及留言`}
                 aria-label={`${pendingReviewCount} 個願望等你評分及留言`}
               >
