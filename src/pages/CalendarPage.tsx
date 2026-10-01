@@ -209,7 +209,7 @@ function getGoogleCalendarUrl(event: CalendarEvent, selectedDate: string) {
   const params = new URLSearchParams({
     action: "TEMPLATE",
     text: eventTitle,
-    details: `活動由 ${event.createdBy || "系統"} 建立`,
+    details: event.createdBy ? `活動由 ${event.createdBy} 在 NR Wish List 建立` : "由 NR Wish List 建立",
   });
 
   if (event.isAllDay) {
