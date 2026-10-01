@@ -235,7 +235,58 @@ function getGoogleCalendarUrl(event: CalendarEvent, selectedDate: string) {
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
 
-function initialEvents(): CalendarEvent[] {
+function initialEvents(includeFeatureTests = false): CalendarEvent[] {
+  const featureTestEvents: CalendarEvent[] = includeFeatureTests
+    ? [
+        {
+          id: "calendar-test-remus-dot-1",
+          title: "測試：Remus 點 1",
+          startDate: "2027-02-07",
+          endDate: "2027-02-07",
+          isAllDay: false,
+          startTime: "10:00",
+          endTime: "11:00",
+          createdBy: "Remus",
+        },
+        {
+          id: "calendar-test-remus-dot-2",
+          title: "測試：Remus 點 2",
+          startDate: "2027-02-07",
+          endDate: "2027-02-07",
+          isAllDay: false,
+          startTime: "14:00",
+          endTime: "15:00",
+          createdBy: "Remus",
+        },
+        {
+          id: "calendar-test-nicole-dot-1",
+          title: "測試：Nicole 點 1",
+          startDate: "2027-02-07",
+          endDate: "2027-02-07",
+          isAllDay: false,
+          startTime: "12:00",
+          endTime: "13:00",
+          createdBy: "Nicole",
+        },
+        {
+          id: "calendar-test-remus-bar",
+          title: "測試：Remus 長條",
+          startDate: "2027-02-06",
+          endDate: "2027-02-09",
+          isAllDay: true,
+          createdBy: "Remus",
+        },
+        {
+          id: "calendar-test-nicole-bar",
+          title: "測試：Nicole 長條",
+          startDate: "2027-02-07",
+          endDate: "2027-02-10",
+          isAllDay: true,
+          createdBy: "Nicole",
+        },
+      ]
+    : [];
+
   return [
     {
       id: "anniversary",
@@ -262,7 +313,35 @@ function initialEvents(): CalendarEvent[] {
       isAllDay: true,
       isRomantic: true,
     },
+    ...featureTestEvents,
   ];
+}
+
+function getMobileMultiDayLanes(events: CalendarEvent[]) {
+  const lanes: CalendarEvent[][] = [];
+  const sortedEvents = [...events].sort((left, right) => {
+    const startDateOrder = left.startDate.localeCompare(right.startDate);
+    if (startDateOrder !== 0) return startDateOrder;
+    const endDateOrder = right.endDate.localeCompare(left.endDate);
+    if (endDateOrder !== 0) return endDateOrder;
+    const creatorRank = (event: CalendarEvent) =>
+      event.createdBy === "Nicole" ? 0 : event.createdBy === "Remus" ? 1 : 2;
+    return creatorRank(left) - creatorRank(right);
+  });
+
+  for (const event of sortedEvents) {
+    const lane = lanes.findIndex((laneEvents) => {
+      const lastEvent = laneEvents[laneEvents.length - 1];
+      return lastEvent.endDate < event.startDate;
+    });
+    if (lane === -1) {
+      lanes.push([event]);
+    } else {
+      lanes[lane].push(event);
+    }
+  }
+
+  return lanes.map((laneEvents) => laneEvents[0]);
 }
 
 export default function CalendarPage() {
@@ -276,6 +355,9 @@ export default function CalendarPage() {
   const updateCalendarEvent = useStore((state) => state.updateCalendarEvent);
   const deleteCalendarEvent = useStore((state) => state.deleteCalendarEvent);
   const defaultEventTimes = getDefaultEventTimes();
+  const isCalendarFeatureTest =
+    new URLSearchParams(window.location.search).get("calendarFix") ===
+    "feature-test";
   const [month, setMonth] = useState(() => {
     const today = new Date();
     return new Date(today.getFullYear(), today.getMonth(), 1);
@@ -311,8 +393,8 @@ export default function CalendarPage() {
 
   const days = useMemo(() => getMonthDays(month), [month]);
   const events = useMemo(
-    () => [...initialEvents(), ...remoteEvents],
-    [remoteEvents],
+    () => [...initialEvents(isCalendarFeatureTest), ...remoteEvents],
+    [isCalendarFeatureTest, remoteEvents],
   );
   const holidays = month.getFullYear() === 2026 ? holidays2026 : [];
   const selectedEvents = events.filter((event) =>
@@ -691,13 +773,13 @@ export default function CalendarPage() {
             const dayEvents = events.filter((event) =>
               eventOccursOn(event, dateKey),
             );
-            const mobileMultiDayEvents = dayEvents
-              .filter((event) => event.startDate !== event.endDate && !event.isRomantic)
-              .sort((left, right) => {
-                const rank = (event: CalendarEvent) =>
-                  event.createdBy === "Nicole" ? 0 : event.createdBy === "Remus" ? 1 : 2;
-                return rank(left) - rank(right);
-              });
+            const mobileMultiDayEvents = dayEvents.filter(
+              (event) =>
+                event.startDate !== event.endDate &&
+                event.isAllDay &&
+                !event.isRomantic,
+            );
+            const mobileMultiDayLanes = getMobileMultiDayLanes(mobileMultiDayEvents);
             const mobileSingleDayEvents = dayEvents.filter(
               (event) =>
                 event.startDate === event.endDate &&
@@ -713,24 +795,9 @@ export default function CalendarPage() {
               (event) => event.startDate !== event.endDate,
             );
             const hasRomanticEvent = dayEvents.some((event) => event.isRomantic);
-            const mobileActivityRows = Math.min(
-              3,
-              mobileMultiDayEvents.length + (mobileSingleDayEvents.length > 0 ? 1 : 0),
-            );
-            const mobileCellHeight =
-              mobileActivityRows >= 3
-                ? "min-h-[3.75rem]"
-                : mobileActivityRows === 2
-                  ? "min-h-14"
-                  : "min-h-12";
-            const mobileActivityHeight =
-              mobileActivityRows >= 3
-                ? "h-6"
-                : mobileActivityRows === 2
-                  ? "h-4"
-                  : mobileActivityRows === 1
-                    ? "h-2"
-                    : "h-0";
+            const mobileActivityRows =
+              mobileMultiDayLanes.length + (mobileSingleDayDotEvents.length > 0 ? 1 : 0);
+            const mobileActivityHeight = mobileActivityRows * 8 + Math.max(0, mobileActivityRows - 1) * 2;
             const holiday = holidays.find((item) => item.date === dateKey);
             const isSelected = selectedDate === dateKey;
             const isToday = toDateKey(new Date()) === dateKey;
@@ -743,7 +810,7 @@ export default function CalendarPage() {
                     ? { zIndex: 100 - (dayIndex % 7) }
                     : undefined
                 }
-                className={`relative ${mobileCellHeight} flex flex-col items-stretch justify-start rounded-xl border p-1 text-left transition-all sm:min-h-16 ${hasMultiDayEvent ? "z-10" : "z-0"} ${
+                className={`relative flex min-h-12 flex-col items-stretch justify-start rounded-xl border p-1 text-left transition-all sm:min-h-16 ${hasMultiDayEvent ? "z-10" : "z-0"} ${
                   isSelected
                     ? "border-gray-900 bg-gray-100 dark:border-gray-100 dark:bg-gray-800"
                     : "border-gray-200 hover:border-gray-400 dark:border-gray-700 dark:hover:border-gray-500"
@@ -761,7 +828,12 @@ export default function CalendarPage() {
                     )}
                   </span>
                 </div>
-                <div className={`mt-1 ${mobileActivityHeight} overflow-visible sm:h-auto sm:min-h-8`}>
+                <div
+                  className="mt-1 overflow-visible sm:h-auto sm:min-h-8"
+                  style={{
+                    minHeight: mobileActivityHeight ? `${mobileActivityHeight}px` : undefined,
+                  }}
+                >
                   <div
                     aria-label={holiday ? `香港假期：${holiday.title}` : undefined}
                     className={`hidden h-4 items-center truncate text-[9px] font-bold text-amber-700 dark:text-amber-200 sm:flex ${holiday ? "sm:rounded sm:bg-amber-100 sm:px-1 dark:sm:bg-amber-900/40" : ""}`}
@@ -773,19 +845,15 @@ export default function CalendarPage() {
                     )}
                   </div>
                   <div className="flex h-full flex-col items-start justify-start gap-0.5 overflow-visible sm:hidden">
-                    {Array.from({ length: 2 }, (_, laneIndex) => mobileMultiDayEvents[laneIndex]).map(
-                      (event, laneIndex) => (
-                        <div key={event?.id ?? `empty-lane-${laneIndex}`} className="flex h-2 w-full items-center">
-                          {event && (
-                            <span
-                              aria-label={`${getCalendarEventTitle(event, dateKey)}（跨日活動）`}
-                              style={{ width: getEventBarWidth(event, dateKey) }}
-                              className={`relative z-50 -mx-1 block h-2 shrink-0 ${getEventBarStyle(event)} ${getEventBarRadius(event, dateKey)}`}
-                            />
-                          )}
-                        </div>
-                      ),
-                    )}
+                    {mobileMultiDayLanes.map((event) => (
+                      <div key={event.id} className="flex h-2 w-full items-center">
+                        <span
+                          aria-label={`${getCalendarEventTitle(event, dateKey)}（跨日活動）`}
+                          style={{ width: getEventBarWidth(event, dateKey) }}
+                          className={`relative z-50 -mx-1 block h-2 shrink-0 ${getEventBarStyle(event)} ${getEventBarRadius(event, dateKey)}`}
+                        />
+                      </div>
+                    ))}
                     <div className="flex h-2 w-full items-center gap-1">
                       {mobileSingleDayDotEvents.map((event) => (
                         <span
