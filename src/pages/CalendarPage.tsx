@@ -721,7 +721,7 @@ export default function CalendarPage() {
           ))}
         </div>
         <div
-          className="grid grid-cols-7 gap-y-1 gap-x-0 sm:gap-1"
+          className="grid grid-cols-7 content-start gap-y-1 gap-x-0 sm:gap-1"
           onTouchStart={handleCalendarTouchStart}
           onTouchEnd={handleCalendarTouchEnd}
         >
@@ -805,8 +805,10 @@ export default function CalendarPage() {
                       </>
                     )}
                   </div>
-                  <div className="flex h-full flex-col items-start justify-start gap-0.5 overflow-visible sm:hidden">
-                    {mobileMultiDayEventsForDate.map((event, laneIndex) => (
+                  <div className="flex flex-col items-start justify-start gap-0.5 overflow-visible sm:hidden">
+                    {mobileMultiDayEventsForDate
+                      .slice(0, lastActiveLaneIndex + 1)
+                      .map((event, laneIndex) => (
                       <div
                         key={event?.id ?? `empty-lane-${laneIndex}`}
                         className="flex h-2 w-full items-center"
