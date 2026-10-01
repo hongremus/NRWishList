@@ -3,13 +3,15 @@ import { useStore } from "../store";
 import { CalendarEvent } from "../types";
 import { useBodyScrollLock } from "../hooks/useBodyScrollLock";
 import ConfirmModal from "../components/ConfirmModal";
+import { RELATIONSHIP_START_DATE } from "../appConfig";
 
 type Holiday = {
   date: string;
   title: string;
 };
 
-const holidays2026: Holiday[] = [
+const holidaysByYear: Record<number, Holiday[]> = {
+  2026: [
   { date: "2026-01-01", title: "一月一日" },
   { date: "2026-02-17", title: "農曆年初一" },
   { date: "2026-02-18", title: "農曆年初二" },
@@ -21,13 +23,28 @@ const holidays2026: Holiday[] = [
   { date: "2026-05-01", title: "勞動節" },
   { date: "2026-05-25", title: "佛誕翌日" },
   { date: "2026-06-20", title: "端午節" },
-  { date: "2026-07-01", title: "港殤日" },
   { date: "2026-09-26", title: "中秋節翌日" },
-  { date: "2026-10-01", title: "總之係紅日" },
   { date: "2026-10-19", title: "重陽節" },
   { date: "2026-12-25", title: "聖誕節" },
   { date: "2026-12-26", title: "聖誕節後第一個周日" },
+  ],
+};
+
+const annualSpecialHolidays = [
+  { month: "07", day: "01", title: "港殤日" },
+  { month: "10", day: "01", title: "總之係紅日" },
 ];
+
+function getHolidays(year: number) {
+  const yearHolidays = holidaysByYear[year] ?? [];
+  const specialHolidays = annualSpecialHolidays.map(({ month, day, title }) => ({
+    date: `${year}-${month}-${day}`,
+    title,
+  }));
+  return [...yearHolidays, ...specialHolidays].sort((left, right) =>
+    left.date.localeCompare(right.date),
+  );
+}
 
 const creatorStyles = {
   Remus: "sm:bg-blue-100 sm:text-blue-700 dark:sm:bg-blue-900/40 dark:sm:text-blue-200",
@@ -202,6 +219,11 @@ function addDaysToDateKey(dateKey: string, days: number) {
   return toDateKey(date);
 }
 
+function addMonthsToDateKey(dateKey: string, months: number) {
+  const [year, month, day] = dateKey.split("-").map(Number);
+  return toDateKey(new Date(year, month - 1 + months, day));
+}
+
 function toGoogleUtcDateTime(dateKey: string, time: string) {
   const [year, month, day] = dateKey.split("-").map(Number);
   const [hours, minutes] = time.split(":").map(Number);
@@ -240,8 +262,8 @@ function initialEvents(): CalendarEvent[] {
     {
       id: "anniversary",
       title: "我哋紀念日",
-      startDate: "2026-09-12",
-      endDate: "2026-09-12",
+      startDate: RELATIONSHIP_START_DATE,
+      endDate: RELATIONSHIP_START_DATE,
       isAllDay: true,
       isRomantic: true,
       recurring: true,
@@ -249,16 +271,16 @@ function initialEvents(): CalendarEvent[] {
     {
       id: "three-month-anniversary",
       title: "3個月紀念日",
-      startDate: "2026-12-12",
-      endDate: "2026-12-12",
+      startDate: addMonthsToDateKey(RELATIONSHIP_START_DATE, 3),
+      endDate: addMonthsToDateKey(RELATIONSHIP_START_DATE, 3),
       isAllDay: true,
       isRomantic: true,
     },
     {
       id: "six-month-anniversary",
       title: "半年紀念日",
-      startDate: "2027-03-12",
-      endDate: "2027-03-12",
+      startDate: addMonthsToDateKey(RELATIONSHIP_START_DATE, 6),
+      endDate: addMonthsToDateKey(RELATIONSHIP_START_DATE, 6),
       isAllDay: true,
       isRomantic: true,
     },
@@ -323,11 +345,12 @@ export default function CalendarPage() {
   const [formError, setFormError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedDate, setSelectedDate] = useState(toDateKey(new Date()));
+  const initialSelectedDate = toDateKey(new Date());
   const touchStartX = useRef<number | null>(null);
   const [form, setForm] = useState({
     title: "",
-    startDate: "2026-09-13",
-    endDate: "2026-09-13",
+    startDate: initialSelectedDate,
+    endDate: initialSelectedDate,
     isAllDay: false,
     isRomantic: false,
     startTime: defaultEventTimes.startTime,
@@ -350,7 +373,7 @@ export default function CalendarPage() {
     () => [...initialEvents(), ...remoteEvents],
     [remoteEvents],
   );
-  const holidays = month.getFullYear() === 2026 ? holidays2026 : [];
+  const holidays = getHolidays(month.getFullYear());
   const selectedEvents = events.filter((event) =>
     eventOccursOn(event, selectedDate),
   );

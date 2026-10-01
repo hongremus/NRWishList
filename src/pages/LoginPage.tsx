@@ -1,7 +1,15 @@
 import React, { useState } from "react";
 import { useStore } from "../store";
+import { RELATIONSHIP_START_DATE } from "../appConfig";
 
-const relationshipStart = new Date(2026, 8, 12);
+const [relationshipStartYear, relationshipStartMonth, relationshipStartDay] = RELATIONSHIP_START_DATE
+  .split("-")
+  .map(Number);
+const relationshipStart = new Date(
+  relationshipStartYear,
+  relationshipStartMonth - 1,
+  relationshipStartDay,
+);
 
 function getRelationshipDuration() {
   const today = new Date();
