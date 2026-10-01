@@ -341,7 +341,7 @@ function getMobileMultiDayLanes(events: CalendarEvent[]) {
     }
   }
 
-  return lanes.map((laneEvents) => laneEvents[0]);
+  return lanes;
 }
 
 export default function CalendarPage() {
@@ -780,6 +780,11 @@ export default function CalendarPage() {
                 !event.isRomantic,
             );
             const mobileMultiDayLanes = getMobileMultiDayLanes(mobileMultiDayEvents);
+            const mobileMultiDayEventsForDate = mobileMultiDayLanes
+              .map((laneEvents) =>
+                laneEvents.find((event) => eventOccursOn(event, dateKey)),
+              )
+              .filter((event): event is CalendarEvent => Boolean(event));
             const mobileSingleDayEvents = dayEvents.filter(
               (event) =>
                 event.startDate === event.endDate &&
@@ -796,7 +801,8 @@ export default function CalendarPage() {
             );
             const hasRomanticEvent = dayEvents.some((event) => event.isRomantic);
             const mobileActivityRows =
-              mobileMultiDayLanes.length + (mobileSingleDayDotEvents.length > 0 ? 1 : 0);
+              mobileMultiDayEventsForDate.length +
+              (mobileSingleDayDotEvents.length > 0 ? 1 : 0);
             const mobileActivityHeight = mobileActivityRows * 8 + Math.max(0, mobileActivityRows - 1) * 2;
             const holiday = holidays.find((item) => item.date === dateKey);
             const isSelected = selectedDate === dateKey;
@@ -845,7 +851,7 @@ export default function CalendarPage() {
                     )}
                   </div>
                   <div className="flex h-full flex-col items-start justify-start gap-0.5 overflow-visible sm:hidden">
-                    {mobileMultiDayLanes.map((event) => (
+                    {mobileMultiDayEventsForDate.map((event) => (
                       <div key={event.id} className="flex h-2 w-full items-center">
                         <span
                           aria-label={`${getCalendarEventTitle(event, dateKey)}（跨日活動）`}
