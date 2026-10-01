@@ -29,7 +29,7 @@ export default function WishList({
   const [tagFilter, setTagFilter] = useState<string | null>(null);
   const [openSortBy, setOpenSortBy] = useState<OpenSortOption>("createdAt");
   const [completedSortBy, setCompletedSortBy] = useState<CompletedSortOption>("completedAt");
-  const [regionFilter, setRegionFilter] = useState("");
+  const [searchFilter, setSearchFilter] = useState("");
 
   // 所有願望中出現過的 tags 與 preset tags 的聯集
   const allTags = useMemo(() => {
@@ -42,10 +42,13 @@ export default function WishList({
     let result = wishes.filter((w) => {
       const matchStatus = w.status === statusFilter;
       const matchTag = tagFilter ? w.tags.includes(tagFilter) : true;
-      const matchRegion = regionFilter.trim()
-        ? (w.region || "").toLocaleLowerCase().includes(regionFilter.trim().toLocaleLowerCase())
+      const normalizedSearch = searchFilter.trim().toLocaleLowerCase();
+      const matchSearch = normalizedSearch
+        ? [w.title, w.region || ""].some((value) =>
+            value.toLocaleLowerCase().includes(normalizedSearch),
+          )
         : true;
-      return matchStatus && matchTag && matchRegion;
+      return matchStatus && matchTag && matchSearch;
     });
 
     result.sort((a, b) => {
@@ -81,7 +84,7 @@ export default function WishList({
     });
 
     return result;
-  }, [wishes, statusFilter, tagFilter, regionFilter, openSortBy, completedSortBy]);
+  }, [wishes, statusFilter, tagFilter, searchFilter, openSortBy, completedSortBy]);
 
   const activeStatusClass = isRemus
     ? "bg-blue-500 text-white shadow-md shadow-blue-500/20"
@@ -151,14 +154,14 @@ export default function WishList({
 
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
           <input
-            value={regionFilter}
-            onChange={(e) => setRegionFilter(e.target.value)}
-            placeholder="📍 搜尋地區／附近願望"
+            value={searchFilter}
+            onChange={(e) => setSearchFilter(e.target.value)}
+            placeholder="🔎 搜尋願望名稱／地區"
             className="min-w-0 flex-1 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
           />
-          {regionFilter && (
-            <button onClick={() => setRegionFilter("")} className="rounded-xl bg-gray-100 px-3 py-2.5 text-xs font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-200">
-              清除地區
+          {searchFilter && (
+            <button onClick={() => setSearchFilter("")} className="rounded-xl bg-gray-100 px-3 py-2.5 text-xs font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-200">
+              清除搜尋
             </button>
           )}
         </div>
