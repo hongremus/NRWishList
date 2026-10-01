@@ -893,7 +893,7 @@ export default function CalendarPage() {
                     title="加入我嘅 Google 日曆"
                     aria-label={`將${getCalendarEventTitle(event, selectedDate)}加入我嘅 Google 日曆`}
                   >
-                    加入日曆
+                    加入 Google 日曆
                   </a>
                 </div>
                 {canManageEvent(event) && (
