@@ -140,23 +140,19 @@ export default function WishCard({ wish, onDetailChange }: { wish: Wish; onDetai
         </div>
 
         {/* 完成次數徽章 */}
-        <div className="text-right flex-shrink-0">
-          <span className="inline-block px-2.5 py-1 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 font-bold rounded-xl text-xs">
-            🎉 {wish.completedCount} 次
-          </span>
+        <div className="flex flex-shrink-0 items-center gap-1 text-right">
           {hasPendingReview && (
-            <button
-              onClick={(event) => {
-                event.stopPropagation();
-                openDetail();
-              }}
-              className="ml-1 inline-flex h-7 w-7 items-center justify-center rounded-lg bg-amber-100 text-sm transition-colors hover:bg-amber-200 dark:bg-amber-900/40 dark:hover:bg-amber-900/60"
+            <span
+              className="text-sm leading-none"
               title="仲未評分及留言"
               aria-label="仲未評分及留言"
             >
               💬
-            </button>
+            </span>
           )}
+          <span className="inline-block px-2.5 py-1 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 font-bold rounded-xl text-xs">
+            🎉 {wish.completedCount} 次
+          </span>
         </div>
       </div>
 
