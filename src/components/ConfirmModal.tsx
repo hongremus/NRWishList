@@ -1,6 +1,7 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import { useBodyScrollLock } from "../hooks/useBodyScrollLock";
+import { useStore } from "../store";
 
 interface ConfirmModalProps {
   isOpen: boolean;
@@ -23,6 +24,9 @@ export default function ConfirmModal({
   onConfirm,
   onCancel,
 }: ConfirmModalProps) {
+  const currentUser = useStore((state) => state.currentUser);
+  const isRemus = currentUser?.username === "Remus";
+
   useBodyScrollLock(isOpen);
   if (!isOpen) return null;
 
@@ -49,7 +53,9 @@ export default function ConfirmModal({
             className={`px-4 py-2 text-sm font-medium text-white rounded-xl active:scale-95 transition-all shadow-md ${
               isDanger
                 ? "bg-red-500 hover:bg-red-600 shadow-red-500/20"
-                : "bg-gradient-to-r from-pink-500 to-rose-500 hover:opacity-90 shadow-pink-500/20"
+                : isRemus
+                  ? "bg-gradient-to-r from-blue-500 to-indigo-600 hover:opacity-90 shadow-blue-500/20"
+                  : "bg-gradient-to-r from-pink-500 to-rose-500 hover:opacity-90 shadow-pink-500/20"
             }`}
           >
             {confirmText}
