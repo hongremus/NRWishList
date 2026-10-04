@@ -4,6 +4,8 @@ import { Wish } from "../types";
 import ConfirmModal from "../components/ConfirmModal";
 
 const MINIMUM_RATING = 7;
+const DAY_IN_MS = 24 * 60 * 60 * 1000;
+const RECENCY_RAMP_DAYS = 90;
 
 function hasQualifiedHistory(wish: Wish) {
   return wish.status === "completed" && wish.history.some(
@@ -21,9 +23,32 @@ function getWishAverageRating(wish: Wish) {
   return ratings.reduce((total, rating) => total + rating, 0) / ratings.length;
 }
 
-function formatDrawChance(optionCount: number) {
-  if (optionCount === 0) return "0%";
-  const percentage = (100 / optionCount).toFixed(1);
+function getWishStats(wish: Wish) {
+  const averageRating = getWishAverageRating(wish);
+  const completedTimes = wish.history
+    .map((history) => new Date(history.completedAt).getTime())
+    .filter((time) => Number.isFinite(time));
+  const latestCompletionTime = completedTimes.length > 0
+    ? Math.max(...completedTimes)
+    : Date.now() - RECENCY_RAMP_DAYS * DAY_IN_MS;
+  const daysSinceLastCompletion = Math.max(
+    0,
+    Math.floor((Date.now() - latestCompletionTime) / DAY_IN_MS),
+  );
+  const scoreWeight = averageRating / 10;
+  const recencyWeight = 0.5 + Math.min(daysSinceLastCompletion / RECENCY_RAMP_DAYS, 1.5);
+
+  return {
+    averageRating,
+    latestCompletionTime,
+    daysSinceLastCompletion,
+    weight: scoreWeight * recencyWeight,
+  };
+}
+
+function formatDrawChance(weight: number, totalWeight: number) {
+  if (totalWeight === 0) return "0%";
+  const percentage = ((weight / totalWeight) * 100).toFixed(1);
   return `${percentage}%`;
 }
 
@@ -45,6 +70,10 @@ export default function RandomWishPage() {
       : eligibleWishes.filter((wish) => wish.tags.includes(selectedTag)),
     [eligibleWishes, selectedTag],
   );
+  const totalWeight = useMemo(
+    () => filteredWishes.reduce((total, wish) => total + getWishStats(wish).weight, 0),
+    [filteredWishes],
+  );
   const poolTags = useMemo(
     () => availableTags.filter((tag) => eligibleWishes.some((wish) => wish.tags.includes(tag))),
     [availableTags, eligibleWishes],
@@ -55,8 +84,12 @@ export default function RandomWishPage() {
       setDrawnWish(null);
       return;
     }
-    const randomIndex = Math.floor(Math.random() * filteredWishes.length);
-    const wish = filteredWishes[randomIndex];
+    const randomValue = Math.random() * totalWeight;
+    let accumulatedWeight = 0;
+    const wish = filteredWishes.find((candidate) => {
+      accumulatedWeight += getWishStats(candidate).weight;
+      return randomValue < accumulatedWeight;
+    }) ?? filteredWishes[filteredWishes.length - 1];
     setDrawnWish(wish);
     setSelectedWish(wish);
   }
@@ -118,27 +151,32 @@ export default function RandomWishPage() {
         <div className="mt-4 border-t border-gray-100 pt-3 dark:border-gray-800">
           <div className="mb-2 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
             <span>可能抽中嘅 option</span>
-            <span>每個機會相同</span>
+            <span>分數高、耐冇做較易抽中</span>
           </div>
           {filteredWishes.length > 0 ? (
             <div className="space-y-2">
               {filteredWishes.map((wish) => (
-                <div
-                  key={wish.id}
-                  className="flex items-center gap-3 rounded-xl bg-gray-50 px-3 py-2.5 dark:bg-gray-800"
-                >
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-bold text-gray-800 dark:text-gray-100">
-                      {wish.title}
+                (() => {
+                  const stats = getWishStats(wish);
+                  return (
+                    <div
+                      key={wish.id}
+                      className="flex items-center gap-3 rounded-xl bg-gray-50 px-3 py-2.5 dark:bg-gray-800"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-sm font-bold text-gray-800 dark:text-gray-100">
+                          {wish.title}
+                        </div>
+                        <div className="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+                          平均 {stats.averageRating.toFixed(1)} 分 · 上次做係 {stats.daysSinceLastCompletion} 日前
+                        </div>
+                      </div>
+                      <span className="shrink-0 rounded-full bg-pink-100 px-2 py-1 text-[11px] font-black text-pink-700 dark:bg-pink-900/40 dark:text-pink-200">
+                        抽中 {formatDrawChance(stats.weight, totalWeight)}
+                      </span>
                     </div>
-                    <div className="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
-                      平均 {getWishAverageRating(wish).toFixed(1)} 分
-                    </div>
-                  </div>
-                  <span className="shrink-0 rounded-full bg-pink-100 px-2 py-1 text-[11px] font-black text-pink-700 dark:bg-pink-900/40 dark:text-pink-200">
-                    抽中 {formatDrawChance(filteredWishes.length)}
-                  </span>
-                </div>
+                  );
+                })()
               ))}
             </div>
           ) : (
