@@ -125,3 +125,8 @@ v1.2.0 — Lucky Dip
 - 新增加權隨機抽選頁，從已完成及評分達 7 分或以上嘅願望中抽選下一個重做項目。
 - 支援按 Tag 篩選、評分及完成時間加權、抽獎滾動動畫，以及結果卡片即時顯示。
 - 加入「再做一次」確認流程，並按 Remus／Nicole 帳戶套用藍色／粉紅色主題。
+
+v1.2.1 — Two Ways To Date
+- Random Date 加入「再戰!」加權重做及「嚟緊Try!」未做過等機率抽選模式。
+- 未做過模式隱藏機率及重做按鈕，option 顯示地區等簡單資料；抽中結果整合到 Random Date hero card。
+- Wish List 同 Random Date 嘅 Tag 按使用數量由多至少排序，Random Date 會預設揀最前 Tag。
