@@ -269,7 +269,7 @@ export default function RandomWishPage() {
           </div>
           {filteredWishes.length > 0 ? (
             <div className="space-y-2">
-              {filteredWishes.map((wish) => (
+              {sortedWishes.map((wish) => (
                 (() => {
                   const stats = getWishStats(wish);
                   return (
