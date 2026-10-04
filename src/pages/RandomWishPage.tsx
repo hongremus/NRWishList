@@ -148,6 +148,32 @@ export default function RandomWishPage() {
         )}
       </section>
 
+      {!isDrawing && drawnWish && (
+        <section className="rounded-3xl border border-pink-200 bg-pink-50 p-5 shadow-sm dark:border-pink-900/50 dark:bg-pink-950/20">
+          <p className="text-xs font-bold text-pink-600 dark:text-pink-300">今次抽中</p>
+          <h3 className="mt-1 break-words text-xl font-black text-gray-900 dark:text-gray-100">
+            {drawnWish.title}
+          </h3>
+          <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold text-gray-600 dark:text-gray-300">
+            {drawnWish.tags.map((tag) => (
+              <span key={tag} className="rounded-full bg-white px-2.5 py-1 dark:bg-gray-800">
+                #{tag}
+              </span>
+            ))}
+            <span className="rounded-full bg-amber-100 px-2.5 py-1 text-amber-700 dark:bg-amber-900/40 dark:text-amber-200">
+              曾經做過 {drawnWish.completedCount} 次
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={repeatWish}
+            className="mt-4 rounded-xl bg-pink-500 px-4 py-2 text-sm font-bold text-white shadow-sm transition-transform active:scale-95"
+          >
+            再做一次
+          </button>
+        </section>
+      )}
+
       <section className="rounded-3xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-900 sm:p-5">
         <div className="flex items-center justify-between gap-3">
           <div>
@@ -219,32 +245,6 @@ export default function RandomWishPage() {
           )}
         </div>
       </section>
-
-      {!isDrawing && drawnWish && (
-        <section className="rounded-3xl border border-pink-200 bg-pink-50 p-5 shadow-sm dark:border-pink-900/50 dark:bg-pink-950/20">
-          <p className="text-xs font-bold text-pink-600 dark:text-pink-300">今次抽中</p>
-          <h3 className="mt-1 break-words text-xl font-black text-gray-900 dark:text-gray-100">
-            {drawnWish.title}
-          </h3>
-          <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold text-gray-600 dark:text-gray-300">
-            {drawnWish.tags.map((tag) => (
-              <span key={tag} className="rounded-full bg-white px-2.5 py-1 dark:bg-gray-800">
-                #{tag}
-              </span>
-            ))}
-            <span className="rounded-full bg-amber-100 px-2.5 py-1 text-amber-700 dark:bg-amber-900/40 dark:text-amber-200">
-              曾經做過 {drawnWish.completedCount} 次
-            </span>
-          </div>
-          <button
-            type="button"
-            onClick={repeatWish}
-            className="mt-4 rounded-xl bg-pink-500 px-4 py-2 text-sm font-bold text-white shadow-sm transition-transform active:scale-95"
-          >
-            再做一次
-          </button>
-        </section>
-      )}
 
       {filteredWishes.length === 0 && (
         <p className="rounded-2xl bg-gray-50 px-4 py-4 text-sm text-gray-500 dark:bg-gray-800 dark:text-gray-300">
