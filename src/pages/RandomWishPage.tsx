@@ -106,7 +106,7 @@ export default function RandomWishPage() {
         <p className="text-xs font-bold uppercase tracking-wide text-white/75">Random Date</p>
         <h2 className="mt-1 text-2xl font-black sm:text-3xl">諗唔到做咩？</h2>
         <p className="mt-2 max-w-md text-sm text-white/85">
-          從以前做過而且有 7 分或以上嘅願望入面，公平咁抽一樣。
+          從以前做過而且有 7 分或以上嘅願望入面抽一樣。
         </p>
         <button
           type="button"
