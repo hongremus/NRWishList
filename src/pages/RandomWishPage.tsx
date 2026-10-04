@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useStore } from "../store";
 import { Wish } from "../types";
-import ConfirmModal from "../components/ConfirmModal";
 
 const MINIMUM_RATING = 7;
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
@@ -57,7 +56,6 @@ export default function RandomWishPage() {
   const availableTags = useStore((state) => state.availableTags);
   const updateWish = useStore((state) => state.updateWish);
   const [selectedTag, setSelectedTag] = useState("all");
-  const [selectedWish, setSelectedWish] = useState<Wish | null>(null);
   const [drawnWish, setDrawnWish] = useState<Wish | null>(null);
   const [rollingWish, setRollingWish] = useState<Wish | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -99,7 +97,6 @@ export default function RandomWishPage() {
       accumulatedWeight += getWishStats(candidate).weight;
       return randomValue < accumulatedWeight;
     }) ?? filteredWishes[filteredWishes.length - 1];
-    setSelectedWish(null);
     setDrawnWish(null);
     setRollingWish(filteredWishes[0]);
     setIsDrawing(true);
@@ -113,14 +110,13 @@ export default function RandomWishPage() {
       setRollingWish(null);
       setIsDrawing(false);
       setDrawnWish(wish);
-      setSelectedWish(wish);
     }, 2400);
   }
 
   function repeatWish() {
-    if (!selectedWish) return;
-    updateWish({ ...selectedWish, status: "open" });
-    setSelectedWish(null);
+    if (!drawnWish) return;
+    updateWish({ ...drawnWish, status: "open" });
+    setDrawnWish(null);
   }
 
   return (
@@ -240,6 +236,13 @@ export default function RandomWishPage() {
               曾經做過 {drawnWish.completedCount} 次
             </span>
           </div>
+          <button
+            type="button"
+            onClick={repeatWish}
+            className="mt-4 rounded-xl bg-pink-500 px-4 py-2 text-sm font-bold text-white shadow-sm transition-transform active:scale-95"
+          >
+            再做一次
+          </button>
         </section>
       )}
 
@@ -249,15 +252,6 @@ export default function RandomWishPage() {
         </p>
       )}
 
-      <ConfirmModal
-        isOpen={Boolean(selectedWish)}
-        title="要唔要再做一次？"
-        message={selectedWish ? `抽中咗「${selectedWish.title}」，要將佢放返入未完成清單？` : ""}
-        confirmText="再做一次"
-        cancelText="Close"
-        onConfirm={repeatWish}
-        onCancel={() => setSelectedWish(null)}
-      />
     </div>
   );
 }
