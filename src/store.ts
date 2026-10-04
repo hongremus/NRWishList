@@ -1,6 +1,6 @@
 import create from "zustand";
 import { persist } from "zustand/middleware";
-import { CalendarEvent, User, Wish } from "./types";
+import { CalendarEvent, User, Wish, WishHistory } from "./types";
 import { supabase } from "./supabase";
 
 const COUPLE_ID = "remus-nicole";
@@ -57,7 +57,7 @@ async function fetchCalendarEvents(startDate: string, endDate: string) {
   return (data ?? []).map((row) => fromDatabaseCalendarEvent(row as Record<string, unknown>));
 }
 
-function fromDatabaseWish(row: Record<string, unknown>): Wish {
+function fromDatabaseWish(row: Record<string, unknown>, history: WishHistory[]): Wish {
   return {
     id: String(row.id),
     title: String(row.title),
@@ -72,11 +72,29 @@ function fromDatabaseWish(row: Record<string, unknown>): Wish {
     status: row.status as Wish["status"],
     createdAt: String(row.created_at),
     completedCount: Number(row.completed_count ?? 0),
-    history: Array.isArray(row.history) ? row.history as Wish["history"] : [],
+    history,
   };
 }
 
-function toDatabaseWish(wish: Wish) {
+function fromDatabaseWishHistory(row: Record<string, unknown>): WishHistory {
+  return {
+    id: String(row.id),
+    completedAt: String(row.completed_at),
+    completedBy: String(row.completed_by),
+    ratings: row.ratings && typeof row.ratings === "object"
+      ? row.ratings as WishHistory["ratings"]
+      : {},
+    remarks: row.remarks && typeof row.remarks === "object"
+      ? row.remarks as WishHistory["remarks"]
+      : {},
+    averageRating: row.average_rating == null
+      ? undefined
+      : Number(row.average_rating),
+    isLocked: Boolean(row.is_locked),
+  };
+}
+
+function toDatabaseWishMaster(wish: Wish) {
   return {
     id: wish.id,
     couple_id: COUPLE_ID,
@@ -92,8 +110,44 @@ function toDatabaseWish(wish: Wish) {
     status: wish.status,
     created_at: wish.createdAt,
     completed_count: wish.completedCount,
-    history: wish.history,
   };
+}
+
+function toDatabaseWishHistory(wishId: string, history: WishHistory) {
+  return {
+    id: history.id,
+    wish_id: wishId,
+    couple_id: COUPLE_ID,
+    completed_at: history.completedAt,
+    completed_by: history.completedBy,
+    ratings: history.ratings,
+    remarks: history.remarks,
+    average_rating: history.averageRating ?? null,
+    is_locked: history.isLocked ?? false,
+  };
+}
+
+async function fetchWishHistory(wishIds: string[]) {
+  if (!supabase || wishIds.length === 0) return new Map<string, WishHistory[]>();
+
+  const { data, error } = await supabase
+    .from("wishHistory")
+    .select("*")
+    .eq("couple_id", COUPLE_ID)
+    .in("wish_id", wishIds)
+    .order("completed_at", { ascending: false });
+
+  if (error) throw error;
+
+  const historyByWish = new Map<string, WishHistory[]>();
+  for (const row of data ?? []) {
+    const databaseRow = row as Record<string, unknown>;
+    const wishId = String(databaseRow.wish_id);
+    const history = historyByWish.get(wishId) ?? [];
+    history.push(fromDatabaseWishHistory(databaseRow));
+    historyByWish.set(wishId, history);
+  }
+  return historyByWish;
 }
 
 function fromDatabaseCalendarEvent(row: Record<string, unknown>): CalendarEvent {
@@ -250,8 +304,13 @@ export const useStore = create<AppState>()(
         }
 
         try {
-          const [{ data: wishRows, error: wishError }, { data: tagRows, error: tagError }] = await Promise.all([
-            supabase.from("wishes").select("*").eq("couple_id", COUPLE_ID).order("created_at", { ascending: false }),
+          const [
+            { data: wishRows, error: wishError },
+            { data: historyRows, error: historyError },
+            { data: tagRows, error: tagError },
+          ] = await Promise.all([
+            supabase.from("wishMaster").select("*").eq("couple_id", COUPLE_ID).order("created_at", { ascending: false }),
+            supabase.from("wishHistory").select("*").eq("couple_id", COUPLE_ID).order("completed_at", { ascending: false }),
             supabase.from("wish_tags").select("name").eq("couple_id", COUPLE_ID).order("name"),
           ]);
 
@@ -259,12 +318,31 @@ export const useStore = create<AppState>()(
             set({ syncError: `讀取願望失敗：${wishError.message}` });
             throw wishError;
           }
+          if (historyError) {
+            set({ syncError: `讀取完成紀錄失敗：${historyError.message}` });
+            throw historyError;
+          }
           if (tagError) {
             set({ syncError: `讀取 Tag 失敗：${tagError.message}` });
             throw tagError;
           }
+          const historyByWish = new Map<string, WishHistory[]>();
+          for (const row of historyRows ?? []) {
+            const databaseRow = row as Record<string, unknown>;
+            const wishId = String(databaseRow.wish_id);
+            const history = historyByWish.get(wishId) ?? [];
+            history.push(fromDatabaseWishHistory(databaseRow));
+            historyByWish.set(wishId, history);
+          }
+
           set({
-            wishes: (wishRows ?? []).map((row) => fromDatabaseWish(row as Record<string, unknown>)),
+            wishes: (wishRows ?? []).map((row) => {
+              const databaseRow = row as Record<string, unknown>;
+              return fromDatabaseWish(
+                databaseRow,
+                historyByWish.get(String(databaseRow.id)) ?? [],
+              );
+            }),
             availableTags: tagRows?.length ? tagRows.map((row) => row.name) : defaultTags,
             syncError: null,
           });
@@ -286,7 +364,10 @@ export const useStore = create<AppState>()(
 
         const channel = supabase
           .channel("nr-wishlist-sync")
-          .on("postgres_changes", { event: "*", schema: "public", table: "wishes", filter: `couple_id=eq.${COUPLE_ID}` }, () => {
+          .on("postgres_changes", { event: "*", schema: "public", table: "wishMaster", filter: `couple_id=eq.${COUPLE_ID}` }, () => {
+            void get().loadRemoteData();
+          })
+          .on("postgres_changes", { event: "*", schema: "public", table: "wishHistory", filter: `couple_id=eq.${COUPLE_ID}` }, () => {
             void get().loadRemoteData();
           })
           .on("postgres_changes", { event: "*", schema: "public", table: "wish_tags", filter: `couple_id=eq.${COUPLE_ID}` }, () => {
@@ -306,27 +387,73 @@ export const useStore = create<AppState>()(
       addWish: async (w) => {
         set((s) => ({ wishes: [w, ...s.wishes] }));
         if (!supabase) return;
-        const { error } = await supabase.from("wishes").insert(toDatabaseWish(w));
+        const { error } = await supabase.from("wishMaster").insert(toDatabaseWishMaster(w));
         if (error) {
           set((s) => ({ wishes: s.wishes.filter((item) => item.id !== w.id), syncError: `新增願望失敗：${error.message}` }));
           return;
         }
+        if (w.history.length > 0) {
+          const { error: historyError } = await supabase
+            .from("wishHistory")
+            .insert(w.history.map((history) => toDatabaseWishHistory(w.id, history)));
+          if (historyError) {
+            set({ syncError: `新增完成紀錄失敗：${historyError.message}` });
+            await get().loadRemoteData();
+            return;
+          }
+        }
         await get().loadRemoteData();
       },
       updateWish: async (w) => {
+        const previousWish = get().wishes.find((item) => item.id === w.id);
         set((s) => ({ wishes: s.wishes.map((x) => (x.id === w.id ? w : x)) }));
         if (!supabase) return;
-        const { error } = await supabase.from("wishes").update(toDatabaseWish(w)).eq("id", w.id).eq("couple_id", COUPLE_ID);
+        const { error } = await supabase
+          .from("wishMaster")
+          .update(toDatabaseWishMaster(w))
+          .eq("id", w.id)
+          .eq("couple_id", COUPLE_ID);
         if (error) {
           set({ syncError: `更新願望失敗：${error.message}` });
           return;
+        }
+
+        const { error: historyError } = await supabase
+          .from("wishHistory")
+          .upsert(w.history.map((history) => toDatabaseWishHistory(w.id, history)));
+        if (historyError) {
+          set({ syncError: `更新完成紀錄失敗：${historyError.message}` });
+          await get().loadRemoteData();
+          return;
+        }
+
+        const currentHistoryIds = new Set(w.history.map((history) => history.id));
+        const removedHistoryIds = (previousWish?.history ?? [])
+          .map((history) => history.id)
+          .filter((historyId) => !currentHistoryIds.has(historyId));
+        if (removedHistoryIds.length > 0) {
+          const { error: deleteHistoryError } = await supabase
+            .from("wishHistory")
+            .delete()
+            .eq("wish_id", w.id)
+            .eq("couple_id", COUPLE_ID)
+            .in("id", removedHistoryIds);
+          if (deleteHistoryError) {
+            set({ syncError: `刪除完成紀錄失敗：${deleteHistoryError.message}` });
+            await get().loadRemoteData();
+            return;
+          }
         }
         await get().loadRemoteData();
       },
       deleteWish: async (id) => {
         set((s) => ({ wishes: s.wishes.filter((x) => x.id !== id) }));
         if (!supabase) return;
-        const { error } = await supabase.from("wishes").delete().eq("id", id).eq("couple_id", COUPLE_ID);
+        const { error } = await supabase
+          .from("wishMaster")
+          .delete()
+          .eq("id", id)
+          .eq("couple_id", COUPLE_ID);
         if (error) {
           set({ syncError: `刪除願望失敗：${error.message}` });
           return;

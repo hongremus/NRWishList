@@ -6,7 +6,7 @@ NR Wish List 係 Remus 同 Nicole 共用嘅願望清單 app，主要功能包括
 - 完成紀錄：保存每次完成嘅時間、完成者、評分、備註同平均分數，方便回顧過往紀錄。
 - 評分同備註：完成願望後，Remus 同 Nicole 可以分別俾分同寫低感想，記錄一齊完成嘅體驗。
 - 地區分類：可以輸入香港地區，並喺願望卡及詳情頁顯示，亦可以按地區排序。
-- Tag 分類：用 Tag 整理不同類型願望，方便按分類篩選清單。
+- Tag 分類：用 Tag 整理不同類型願望，方便按分類篩選願望。
 - 優先度管理：以高、中、低三個級別標記願望重要程度，亦可以按優先度排序。
 - 清單篩選排序：可以按未搞掂、已完成、Tag 篩選，並按建立日期（最新／最舊）、優先度、截止日、完成次數或地區排序。
 - 統計分析：顯示願望總數、完成率、提出者、Top 5 完成排行及評分資料。
@@ -23,11 +23,11 @@ NR Wish List Version History
 v1.0.0 — The Wish Awakens
 - 初版 NR Wish List。
 - 支援新增、完成、重做、刪除願望，以及優先度、負責人、截止日、Tag、備註同完成紀錄。
-- Remus 同 Nicole 可以共享及管理同一份願望清單。
+- 接駁 Supabase，支援兩個人共享願望資料。
 
 v1.0.1 — Pocket Rocket
-- 全面改善手機版顯示，願望卡片及操作按鈕更易使用。
-- 登入頁加入版本資訊及 NR Wish List 圖示。
+- 集中改善手機版 responsive layout，包括 header、願望卡片、操作按鈕及 modal。
+- Login page 加入版本顯示、NR Wish List app icon 同 favicon。
 
 v1.0.2 — Wish Upon Details
 - 重整願望詳情、評分、重做同刪除操作流程，成張願望卡可以撳入詳情頁。
@@ -35,26 +35,26 @@ v1.0.2 — Wish Upon Details
 
 v1.0.3 — Canto-lish
 - 將主要 UI 同評分用字本地化成自然廣東話。
-- 改善 iPhone 上查看願望詳情時嘅使用體驗。
+- Wish detail modal 加入背景 scroll lock，改善 iPhone 使用體驗。
 
 v1.0.4 — Sync and the City
-- 改善畫面顏色層次，令願望卡及詳情頁更易閱讀。
-- 改善資料同步，兩個人可以更穩定地查看最新內容。
+- 改善 dark mode 嘅背景、卡片同 modal 顏色層次。
+- 完善 Supabase shared data sync、Realtime 同 mutation error handling，並建立 production deployment workflow。
 
 v1.0.5 — Zoom? No Thanks
-- 統一使用明亮介面，令願望卡外觀更清晰。
-- 改善手機輸入框及各個操作頁面嘅使用體驗。
+- 移除 dark mode toggle，統一使用 light mode，Wish cards 還原為白色外觀。
+- 所有 modal 加入 iPhone body scroll lock，並改善手機輸入框體驗。
 
 v1.0.6 — NR Goes Brrr
 - 設計並加入 NR monogram app logo、browser favicon、PWA icon 同 login page branding。
 - Tag 改為新增願望時必填，未揀 Tag 唔可以提交。
 
 v1.0.7 — Modal Kombat
-- 改善願望詳情、新增願望及完成願望嘅操作流程。
+- 重整 subpage、modal、FAB 及完成願望詳情嘅層級和開關行為。
 
 v1.0.8 — Password? Bye
 - 登入改為只輸入 Account Name，並支援按 Enter 登入。
-- 整理「許願」入口，新增願望更加方便。
+- 整理「許願」入口及新增願望版面，保留下方 FAB 作主要入口。
 
 v1.0.9 — Location, Location, Location
 - 新增地區欄位，支援保存、編輯、顯示及按地區排序。
@@ -74,24 +74,23 @@ v1.0.12 — Stats McGee
 - 顯示願望提出者、完成次數及平均評分，方便比較共同完成紀錄。
 
 v1.1.0 — Calendar? We Ball
-- 新增 Remus 同 Nicole 共用行事曆，活動會即時同步。
-- 加入香港公眾假期、浪漫紀念日提示及建立者顏色識別。
+- 新增 Remus 同 Nicole 共用行事曆，活動會透過 Supabase Realtime 同步。
+- 加入香港公眾假期、浪漫紀念日提示、建立者 marker 顏色及活動 CRUD。
 - 活動支援日期／時間驗證、自動結束時間，以及跨日全日活動。
 - 單日活動支援揀年份、月份及多個日子一次過重覆。
 - 年份／月份可以直接跳轉，並支援由 2026 年開始嘅逐年選擇。
 - 固定紀念日按年份顯示「我哋紀念日」、「1周年紀念」等名稱，並保持唯讀。
-- Remus 同 Nicole 可以共同管理約會活動；普通活動仍只限建立者操作。
+- 約會活動開放 Remus 同 Nicole 共同重覆、編輯及刪除；普通活動仍只限建立者操作。
 - 2026 年 7 月 1 日改名為「港殤日」，10 月 1 日改名為「鄰近國家國慶日」。
 
 v1.1.1 — Calendar, Clearly
-- 手機行事曆會以連續長條顯示跨日活動，並將重疊活動分開顯示。
-- 單日活動會以小點顯示，活動較多嘅星期會自動增加空間。
-- 改善活動位置、確認視窗、今日標記及月份切換顯示。
+- Mobile 行事曆加入連續跨日活動 bar、分開活動 lane、單日活動 dot，以及按內容自動調整行高。
+- 修正跨日 bar 對齊、modal／確認窗層級、今日紫色標記及月份直接切換。
 - Mobile 行事曆支援左右 swipe 轉換月份，並喺月份邊界停止切換。
 - 月份選擇由 2026 年開始，結束年份按 current year + 1 動態延伸。
-- 改善願望統計、Tag 管理及活動編輯畫面嘅顯示。
+- 統一願望統計、管理 Tag、新增／編輯及重覆活動 modal 層級，避免內容互相穿底。
 - 轉換月份時自動選取該月份 1 號，方便即時查看該月活動。
-- 簡化公眾假期及 Tag 管理畫面。
+- 公眾假期移除旗仔 icon，管理 Tag 改為 header icon。
 - 登入頁相處日數改用日曆計算，正確顯示 Day 1、月份及周年，並隱藏零值單位。
 
 v1.1.2 — Small Moves, Better Days
@@ -99,7 +98,7 @@ v1.1.2 — Small Moves, Better Days
 - 點擊日曆上／下個月日期時，自動跳到該日期所屬月份並選取該日。
 
 v1.1.3 — Room To Say More
-- 評分改為 10 分滿分，現有評分會按新制顯示。
+- 評分改為 10 分滿分，現有 1–5 分可透過 Supabase migration 轉換為 10 分制。
 - 評分 Remark 輸入框加高至 10 行，方便輸入較長評論。
 
 v1.1.4 — Sort It Out
@@ -108,13 +107,16 @@ v1.1.4 — Sort It Out
 - 修正超長 description 及網站連結穿出願望卡片嘅問題。
 
 v1.1.5 — Calendar & Check-ins
-- 「加入日曆」更新為「加入 Google 日曆」，並以外部連結開啟 Google Calendar，保留原本 web app 畫面。
-- 完成願望後，如果仍有未評分及留言嘅項目，會顯示待辦數目提示。
-- 點擊待辦提示會直接開啟已完成願望清單。
 - 手機日曆單日非全日活動按建立者顏色合併小點，同色活動每日只顯示一粒。
 - 手機日曆跨日全日活動按月份統一分配 lane，重疊活動會自動新增一行，並保持長條位置一致。
 - 日曆格高度按每星期實際需要調整，只有受影響嘅星期行會拉高。
+- 「加入日曆」更新為「加入 Google 日曆」，並以外部連結開啟 Google Calendar，保留原本 web app 畫面。
 - Header 加入 pending review 數字提示，只有存在未評分及留言嘅近期完成願望時顯示。
 - Pending review 提示改用深酒紅圓形按鈕，點擊後會直接開啟已完成願望清單。
 - 香港公眾假期改用自動計算，按香港假期規則處理農曆日期及補假，毋須每年手動更新日期。
 - 保留 7 月 1 日「港殤日」及 10 月 1 日「總之係紅日」嘅全年特別顯示。
+
+v1.1.6 — Split Wish Records
+- 願望主資料改由 `wishMaster` 管理，完成紀錄改由 `wishHistory` 管理。
+- 保留現有願望清單、完成紀錄、評分、留言及 Realtime 使用方式。
+- 舊 `wishes` table 暫時保留作 backup，方便確認新 table 運作正常後再清理。
