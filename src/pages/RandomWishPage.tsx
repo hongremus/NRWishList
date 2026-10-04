@@ -157,33 +157,32 @@ export default function RandomWishPage() {
             </div>
           </div>
         )}
-      </section>
-
-      {!isDrawing && drawnWish && (
-        <section className={`rounded-3xl border p-5 shadow-sm dark:shadow-black/20 ${isRemus ? "border-blue-200 bg-blue-50 dark:border-blue-800/70 dark:bg-gradient-to-br dark:from-blue-950/80 dark:via-gray-900 dark:to-cyan-950/50" : "border-pink-200 bg-pink-50 dark:border-pink-800/70 dark:bg-gradient-to-br dark:from-pink-950/80 dark:via-gray-900 dark:to-rose-950/50"}`}>
-          <p className={`text-xs font-bold ${isRemus ? "text-blue-600 dark:text-blue-300" : "text-pink-600 dark:text-pink-300"}`}>今次抽中</p>
-          <h3 className="mt-1 break-words text-xl font-black text-gray-900 dark:text-gray-100">
-            {drawnWish.title}
-          </h3>
-          <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold text-gray-600 dark:text-gray-300">
-            {drawnWish.tags.map((tag) => (
-              <span key={tag} className="rounded-full border border-gray-200/80 bg-white/80 px-2.5 py-1 dark:border-gray-700 dark:bg-gray-800/90 dark:text-gray-200">
-                #{tag}
+        {!isDrawing && drawnWish && (
+          <div className="mt-5 border-t border-white/25 pt-4">
+            <p className="text-xs font-bold text-white/75">今次抽中</p>
+            <h3 className="mt-1 break-words text-xl font-black text-white">
+              {drawnWish.title}
+            </h3>
+            <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold text-white/90">
+              {drawnWish.tags.map((tag) => (
+                <span key={tag} className="rounded-full border border-white/20 bg-white/15 px-2.5 py-1">
+                  #{tag}
+                </span>
+              ))}
+              <span className="rounded-full border border-amber-200/40 bg-amber-300/20 px-2.5 py-1 text-amber-100">
+                曾經做過 {drawnWish.completedCount} 次
               </span>
-            ))}
-            <span className="rounded-full border border-amber-200/80 bg-amber-100 px-2.5 py-1 text-amber-700 dark:border-amber-700/60 dark:bg-amber-900/50 dark:text-amber-200">
-              曾經做過 {drawnWish.completedCount} 次
-            </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setPendingRepeatWish(drawnWish)}
+              className={`mt-4 rounded-xl bg-white px-4 py-2 text-sm font-bold shadow-md transition-transform active:scale-95 ${isRemus ? "text-blue-600 shadow-blue-950/30 hover:bg-blue-50" : "text-rose-600 shadow-rose-950/30 hover:bg-rose-50"}`}
+            >
+              再做一次
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={() => setPendingRepeatWish(drawnWish)}
-            className={`mt-4 rounded-xl px-4 py-2 text-sm font-bold text-white shadow-md transition-transform active:scale-95 ${isRemus ? "bg-blue-500 shadow-blue-950/30 hover:bg-blue-400" : "bg-pink-500 shadow-pink-950/30 hover:bg-pink-400"}`}
-          >
-            再做一次
-          </button>
-        </section>
-      )}
+        )}
+      </section>
 
       <section className="rounded-3xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-900 sm:p-5">
         <div className="flex items-center justify-between gap-3">
