@@ -85,6 +85,12 @@ export default function RandomWishPage() {
     () => filteredWishes.reduce((total, wish) => total + getWishStats(wish).weight, 0),
     [filteredWishes],
   );
+  const sortedWishes = useMemo(
+    () => [...filteredWishes].sort((firstWish, secondWish) => (
+      getWishStats(secondWish).weight - getWishStats(firstWish).weight
+    )),
+    [filteredWishes],
+  );
   const poolTags = useMemo(
     () => availableTags.filter((tag) => eligibleWishes.some((wish) => wish.tags.includes(tag))),
     [availableTags, eligibleWishes],
@@ -130,7 +136,7 @@ export default function RandomWishPage() {
         <p className="text-xs font-bold uppercase tracking-wide text-white/75">Random Date</p>
         <h2 className="mt-1 text-2xl font-black sm:text-3xl">諗唔到做咩？</h2>
         <p className="mt-2 max-w-md text-sm text-white/85">
-          從以前做過而且有 7 分或以上嘅願望入面抽一樣。
+          從以前做過而且有 7 分或以上嘅願望入面抽一樣。分數越高、越耐冇做過，抽中機率越高。
         </p>
         <button
           type="button"
@@ -154,25 +160,25 @@ export default function RandomWishPage() {
       </section>
 
       {!isDrawing && drawnWish && (
-        <section className={`rounded-3xl border p-5 shadow-sm ${isRemus ? "border-blue-200 bg-blue-50 dark:border-blue-900/50 dark:bg-blue-950/20" : "border-pink-200 bg-pink-50 dark:border-pink-900/50 dark:bg-pink-950/20"}`}>
+        <section className={`rounded-3xl border p-5 shadow-sm dark:shadow-black/20 ${isRemus ? "border-blue-200 bg-blue-50 dark:border-blue-800/70 dark:bg-gradient-to-br dark:from-blue-950/80 dark:via-gray-900 dark:to-cyan-950/50" : "border-pink-200 bg-pink-50 dark:border-pink-800/70 dark:bg-gradient-to-br dark:from-pink-950/80 dark:via-gray-900 dark:to-rose-950/50"}`}>
           <p className={`text-xs font-bold ${isRemus ? "text-blue-600 dark:text-blue-300" : "text-pink-600 dark:text-pink-300"}`}>今次抽中</p>
           <h3 className="mt-1 break-words text-xl font-black text-gray-900 dark:text-gray-100">
             {drawnWish.title}
           </h3>
           <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold text-gray-600 dark:text-gray-300">
             {drawnWish.tags.map((tag) => (
-              <span key={tag} className="rounded-full bg-white px-2.5 py-1 dark:bg-gray-800">
+              <span key={tag} className="rounded-full border border-gray-200/80 bg-white/80 px-2.5 py-1 dark:border-gray-700 dark:bg-gray-800/90 dark:text-gray-200">
                 #{tag}
               </span>
             ))}
-            <span className="rounded-full bg-amber-100 px-2.5 py-1 text-amber-700 dark:bg-amber-900/40 dark:text-amber-200">
+            <span className="rounded-full border border-amber-200/80 bg-amber-100 px-2.5 py-1 text-amber-700 dark:border-amber-700/60 dark:bg-amber-900/50 dark:text-amber-200">
               曾經做過 {drawnWish.completedCount} 次
             </span>
           </div>
           <button
             type="button"
             onClick={() => setPendingRepeatWish(drawnWish)}
-            className={`mt-4 rounded-xl px-4 py-2 text-sm font-bold text-white shadow-sm transition-transform active:scale-95 ${isRemus ? "bg-blue-500" : "bg-pink-500"}`}
+            className={`mt-4 rounded-xl px-4 py-2 text-sm font-bold text-white shadow-md transition-transform active:scale-95 ${isRemus ? "bg-blue-500 shadow-blue-950/30 hover:bg-blue-400" : "bg-pink-500 shadow-pink-950/30 hover:bg-pink-400"}`}
           >
             再做一次
           </button>
@@ -215,11 +221,11 @@ export default function RandomWishPage() {
         <div className="mt-4 border-t border-gray-100 pt-3 dark:border-gray-800">
           <div className="mb-2 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
             <span>可能抽中嘅 option</span>
-            <span>分數高、耐冇做較易抽中</span>
+            <span>機率由高至低</span>
           </div>
           {filteredWishes.length > 0 ? (
             <div className="space-y-2">
-              {filteredWishes.map((wish) => (
+              {sortedWishes.map((wish) => (
                 (() => {
                   const stats = getWishStats(wish);
                   return (
