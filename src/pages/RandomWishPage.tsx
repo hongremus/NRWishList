@@ -13,6 +13,20 @@ function hasQualifiedHistory(wish: Wish) {
   );
 }
 
+function getWishAverageRating(wish: Wish) {
+  const ratings = wish.history
+    .map((history) => history.averageRating)
+    .filter((rating): rating is number => typeof rating === "number");
+  if (ratings.length === 0) return 0;
+  return ratings.reduce((total, rating) => total + rating, 0) / ratings.length;
+}
+
+function formatDrawChance(optionCount: number) {
+  if (optionCount === 0) return "0%";
+  const percentage = (100 / optionCount).toFixed(1);
+  return `${percentage}%`;
+}
+
 export default function RandomWishPage() {
   const wishes = useStore((state) => state.wishes);
   const availableTags = useStore((state) => state.availableTags);
@@ -100,6 +114,38 @@ export default function RandomWishPage() {
               #{tag}
             </button>
           ))}
+        </div>
+        <div className="mt-4 border-t border-gray-100 pt-3 dark:border-gray-800">
+          <div className="mb-2 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+            <span>可能抽中嘅 option</span>
+            <span>每個機會相同</span>
+          </div>
+          {filteredWishes.length > 0 ? (
+            <div className="space-y-2">
+              {filteredWishes.map((wish) => (
+                <div
+                  key={wish.id}
+                  className="flex items-center gap-3 rounded-xl bg-gray-50 px-3 py-2.5 dark:bg-gray-800"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-bold text-gray-800 dark:text-gray-100">
+                      {wish.title}
+                    </div>
+                    <div className="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+                      平均 {getWishAverageRating(wish).toFixed(1)} 分
+                    </div>
+                  </div>
+                  <span className="shrink-0 rounded-full bg-pink-100 px-2 py-1 text-[11px] font-black text-pink-700 dark:bg-pink-900/40 dark:text-pink-200">
+                    抽中 {formatDrawChance(filteredWishes.length)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="rounded-xl bg-gray-50 px-3 py-3 text-xs text-gray-400 dark:bg-gray-800">
+              呢個 Tag 暫時未有合資格 option
+            </p>
+          )}
         </div>
       </section>
 
