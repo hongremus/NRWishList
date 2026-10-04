@@ -54,7 +54,9 @@ function formatDrawChance(weight: number, totalWeight: number) {
 export default function RandomWishPage() {
   const wishes = useStore((state) => state.wishes);
   const availableTags = useStore((state) => state.availableTags);
+  const currentUser = useStore((state) => state.currentUser);
   const updateWish = useStore((state) => state.updateWish);
+  const isRemus = currentUser?.username === "Remus";
   const [selectedTag, setSelectedTag] = useState("all");
   const [drawnWish, setDrawnWish] = useState<Wish | null>(null);
   const [rollingWish, setRollingWish] = useState<Wish | null>(null);
@@ -121,7 +123,7 @@ export default function RandomWishPage() {
 
   return (
     <div className="space-y-3 sm:space-y-4">
-      <section className="rounded-3xl bg-gradient-to-br from-rose-500 via-pink-500 to-orange-400 p-5 text-white shadow-lg sm:p-7">
+      <section className={`rounded-3xl bg-gradient-to-br p-5 text-white shadow-lg sm:p-7 ${isRemus ? "from-blue-600 via-indigo-600 to-cyan-500" : "from-rose-500 via-pink-500 to-orange-400"}`}>
         <p className="text-xs font-bold uppercase tracking-wide text-white/75">Random Date</p>
         <h2 className="mt-1 text-2xl font-black sm:text-3xl">諗唔到做咩？</h2>
         <p className="mt-2 max-w-md text-sm text-white/85">
@@ -131,7 +133,7 @@ export default function RandomWishPage() {
           type="button"
           onClick={drawWish}
           disabled={isDrawing || filteredWishes.length === 0}
-          className="mt-5 rounded-2xl bg-white px-5 py-3 text-sm font-black text-rose-600 shadow-md transition-transform active:scale-95 disabled:cursor-wait disabled:opacity-70"
+          className={`mt-5 rounded-2xl bg-white px-5 py-3 text-sm font-black shadow-md transition-transform active:scale-95 disabled:cursor-wait disabled:opacity-70 ${isRemus ? "text-blue-600" : "text-rose-600"}`}
         >
           {isDrawing ? "🎰 抽緊…" : "🎲 幫我揀一樣"}
         </button>
@@ -149,8 +151,8 @@ export default function RandomWishPage() {
       </section>
 
       {!isDrawing && drawnWish && (
-        <section className="rounded-3xl border border-pink-200 bg-pink-50 p-5 shadow-sm dark:border-pink-900/50 dark:bg-pink-950/20">
-          <p className="text-xs font-bold text-pink-600 dark:text-pink-300">今次抽中</p>
+        <section className={`rounded-3xl border p-5 shadow-sm ${isRemus ? "border-blue-200 bg-blue-50 dark:border-blue-900/50 dark:bg-blue-950/20" : "border-pink-200 bg-pink-50 dark:border-pink-900/50 dark:bg-pink-950/20"}`}>
+          <p className={`text-xs font-bold ${isRemus ? "text-blue-600 dark:text-blue-300" : "text-pink-600 dark:text-pink-300"}`}>今次抽中</p>
           <h3 className="mt-1 break-words text-xl font-black text-gray-900 dark:text-gray-100">
             {drawnWish.title}
           </h3>
@@ -167,7 +169,7 @@ export default function RandomWishPage() {
           <button
             type="button"
             onClick={repeatWish}
-            className="mt-4 rounded-xl bg-pink-500 px-4 py-2 text-sm font-bold text-white shadow-sm transition-transform active:scale-95"
+            className={`mt-4 rounded-xl px-4 py-2 text-sm font-bold text-white shadow-sm transition-transform active:scale-95 ${isRemus ? "bg-blue-500" : "bg-pink-500"}`}
           >
             再做一次
           </button>
@@ -191,7 +193,7 @@ export default function RandomWishPage() {
             type="button"
             onClick={() => setSelectedTag("all")}
             disabled={isDrawing}
-            className={`rounded-full px-3 py-1.5 text-xs font-bold transition-colors ${selectedTag === "all" ? "bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900" : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300"}`}
+            className={`rounded-full px-3 py-1.5 text-xs font-bold transition-colors ${selectedTag === "all" ? (isRemus ? "bg-blue-600 text-white" : "bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900") : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300"}`}
           >
             全部
           </button>
@@ -201,7 +203,7 @@ export default function RandomWishPage() {
               type="button"
               onClick={() => setSelectedTag(tag)}
               disabled={isDrawing}
-              className={`rounded-full px-3 py-1.5 text-xs font-bold transition-colors ${selectedTag === tag ? "bg-pink-500 text-white" : "bg-pink-50 text-pink-700 dark:bg-pink-950/30 dark:text-pink-200"}`}
+              className={`rounded-full px-3 py-1.5 text-xs font-bold transition-colors ${selectedTag === tag ? (isRemus ? "bg-blue-500 text-white" : "bg-pink-500 text-white") : (isRemus ? "bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-200" : "bg-pink-50 text-pink-700 dark:bg-pink-950/30 dark:text-pink-200")}`}
             >
               #{tag}
             </button>
@@ -230,7 +232,7 @@ export default function RandomWishPage() {
                           平均 {stats.averageRating.toFixed(1)} 分 · 上次做係 {stats.daysSinceLastCompletion} 日前
                         </div>
                       </div>
-                      <span className="shrink-0 rounded-full bg-pink-100 px-2 py-1 text-[11px] font-black text-pink-700 dark:bg-pink-900/40 dark:text-pink-200">
+                      <span className={`shrink-0 rounded-full px-2 py-1 text-[11px] font-black ${isRemus ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-200" : "bg-pink-100 text-pink-700 dark:bg-pink-900/40 dark:text-pink-200"}`}>
                         抽中 {formatDrawChance(stats.weight, totalWeight)}
                       </span>
                     </div>
