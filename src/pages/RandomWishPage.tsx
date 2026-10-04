@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useStore } from "../store";
 import { Wish } from "../types";
 import ConfirmModal from "../components/ConfirmModal";
@@ -59,6 +59,15 @@ export default function RandomWishPage() {
   const [selectedTag, setSelectedTag] = useState("all");
   const [selectedWish, setSelectedWish] = useState<Wish | null>(null);
   const [drawnWish, setDrawnWish] = useState<Wish | null>(null);
+  const [rollingWish, setRollingWish] = useState<Wish | null>(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const animationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const animationInterval = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => () => {
+    if (animationTimer.current) clearTimeout(animationTimer.current);
+    if (animationInterval.current) clearInterval(animationInterval.current);
+  }, []);
 
   const eligibleWishes = useMemo(
     () => wishes.filter(hasQualifiedHistory),
@@ -80,7 +89,7 @@ export default function RandomWishPage() {
   );
 
   function drawWish() {
-    if (filteredWishes.length === 0) {
+    if (filteredWishes.length === 0 || isDrawing) {
       setDrawnWish(null);
       return;
     }
@@ -90,8 +99,22 @@ export default function RandomWishPage() {
       accumulatedWeight += getWishStats(candidate).weight;
       return randomValue < accumulatedWeight;
     }) ?? filteredWishes[filteredWishes.length - 1];
-    setDrawnWish(wish);
-    setSelectedWish(wish);
+    setSelectedWish(null);
+    setDrawnWish(null);
+    setRollingWish(filteredWishes[0]);
+    setIsDrawing(true);
+    animationInterval.current = setInterval(() => {
+      const randomIndex = Math.floor(Math.random() * filteredWishes.length);
+      setRollingWish(filteredWishes[randomIndex]);
+    }, 120);
+    animationTimer.current = setTimeout(() => {
+      if (animationInterval.current) clearInterval(animationInterval.current);
+      animationInterval.current = null;
+      setRollingWish(null);
+      setIsDrawing(false);
+      setDrawnWish(wish);
+      setSelectedWish(wish);
+    }, 2400);
   }
 
   function repeatWish() {
@@ -111,9 +134,10 @@ export default function RandomWishPage() {
         <button
           type="button"
           onClick={drawWish}
-          className="mt-5 rounded-2xl bg-white px-5 py-3 text-sm font-black text-rose-600 shadow-md transition-transform active:scale-95"
+          disabled={isDrawing || filteredWishes.length === 0}
+          className="mt-5 rounded-2xl bg-white px-5 py-3 text-sm font-black text-rose-600 shadow-md transition-transform active:scale-95 disabled:cursor-wait disabled:opacity-70"
         >
-          🎲 幫我揀一樣
+          {isDrawing ? "🎰 抽緊…" : "🎲 幫我揀一樣"}
         </button>
       </section>
 
@@ -133,6 +157,7 @@ export default function RandomWishPage() {
           <button
             type="button"
             onClick={() => setSelectedTag("all")}
+              disabled={isDrawing}
             className={`rounded-full px-3 py-1.5 text-xs font-bold transition-colors ${selectedTag === "all" ? "bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900" : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300"}`}
           >
             全部
@@ -142,6 +167,7 @@ export default function RandomWishPage() {
               key={tag}
               type="button"
               onClick={() => setSelectedTag(tag)}
+              disabled={isDrawing}
               className={`rounded-full px-3 py-1.5 text-xs font-bold transition-colors ${selectedTag === tag ? "bg-pink-500 text-white" : "bg-pink-50 text-pink-700 dark:bg-pink-950/30 dark:text-pink-200"}`}
             >
               #{tag}
@@ -187,7 +213,21 @@ export default function RandomWishPage() {
         </div>
       </section>
 
-      {drawnWish && (
+      {isDrawing && rollingWish && (
+        <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 shadow-sm dark:border-amber-900/50 dark:bg-amber-950/20">
+          <p className="text-xs font-bold text-amber-700 dark:text-amber-300">抽緊中…</p>
+          <div className="mt-2 flex min-h-14 items-center justify-center rounded-2xl bg-white px-4 text-center shadow-inner dark:bg-gray-900">
+            <span className="animate-pulse break-words text-xl font-black text-gray-900 dark:text-gray-100">
+              {rollingWish.title}
+            </span>
+          </div>
+          <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-amber-200 dark:bg-amber-900">
+            <div className="h-full w-1/2 animate-pulse rounded-full bg-amber-500" />
+          </div>
+        </section>
+      )}
+
+      {!isDrawing && drawnWish && (
         <section className="rounded-3xl border border-pink-200 bg-pink-50 p-5 shadow-sm dark:border-pink-900/50 dark:bg-pink-950/20">
           <p className="text-xs font-bold text-pink-600 dark:text-pink-300">今次抽中</p>
           <h3 className="mt-1 break-words text-xl font-black text-gray-900 dark:text-gray-100">
