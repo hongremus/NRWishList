@@ -15,6 +15,10 @@ function hasQualifiedHistory(wish: Wish) {
   );
 }
 
+function isOpenWish(wish: Wish) {
+  return wish.status === "open";
+}
+
 function getWishAverageRating(wish: Wish) {
   const ratings = wish.history
     .map((history) => history.averageRating)
@@ -58,6 +62,7 @@ export default function RandomWishPage() {
   const currentUser = useStore((state) => state.currentUser);
   const updateWish = useStore((state) => state.updateWish);
   const isRemus = currentUser?.username === "Remus";
+  const [drawMode, setDrawMode] = useState<"repeat" | "try">("repeat");
   const [selectedTag, setSelectedTag] = useState("all");
   const [drawnWish, setDrawnWish] = useState<Wish | null>(null);
   const [pendingRepeatWish, setPendingRepeatWish] = useState<Wish | null>(null);
@@ -72,8 +77,8 @@ export default function RandomWishPage() {
   }, []);
 
   const eligibleWishes = useMemo(
-    () => wishes.filter(hasQualifiedHistory),
-    [wishes],
+    () => wishes.filter(drawMode === "repeat" ? hasQualifiedHistory : isOpenWish),
+    [drawMode, wishes],
   );
   const filteredWishes = useMemo(
     () => selectedTag === "all"
@@ -82,8 +87,18 @@ export default function RandomWishPage() {
     [eligibleWishes, selectedTag],
   );
   const totalWeight = useMemo(
-    () => filteredWishes.reduce((total, wish) => total + getWishStats(wish).weight, 0),
-    [filteredWishes],
+    () => drawMode === "repeat"
+      ? filteredWishes.reduce((total, wish) => total + getWishStats(wish).weight, 0)
+      : filteredWishes.length,
+    [drawMode, filteredWishes],
+  );
+  const sortedWishes = useMemo(
+    () => drawMode === "repeat"
+      ? [...filteredWishes].sort((firstWish, secondWish) => (
+        getWishStats(secondWish).weight - getWishStats(firstWish).weight
+      ))
+      : filteredWishes,
+    [drawMode, filteredWishes],
   );
   const poolTags = useMemo(
     () => availableTags.filter((tag) => eligibleWishes.some((wish) => wish.tags.includes(tag))),
@@ -98,7 +113,7 @@ export default function RandomWishPage() {
     const randomValue = Math.random() * totalWeight;
     let accumulatedWeight = 0;
     const wish = filteredWishes.find((candidate) => {
-      accumulatedWeight += getWishStats(candidate).weight;
+      accumulatedWeight += drawMode === "repeat" ? getWishStats(candidate).weight : 1;
       return randomValue < accumulatedWeight;
     }) ?? filteredWishes[filteredWishes.length - 1];
     setDrawnWish(null);
@@ -127,10 +142,40 @@ export default function RandomWishPage() {
   return (
     <div className="space-y-3 sm:space-y-4">
       <section className={`rounded-3xl bg-gradient-to-br p-5 text-white shadow-lg sm:p-7 ${isRemus ? "from-blue-600 via-indigo-600 to-cyan-500" : "from-rose-500 via-pink-500 to-orange-400"}`}>
-        <p className="text-xs font-bold uppercase tracking-wide text-white/75">Random Date</p>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-xs font-bold uppercase tracking-wide text-white/75">Random Date</p>
+          <div className="flex rounded-xl bg-black/15 p-1 text-xs font-bold">
+            <button
+              type="button"
+              onClick={() => {
+                setDrawMode("repeat");
+                setDrawnWish(null);
+                setSelectedTag("all");
+              }}
+              disabled={isDrawing}
+              className={`rounded-lg px-3 py-1.5 transition-colors ${drawMode === "repeat" ? "bg-white text-gray-900 shadow-sm" : "text-white/80 hover:bg-white/10"}`}
+            >
+              做過重做
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setDrawMode("try");
+                setDrawnWish(null);
+                setSelectedTag("all");
+              }}
+              disabled={isDrawing}
+              className={`rounded-lg px-3 py-1.5 transition-colors ${drawMode === "try" ? "bg-white text-gray-900 shadow-sm" : "text-white/80 hover:bg-white/10"}`}
+            >
+              未做過去試
+            </button>
+          </div>
+        </div>
         <h2 className="mt-1 text-2xl font-black sm:text-3xl">諗唔到做咩？</h2>
         <p className="mt-2 max-w-md text-sm text-white/85">
-          從以前做過而且有 7 分或以上嘅願望入面抽一樣。
+          {drawMode === "repeat"
+            ? "從以前做過而且有 7 分或以上嘅願望入面抽一樣。分數越高、越耐冇做過，抽中機率越高。"
+            : "從未做過嘅願望入面抽一樣，每個願望都有相同機率。"}
         </p>
         <button
           type="button"
@@ -188,7 +233,7 @@ export default function RandomWishPage() {
             </p>
           </div>
           <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700 dark:bg-amber-900/40 dark:text-amber-200">
-            7+ 分
+            {drawMode === "repeat" ? "7+ 分" : "全部等機率"}
           </span>
         </div>
         <div className="mt-3 flex flex-wrap gap-2">
@@ -215,7 +260,7 @@ export default function RandomWishPage() {
         <div className="mt-4 border-t border-gray-100 pt-3 dark:border-gray-800">
           <div className="mb-2 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
             <span>可能抽中嘅 option</span>
-            <span>分數高、耐冇做較易抽中</span>
+            <span>{drawMode === "repeat" ? "機率由高至低" : "每個 1 份機率"}</span>
           </div>
           {filteredWishes.length > 0 ? (
             <div className="space-y-2">
@@ -232,11 +277,13 @@ export default function RandomWishPage() {
                           {wish.title}
                         </div>
                         <div className="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
-                          平均 {stats.averageRating.toFixed(1)} 分 · 上次做係 {stats.daysSinceLastCompletion} 日前
+                          {drawMode === "repeat"
+                            ? `平均 ${stats.averageRating.toFixed(1)} 分 · 上次做係 ${stats.daysSinceLastCompletion} 日前`
+                            : "未做過 · 每個願望相同機率"}
                         </div>
                       </div>
                       <span className={`shrink-0 rounded-full px-2 py-1 text-[11px] font-black ${isRemus ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-200" : "bg-pink-100 text-pink-700 dark:bg-pink-900/40 dark:text-pink-200"}`}>
-                        抽中 {formatDrawChance(stats.weight, totalWeight)}
+                        抽中 {formatDrawChance(drawMode === "repeat" ? stats.weight : 1, totalWeight)}
                       </span>
                     </div>
                   );
@@ -253,7 +300,9 @@ export default function RandomWishPage() {
 
       {filteredWishes.length === 0 && (
         <p className="rounded-2xl bg-gray-50 px-4 py-4 text-sm text-gray-500 dark:bg-gray-800 dark:text-gray-300">
-          呢個 Tag 暫時未有 7 分或以上嘅已完成願望。
+          {drawMode === "repeat"
+            ? "呢個 Tag 暫時未有 7 分或以上嘅已完成願望。"
+            : "呢個 Tag 暫時未有未做過嘅願望。"}
         </p>
       )}
 
