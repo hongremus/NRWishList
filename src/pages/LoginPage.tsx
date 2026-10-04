@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useStore } from "../store";
-import { RELATIONSHIP_START_DATE } from "../appConfig";
+import { APP_VERSION, RELATIONSHIP_START_DATE } from "../appConfig";
 
 const [relationshipStartYear, relationshipStartMonth, relationshipStartDay] = RELATIONSHIP_START_DATE
   .split("-")
@@ -114,7 +114,7 @@ export default function LoginPage() {
         </div>
 
         <div className="mt-5 text-center text-[11px] text-gray-400">
-          <div>v1.1.5</div>
+          <div>v{APP_VERSION}</div>
           <div>Since 2026.9.12 · 我哋已經一齊咗 {getRelationshipDuration()}啦🥰</div>
         </div>
       </div>
