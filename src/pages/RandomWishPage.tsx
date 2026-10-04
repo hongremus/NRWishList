@@ -63,7 +63,7 @@ export default function RandomWishPage() {
   const updateWish = useStore((state) => state.updateWish);
   const isRemus = currentUser?.username === "Remus";
   const [drawMode, setDrawMode] = useState<"repeat" | "try">("repeat");
-  const [selectedTag, setSelectedTag] = useState("all");
+  const [selectedTag, setSelectedTag] = useState("");
   const [drawnWish, setDrawnWish] = useState<Wish | null>(null);
   const [pendingRepeatWish, setPendingRepeatWish] = useState<Wish | null>(null);
   const [rollingWish, setRollingWish] = useState<Wish | null>(null);
@@ -81,9 +81,7 @@ export default function RandomWishPage() {
     [drawMode, wishes],
   );
   const filteredWishes = useMemo(
-    () => selectedTag === "all"
-      ? eligibleWishes
-      : eligibleWishes.filter((wish) => wish.tags.includes(selectedTag)),
+    () => eligibleWishes.filter((wish) => wish.tags.includes(selectedTag)),
     [eligibleWishes, selectedTag],
   );
   const totalWeight = useMemo(
@@ -101,9 +99,21 @@ export default function RandomWishPage() {
     [drawMode, filteredWishes],
   );
   const poolTags = useMemo(
-    () => availableTags.filter((tag) => eligibleWishes.some((wish) => wish.tags.includes(tag))),
+    () => availableTags
+      .map((tag, index) => ({
+        tag,
+        index,
+        count: eligibleWishes.filter((wish) => wish.tags.includes(tag)).length,
+      }))
+      .filter(({ count }) => count > 0)
+      .sort((firstTag, secondTag) => secondTag.count - firstTag.count || firstTag.index - secondTag.index)
+      .map(({ tag }) => tag),
     [availableTags, eligibleWishes],
   );
+
+  useEffect(() => {
+    setSelectedTag(poolTags[0] ?? "");
+  }, [drawMode, poolTags]);
 
   function drawWish() {
     if (filteredWishes.length === 0 || isDrawing) {
@@ -150,24 +160,22 @@ export default function RandomWishPage() {
               onClick={() => {
                 setDrawMode("repeat");
                 setDrawnWish(null);
-                setSelectedTag("all");
               }}
               disabled={isDrawing}
               className={`rounded-lg px-3 py-1.5 transition-colors ${drawMode === "repeat" ? "bg-white text-gray-900 shadow-sm" : "text-white/80 hover:bg-white/10"}`}
             >
-              做過重做
+              再戰!
             </button>
             <button
               type="button"
               onClick={() => {
                 setDrawMode("try");
                 setDrawnWish(null);
-                setSelectedTag("all");
               }}
               disabled={isDrawing}
               className={`rounded-lg px-3 py-1.5 transition-colors ${drawMode === "try" ? "bg-white text-gray-900 shadow-sm" : "text-white/80 hover:bg-white/10"}`}
             >
-              未做過去試
+              嚟緊Try!
             </button>
           </div>
         </div>
@@ -187,7 +195,7 @@ export default function RandomWishPage() {
         </button>
         {isDrawing && rollingWish && (
           <div className="mt-4 rounded-2xl bg-white/95 p-3 text-center text-gray-900 shadow-inner">
-            <p className="text-xs font-bold text-amber-600">抽緊中…</p>
+            <p className="text-xs font-bold text-amber-600">抽緊…</p>
             <p className="mt-1 min-h-7 break-words text-lg font-black animate-pulse">
               {rollingWish.title}
             </p>
@@ -196,33 +204,36 @@ export default function RandomWishPage() {
             </div>
           </div>
         )}
-      </section>
-
-      {!isDrawing && drawnWish && (
-        <section className={`rounded-3xl border p-5 shadow-sm ${isRemus ? "border-blue-200 bg-blue-50 dark:border-blue-900/50 dark:bg-blue-950/20" : "border-pink-200 bg-pink-50 dark:border-pink-900/50 dark:bg-pink-950/20"}`}>
-          <p className={`text-xs font-bold ${isRemus ? "text-blue-600 dark:text-blue-300" : "text-pink-600 dark:text-pink-300"}`}>今次抽中</p>
-          <h3 className="mt-1 break-words text-xl font-black text-gray-900 dark:text-gray-100">
-            {drawnWish.title}
-          </h3>
-          <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold text-gray-600 dark:text-gray-300">
-            {drawnWish.tags.map((tag) => (
-              <span key={tag} className="rounded-full bg-white px-2.5 py-1 dark:bg-gray-800">
-                #{tag}
-              </span>
-            ))}
-            <span className="rounded-full bg-amber-100 px-2.5 py-1 text-amber-700 dark:bg-amber-900/40 dark:text-amber-200">
-              曾經做過 {drawnWish.completedCount} 次
-            </span>
+        {!isDrawing && drawnWish && (
+          <div className="mt-5 border-t border-white/25 pt-4">
+            <p className="text-xs font-bold text-white/75">今次抽中</p>
+            <h3 className="mt-1 break-words text-xl font-black text-white">
+              {drawnWish.title}
+            </h3>
+            <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold text-white/90">
+              {drawnWish.tags.map((tag) => (
+                <span key={tag} className="rounded-full border border-white/20 bg-white/15 px-2.5 py-1">
+                  #{tag}
+                </span>
+              ))}
+              {drawMode === "repeat" && (
+                <span className="rounded-full border border-amber-200/40 bg-amber-300/20 px-2.5 py-1 text-amber-100">
+                  曾經做過 {drawnWish.completedCount} 次
+                </span>
+              )}
+            </div>
+            {drawMode === "repeat" && (
+              <button
+                type="button"
+                onClick={() => setPendingRepeatWish(drawnWish)}
+                className={`mt-4 rounded-xl bg-white px-4 py-2 text-sm font-bold shadow-md transition-transform active:scale-95 ${isRemus ? "text-blue-600 shadow-blue-950/30 hover:bg-blue-50" : "text-rose-600 shadow-rose-950/30 hover:bg-rose-50"}`}
+              >
+                再做一次
+              </button>
+            )}
           </div>
-          <button
-            type="button"
-            onClick={() => setPendingRepeatWish(drawnWish)}
-            className={`mt-4 rounded-xl px-4 py-2 text-sm font-bold text-white shadow-sm transition-transform active:scale-95 ${isRemus ? "bg-blue-500" : "bg-pink-500"}`}
-          >
-            再做一次
-          </button>
-        </section>
-      )}
+        )}
+      </section>
 
       <section className="rounded-3xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-900 sm:p-5">
         <div className="flex items-center justify-between gap-3">
@@ -232,19 +243,13 @@ export default function RandomWishPage() {
               Pool 入面有 {filteredWishes.length} 個願望
             </p>
           </div>
-          <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700 dark:bg-amber-900/40 dark:text-amber-200">
-            {drawMode === "repeat" ? "7+ 分" : "全部等機率"}
-          </span>
+          {drawMode === "repeat" && (
+            <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700 dark:bg-amber-900/40 dark:text-amber-200">
+              7+ 分
+            </span>
+          )}
         </div>
         <div className="mt-3 flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={() => setSelectedTag("all")}
-            disabled={isDrawing}
-            className={`rounded-full px-3 py-1.5 text-xs font-bold transition-colors ${selectedTag === "all" ? (isRemus ? "bg-blue-600 text-white" : "bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900") : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300"}`}
-          >
-            全部
-          </button>
           {poolTags.map((tag) => (
             <button
               key={tag}
@@ -260,7 +265,7 @@ export default function RandomWishPage() {
         <div className="mt-4 border-t border-gray-100 pt-3 dark:border-gray-800">
           <div className="mb-2 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
             <span>可能抽中嘅 option</span>
-            <span>{drawMode === "repeat" ? "機率由高至低" : "每個 1 份機率"}</span>
+            {drawMode === "repeat" && <span>機率由高至低</span>}
           </div>
           {filteredWishes.length > 0 ? (
             <div className="space-y-2">
@@ -276,15 +281,21 @@ export default function RandomWishPage() {
                         <div className="truncate text-sm font-bold text-gray-800 dark:text-gray-100">
                           {wish.title}
                         </div>
-                        <div className="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
-                          {drawMode === "repeat"
-                            ? `平均 ${stats.averageRating.toFixed(1)} 分 · 上次做係 ${stats.daysSinceLastCompletion} 日前`
-                            : "未做過 · 每個願望相同機率"}
-                        </div>
+                        {drawMode === "repeat" ? (
+                          <div className="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+                            平均 {stats.averageRating.toFixed(1)} 分 · 上次係 {stats.daysSinceLastCompletion} 日前
+                          </div>
+                        ) : wish.region ? (
+                          <div className="mt-0.5 truncate text-[11px] text-gray-500 dark:text-gray-400">
+                            📍 {wish.region}
+                          </div>
+                        ) : null}
                       </div>
-                      <span className={`shrink-0 rounded-full px-2 py-1 text-[11px] font-black ${isRemus ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-200" : "bg-pink-100 text-pink-700 dark:bg-pink-900/40 dark:text-pink-200"}`}>
-                        抽中 {formatDrawChance(drawMode === "repeat" ? stats.weight : 1, totalWeight)}
-                      </span>
+                      {drawMode === "repeat" && (
+                        <span className={`shrink-0 rounded-full px-2 py-1 text-[11px] font-black ${isRemus ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-200" : "bg-pink-100 text-pink-700 dark:bg-pink-900/40 dark:text-pink-200"}`}>
+                          抽中 {formatDrawChance(stats.weight, totalWeight)}
+                        </span>
+                      )}
                     </div>
                   );
                 })()

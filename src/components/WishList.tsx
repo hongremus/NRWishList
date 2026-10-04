@@ -33,8 +33,15 @@ export default function WishList({
 
   // 所有願望中出現過的 tags 與 preset tags 的聯集
   const allTags = useMemo(() => {
-    const set = new Set([...availableTags, ...wishes.flatMap((w) => w.tags)]);
-    return Array.from(set);
+    const tags = Array.from(new Set([...availableTags, ...wishes.flatMap((w) => w.tags)]));
+    return tags
+      .map((tag, index) => ({
+        tag,
+        index,
+        count: wishes.filter((wish) => wish.tags.includes(tag)).length,
+      }))
+      .sort((firstTag, secondTag) => secondTag.count - firstTag.count || firstTag.index - secondTag.index)
+      .map(({ tag }) => tag);
   }, [wishes, availableTags]);
 
   // 過濾與排序邏輯
