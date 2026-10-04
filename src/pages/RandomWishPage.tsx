@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useStore } from "../store";
 import { Wish } from "../types";
+import ConfirmModal from "../components/ConfirmModal";
 
 const MINIMUM_RATING = 7;
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
@@ -59,6 +60,7 @@ export default function RandomWishPage() {
   const isRemus = currentUser?.username === "Remus";
   const [selectedTag, setSelectedTag] = useState("all");
   const [drawnWish, setDrawnWish] = useState<Wish | null>(null);
+  const [pendingRepeatWish, setPendingRepeatWish] = useState<Wish | null>(null);
   const [rollingWish, setRollingWish] = useState<Wish | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const animationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -116,8 +118,9 @@ export default function RandomWishPage() {
   }
 
   function repeatWish() {
-    if (!drawnWish) return;
-    updateWish({ ...drawnWish, status: "open" });
+    if (!pendingRepeatWish) return;
+    updateWish({ ...pendingRepeatWish, status: "open" });
+    setPendingRepeatWish(null);
     setDrawnWish(null);
   }
 
@@ -168,7 +171,7 @@ export default function RandomWishPage() {
           </div>
           <button
             type="button"
-            onClick={repeatWish}
+            onClick={() => setPendingRepeatWish(drawnWish)}
             className={`mt-4 rounded-xl px-4 py-2 text-sm font-bold text-white shadow-sm transition-transform active:scale-95 ${isRemus ? "bg-blue-500" : "bg-pink-500"}`}
           >
             再做一次
@@ -254,6 +257,15 @@ export default function RandomWishPage() {
         </p>
       )}
 
+      <ConfirmModal
+        isOpen={Boolean(pendingRepeatWish)}
+        title="真係要再做一次？"
+        message="重置之後個願望會變返未搞掂，可以再做一次。之前嘅完成紀錄同評分會保留！"
+        confirmText="再做啦"
+        cancelText="取消"
+        onConfirm={repeatWish}
+        onCancel={() => setPendingRepeatWish(null)}
+      />
     </div>
   );
 }
