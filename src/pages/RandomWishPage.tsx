@@ -139,6 +139,17 @@ export default function RandomWishPage() {
         >
           {isDrawing ? "🎰 抽緊…" : "🎲 幫我揀一樣"}
         </button>
+        {isDrawing && rollingWish && (
+          <div className="mt-4 rounded-2xl bg-white/95 p-3 text-center text-gray-900 shadow-inner">
+            <p className="text-xs font-bold text-amber-600">抽緊中…</p>
+            <p className="mt-1 min-h-7 break-words text-lg font-black animate-pulse">
+              {rollingWish.title}
+            </p>
+            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-amber-100">
+              <div className="h-full w-1/2 animate-pulse rounded-full bg-amber-500" />
+            </div>
+          </div>
+        )}
       </section>
 
       <section className="rounded-3xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-900 sm:p-5">
@@ -157,7 +168,7 @@ export default function RandomWishPage() {
           <button
             type="button"
             onClick={() => setSelectedTag("all")}
-              disabled={isDrawing}
+            disabled={isDrawing}
             className={`rounded-full px-3 py-1.5 text-xs font-bold transition-colors ${selectedTag === "all" ? "bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900" : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300"}`}
           >
             全部
@@ -212,20 +223,6 @@ export default function RandomWishPage() {
           )}
         </div>
       </section>
-
-      {isDrawing && rollingWish && (
-        <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5 shadow-sm dark:border-amber-900/50 dark:bg-amber-950/20">
-          <p className="text-xs font-bold text-amber-700 dark:text-amber-300">抽緊中…</p>
-          <div className="mt-2 flex min-h-14 items-center justify-center rounded-2xl bg-white px-4 text-center shadow-inner dark:bg-gray-900">
-            <span className="animate-pulse break-words text-xl font-black text-gray-900 dark:text-gray-100">
-              {rollingWish.title}
-            </span>
-          </div>
-          <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-amber-200 dark:bg-amber-900">
-            <div className="h-full w-1/2 animate-pulse rounded-full bg-amber-500" />
-          </div>
-        </section>
-      )}
 
       {!isDrawing && drawnWish && (
         <section className="rounded-3xl border border-pink-200 bg-pink-50 p-5 shadow-sm dark:border-pink-900/50 dark:bg-pink-950/20">
