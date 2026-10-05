@@ -789,7 +789,6 @@ export default function CalendarPage() {
             const mobileSingleDayEvents = dayEvents.filter(
               (event) =>
                 event.startDate === event.endDate &&
-                !event.isAllDay &&
                 !event.isRomantic,
             );
             const mobileSingleDayDotEvents = Array.from(
