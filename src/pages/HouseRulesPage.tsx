@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useStore } from "../store";
 import { HouseRule } from "../types";
+import CrimeRecordsPage from "./CrimeRecordsPage";
 
 function getRuleText(rule: HouseRule | undefined) {
   return rule?.text ?? "";
@@ -18,6 +19,7 @@ export default function HouseRulesPage() {
   const [draftText, setDraftText] = useState("");
   const [saving, setSaving] = useState(false);
   const [actionError, setActionError] = useState("");
+  const [activeSection, setActiveSection] = useState<"rules" | "crime">("rules");
 
   const currentRole = currentUser?.role ?? "Remus";
   const isRemus = currentRole === "Remus";
@@ -77,7 +79,24 @@ export default function HouseRulesPage() {
         </div>
       </div>
 
-      <div className="space-y-2">
+      <div className="grid grid-cols-2 gap-1 rounded-2xl bg-gray-100 p-1 dark:bg-gray-800">
+        <button
+          type="button"
+          onClick={() => setActiveSection("rules")}
+          className={`rounded-xl px-3 py-2 text-sm font-bold transition-all ${activeSection === "rules" ? "bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-gray-100" : "text-gray-500 dark:text-gray-400"}`}
+        >
+          📜 家規
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveSection("crime")}
+          className={`rounded-xl px-3 py-2 text-sm font-bold transition-all ${activeSection === "crime" ? "bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-gray-100" : "text-gray-500 dark:text-gray-400"}`}
+        >
+          🚨 犯罪紀錄
+        </button>
+      </div>
+
+      {activeSection === "crime" ? <CrimeRecordsPage /> : <div className="space-y-2">
         {pendingApprovalCount > 0 && (
           <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm font-semibold text-amber-800 dark:border-amber-900/50 dark:bg-amber-900/20 dark:text-amber-200">
             <span aria-hidden="true">🔔</span>
@@ -184,7 +203,7 @@ export default function HouseRulesPage() {
             </article>
           );
         })}
-      </div>
+      </div>}
     </section>
   );
 }
