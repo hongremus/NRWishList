@@ -9,6 +9,25 @@ const defaultTags = ["約會", "禮物", "旅行", "日常生活", "驚喜", "�
 let visibleRemoteLoadCount = 0;
 const calendarLoadPromises = new Map<string, Promise<void>>();
 
+function createUuid() {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  if (typeof crypto !== "undefined" && typeof crypto.getRandomValues === "function") {
+    const bytes = new Uint8Array(16);
+    crypto.getRandomValues(bytes);
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+    return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("")
+      .replace(/^(........)(....)(....)(....)(............)$/, "$1-$2-$3-$4-$5");
+  }
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (character) => {
+    const randomValue = Math.random() * 16 | 0;
+    const value = character === "x" ? randomValue : (randomValue & 0x3) | 0x8;
+    return value.toString(16);
+  });
+}
+
 function toDateKey(date: Date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
@@ -645,9 +664,7 @@ export const useStore = create<AppState>()(
         }
 
         const proposal: HouseRuleProposal = {
-          id: typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
-            ? crypto.randomUUID()
-            : `rule-proposal-${Date.now()}`,
+          id: createUuid(),
           ruleNumber,
           currentText: currentRule?.text ?? "",
           proposedText: trimmedText,
