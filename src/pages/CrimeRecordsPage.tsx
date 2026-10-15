@@ -174,8 +174,8 @@ export default function CrimeRecordsPage() {
             const firstUpdateIndex = pendingProposals.findIndex((item) => Boolean(item.recordId));
             return (
               <React.Fragment key={proposal.id}>
-                {index === firstCaseIndex && <h2 className="px-1 text-sm font-black text-gray-700 dark:text-gray-200">待確認案件</h2>}
-                {index === firstUpdateIndex && <h2 className="px-1 pt-3 text-sm font-black text-gray-700 dark:text-gray-200">待確認懲罰／狀態修改</h2>}
+                {index === firstCaseIndex && <h2 className="rounded-xl border border-amber-200 bg-amber-100 px-3 py-2 text-sm font-black text-amber-900 dark:border-amber-800/70 dark:bg-[#292315] dark:text-amber-100">待確認案件</h2>}
+                {index === firstUpdateIndex && <h2 className="rounded-xl border border-rose-200 bg-rose-100 px-3 py-2 text-sm font-black text-rose-900 dark:border-rose-800/70 dark:bg-rose-950/45 dark:text-rose-100">待確認懲罰／狀態修改</h2>}
                 <article className="rounded-2xl border border-amber-200 bg-amber-50 p-4 shadow-sm dark:border-amber-800/70 dark:bg-[#292315]">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
@@ -205,7 +205,7 @@ export default function CrimeRecordsPage() {
       )}
 
       <div className="space-y-2">
-        <h2 className="px-1 text-sm font-black text-gray-700 dark:text-gray-200">已確認紀錄</h2>
+        <h2 className="rounded-xl border border-slate-200 bg-slate-100 px-3 py-2 text-sm font-black text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">已確認紀錄</h2>
         {crimeRecords.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-gray-300 bg-white px-4 py-8 text-center text-sm text-gray-400 dark:border-gray-700 dark:bg-gray-900">暫時未有犯罪紀錄，大家都好乖。</div>
         ) : (
