@@ -11,6 +11,7 @@ import HouseRulesPage from "./HouseRulesPage";
 export default function HomePage() {
   const currentUser = useStore((s) => s.currentUser);
   const wishes = useStore((s) => s.wishes);
+  const houseRuleProposals = useStore((s) => s.houseRuleProposals);
   const syncError = useStore((s) => s.syncError);
   const clearSyncError = useStore((s) => s.clearSyncError);
   const setCurrentUser = useStore((s) => s.setCurrentUser);
@@ -47,6 +48,9 @@ export default function HomePage() {
         !latestHistory.remarks[ratingRole]?.trim(),
     );
   }).length;
+  const pendingHouseRuleCount = houseRuleProposals.filter((proposal) =>
+    isRemus ? !proposal.remusApproved : !proposal.nicoleApproved,
+  ).length;
 
   useEffect(() => {
     // 檢查是否有儲存登入狀態
@@ -104,6 +108,17 @@ export default function HomePage() {
 
           {/* 右側操作按鈕 */}
           <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
+            {pendingHouseRuleCount > 0 && (
+              <button
+                type="button"
+                onClick={() => setActivePage("rules")}
+                className="relative flex h-8 min-w-8 items-center justify-center rounded-full bg-amber-300 px-2 text-sm font-black leading-none text-amber-950 shadow-sm sm:h-9 sm:min-w-9"
+                title={`${pendingHouseRuleCount} 條家規等你確認`}
+                aria-label={`${pendingHouseRuleCount} 條家規等你確認`}
+              >
+                📜 {pendingHouseRuleCount}
+              </button>
+            )}
             {pendingReviewCount > 0 && (
               <button
                 type="button"

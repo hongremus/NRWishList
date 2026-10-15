@@ -21,6 +21,9 @@ export default function HouseRulesPage() {
 
   const currentRole = currentUser?.role ?? "Remus";
   const isRemus = currentRole === "Remus";
+  const pendingApprovalCount = proposals.filter((proposal) =>
+    isRemus ? !proposal.remusApproved : !proposal.nicoleApproved,
+  ).length;
 
   function openEditor(ruleNumber: number) {
     const rule = houseRules.find((item) => item.ruleNumber === ruleNumber);
@@ -75,6 +78,12 @@ export default function HouseRulesPage() {
       </div>
 
       <div className="space-y-2">
+        {pendingApprovalCount > 0 && (
+          <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm font-semibold text-amber-800 dark:border-amber-900/50 dark:bg-amber-900/20 dark:text-amber-200">
+            <span aria-hidden="true">🔔</span>
+            <span>有 {pendingApprovalCount} 條家規等你確認</span>
+          </div>
+        )}
         {(actionError || syncError) && (
           <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs leading-5 text-red-700 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-200">
             {actionError || syncError}
