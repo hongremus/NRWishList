@@ -27,7 +27,6 @@ export default function CrimeRecordsPage() {
   const rejectProposal = useStore((state) => state.rejectCrimeRecordProposal);
   const [showForm, setShowForm] = useState(false);
   const [incidentDate, setIncidentDate] = useState(getToday);
-  const [offender, setOffender] = useState<UserRole>(currentUser?.role ?? "Remus");
   const [ruleNumber, setRuleNumber] = useState("");
   const [description, setDescription] = useState("");
   const [saving, setSaving] = useState(false);
@@ -35,11 +34,11 @@ export default function CrimeRecordsPage() {
 
   const currentRole = currentUser?.role ?? "Remus";
   const isRemus = currentRole === "Remus";
+  const offender: UserRole = isRemus ? "Nicole" : "Remus";
   const pendingForCurrentUser = proposals.filter((proposal) => proposal.proposedBy !== currentRole).length;
 
   function resetForm() {
     setIncidentDate(getToday());
-    setOffender(currentRole);
     setRuleNumber("");
     setDescription("");
     setShowForm(false);
@@ -125,10 +124,9 @@ export default function CrimeRecordsPage() {
             </label>
             <label className="text-xs font-semibold text-gray-600 dark:text-gray-300">
               犯案人
-              <select value={offender} onChange={(event) => setOffender(event.target.value as UserRole)} className="mt-1.5 w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white">
-                <option value="Remus">Remus</option>
-                <option value="Nicole">Nicole</option>
-              </select>
+              <div className="mt-1.5 rounded-xl border border-red-100 bg-red-50 px-3 py-2.5 text-sm font-bold text-red-700 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-200">
+                {offender}
+              </div>
             </label>
           </div>
           <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300">

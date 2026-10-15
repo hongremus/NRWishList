@@ -832,7 +832,10 @@ export const useStore = create<AppState>()(
       },
       submitCrimeRecordProposal: async (crime, proposedBy) => {
         const description = crime.description.trim();
-        if (!crime.incidentDate || !description) return false;
+        if (!crime.incidentDate || !description || crime.offender === proposedBy) {
+          set({ syncError: "犯罪紀錄只可以提交對方作為犯案人。" });
+          return false;
+        }
 
         const proposal: CrimeRecordProposal = {
           id: createUuid(),
