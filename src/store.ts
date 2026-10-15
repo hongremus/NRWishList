@@ -923,7 +923,14 @@ export const useStore = create<AppState>()(
             set({ syncError: `清除待確認修改失敗：${updateDeleteError.message}` });
             return false;
           }
-          await get().loadCrimeRecords();
+          set((state) => ({
+            crimeRecords: state.crimeRecords.map((item) => item.id === proposal.recordId
+              ? { ...item, status: proposal.status, punishment: proposal.punishment }
+              : item),
+            crimeRecordProposals: state.crimeRecordProposals.filter((item) => item.id !== proposalId),
+            syncError: null,
+          }));
+          void get().loadCrimeRecords();
           return true;
         }
 
@@ -978,7 +985,12 @@ export const useStore = create<AppState>()(
           set({ syncError: `清除待確認紀錄失敗：${deleteError.message}` });
           return false;
         }
-        await get().loadCrimeRecords();
+        set((state) => ({
+          crimeRecords: [record, ...state.crimeRecords],
+          crimeRecordProposals: state.crimeRecordProposals.filter((item) => item.id !== proposalId),
+          syncError: null,
+        }));
+        void get().loadCrimeRecords();
         return true;
       },
       rejectCrimeRecordProposal: async (proposalId) => {
