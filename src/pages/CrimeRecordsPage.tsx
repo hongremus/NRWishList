@@ -225,9 +225,7 @@ export default function CrimeRecordsPage() {
                       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                         <select value={editingStatus} onChange={(event) => setEditingStatus(event.target.value as CrimeStatus)} className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100">
                           <option value="未處理">未處理</option>
-                          <option value="已道歉">已道歉</option>
-                          <option value="已補償">已補償</option>
-                          <option value="已處理">已處理</option>
+                          <option value="錫返了">錫返了</option>
                         </select>
                         <input value={editingPunishment} onChange={(event) => setEditingPunishment(event.target.value)} placeholder="懲罰／處理方式" className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500" />
                       </div>

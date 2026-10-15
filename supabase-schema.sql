@@ -88,7 +88,7 @@ create table if not exists public.crime_records (
   rule_number integer check (rule_number between 1 and 10),
   rule_text text not null default '',
   description text not null,
-  status text not null default '未處理' check (status in ('未處理', '已道歉', '已補償', '已處理')),
+  status text not null default '未處理' check (status in ('未處理', '錫返了')),
   punishment text not null default '',
   recorded_by text not null check (recorded_by in ('Remus', 'Nicole')),
   confirmed_by text not null check (confirmed_by in ('Remus', 'Nicole')),
@@ -105,7 +105,7 @@ create table if not exists public.crime_record_proposals (
   rule_number integer check (rule_number between 1 and 10),
   rule_text text not null default '',
   description text not null,
-  status text not null default '未處理' check (status in ('未處理', '已道歉', '已補償', '已處理')),
+  status text not null default '未處理' check (status in ('未處理', '錫返了')),
   punishment text not null default '',
   proposed_by text not null check (proposed_by in ('Remus', 'Nicole')),
   created_at timestamptz not null default now()

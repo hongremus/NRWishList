@@ -72,7 +72,7 @@ export type HouseRuleProposal = {
   createdAt: string;
 };
 
-export type CrimeStatus = "未處理" | "已道歉" | "已補償" | "已處理";
+export type CrimeStatus = "未處理" | "錫返了";
 
 export type CrimeRecord = {
   id: string;

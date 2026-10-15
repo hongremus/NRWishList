@@ -17,6 +17,13 @@ alter table public.crime_record_proposals
   add column if not exists rule_text text not null default '';
 
 update public.crime_records
+set status = '錫返了'
+where status in ('已道歉', '已補償', '已處理');
+update public.crime_record_proposals
+set status = '錫返了'
+where status in ('已道歉', '已補償', '已處理');
+
+update public.crime_records
 set status = '未處理'
 where status is null;
 
@@ -45,6 +52,9 @@ alter table public.crime_record_proposals
 
 do $$
 begin
+  alter table public.crime_records drop constraint if exists crime_records_status_check;
+  alter table public.crime_record_proposals drop constraint if exists crime_record_proposals_status_check;
+
   if not exists (
     select 1 from pg_constraint
     where conname = 'crime_records_status_check'
@@ -52,7 +62,7 @@ begin
   ) then
     alter table public.crime_records
       add constraint crime_records_status_check
-      check (status in ('未處理', '已道歉', '已補償', '已處理'));
+      check (status in ('未處理', '錫返了'));
   end if;
 
   if not exists (
@@ -62,7 +72,7 @@ begin
   ) then
     alter table public.crime_record_proposals
       add constraint crime_record_proposals_status_check
-      check (status in ('未處理', '已道歉', '已補償', '已處理'));
+      check (status in ('未處理', '錫返了'));
   end if;
 end
 $$;
