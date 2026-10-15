@@ -79,6 +79,7 @@ export type CrimeRecord = {
   incidentDate: string;
   offender: UserRole;
   ruleNumber?: number;
+  ruleText?: string;
   description: string;
   status: CrimeStatus;
   punishment: string;
@@ -94,6 +95,7 @@ export type CrimeRecordProposal = {
   incidentDate: string;
   offender: UserRole;
   ruleNumber?: number;
+  ruleText?: string;
   description: string;
   status: CrimeStatus;
   punishment: string;

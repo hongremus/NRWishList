@@ -103,8 +103,9 @@ export default function CrimeRecordsPage() {
     if (!rejected) setActionError(syncError || "拒絕未成功，請稍後再試。 ");
   }
 
-  function ruleLabel(ruleNumber?: number) {
+  function ruleLabel(ruleNumber?: number, ruleText?: string) {
     if (!ruleNumber) return "其他事件";
+    if (ruleText) return `家規 ${ruleNumber}：${ruleText}`;
     const rule = houseRules.find((item) => item.ruleNumber === ruleNumber);
     return rule?.text ? `家規 ${ruleNumber}：${rule.text}` : `家規 ${ruleNumber}`;
   }
@@ -174,7 +175,7 @@ export default function CrimeRecordsPage() {
                       <span>· {proposal.offender} 被控</span>
                     </div>
                     <p className="mt-2 whitespace-pre-wrap break-words text-sm font-medium leading-6 text-amber-950 dark:text-amber-100">{proposal.description}</p>
-                    <p className="mt-2 text-xs text-amber-700 dark:text-amber-300">{ruleLabel(proposal.ruleNumber)} · {proposal.proposedBy} 提交</p>
+                    <p className="mt-2 text-xs text-amber-700 dark:text-amber-300">{ruleLabel(proposal.ruleNumber, proposal.ruleText)} · {proposal.proposedBy} 提交</p>
                     <p className="mt-2 text-xs font-semibold text-amber-800 dark:text-amber-200">狀態：{proposal.status}{proposal.punishment ? ` · 懲罰：${proposal.punishment}` : ""}</p>
                   </div>
                   <span className="shrink-0 text-xl" aria-hidden="true">⚖️</span>
@@ -208,7 +209,7 @@ export default function CrimeRecordsPage() {
                     <span>· {record.offender} 犯案</span>
                   </div>
                   <p className="mt-2 whitespace-pre-wrap break-words text-sm font-medium leading-6 text-gray-800 dark:text-gray-100">{record.description}</p>
-                  <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">{ruleLabel(record.ruleNumber)} · {record.confirmedBy} 已確認</p>
+                  <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">{ruleLabel(record.ruleNumber, record.ruleText)} · {record.confirmedBy} 已確認</p>
                   {editingRecordId === record.id ? (
                     <div className="mt-3 space-y-2 rounded-xl bg-gray-50 p-3 dark:bg-gray-800">
                       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">

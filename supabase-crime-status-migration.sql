@@ -11,6 +11,10 @@ alter table public.crime_record_proposals
   add column if not exists punishment text default '';
 alter table public.crime_record_proposals
   add column if not exists record_id uuid references public.crime_records(id) on delete cascade;
+alter table public.crime_records
+  add column if not exists rule_text text not null default '';
+alter table public.crime_record_proposals
+  add column if not exists rule_text text not null default '';
 
 update public.crime_records
 set status = '未處理'
