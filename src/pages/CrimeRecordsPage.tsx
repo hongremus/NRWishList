@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useStore } from "../store";
 import { CrimeStatus, UserRole } from "../types";
+import ConfirmModal from "../components/ConfirmModal";
 
 function getToday() {
   const date = new Date();
@@ -35,6 +36,7 @@ export default function CrimeRecordsPage() {
   const [editingPunishment, setEditingPunishment] = useState("");
   const [saving, setSaving] = useState(false);
   const [actionError, setActionError] = useState("");
+  const [pendingStatusSave, setPendingStatusSave] = useState<{ id: string; punishment: string } | null>(null);
 
   const currentRole = currentUser?.role ?? "Remus";
   const isRemus = currentRole === "Remus";
@@ -59,9 +61,18 @@ export default function CrimeRecordsPage() {
   }
 
   async function saveRecordDetails(id: string) {
+    const record = crimeRecords.find((item) => item.id === id);
+    if (editingStatus === "錫返了" && record?.status !== "錫返了") {
+      setPendingStatusSave({ id, punishment: editingPunishment });
+      return;
+    }
+    await submitRecordDetails(id, editingStatus, editingPunishment);
+  }
+
+  async function submitRecordDetails(id: string, status: CrimeStatus, punishment: string) {
     setActionError("");
     setSaving(true);
-    const saved = await submitCrimeRecordUpdate(id, editingStatus, editingPunishment, currentRole);
+    const saved = await submitCrimeRecordUpdate(id, status, punishment, currentRole);
     setSaving(false);
     if (saved) cancelEditing();
     else setActionError(syncError || "更新未成功，請稍後再試。 ");
@@ -237,7 +248,7 @@ export default function CrimeRecordsPage() {
                   ) : (
                     <div className="mt-2 flex flex-wrap items-center gap-2">
                       <p className="text-xs font-semibold text-gray-600 dark:text-gray-300">狀態：{record.status}{record.punishment ? ` · 懲罰：${record.punishment}` : ""}</p>
-                      {record.recordedBy === currentRole && !proposals.some((proposal) => proposal.recordId === record.id) && <button type="button" onClick={() => startEditing(record)} className="rounded-lg bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-600 dark:bg-slate-800 dark:text-slate-200">提出修改</button>}
+                      {record.recordedBy === currentRole && record.status !== "錫返了" && !proposals.some((proposal) => proposal.recordId === record.id) && <button type="button" onClick={() => startEditing(record)} className="rounded-lg bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-600 dark:bg-slate-800 dark:text-slate-200">提出修改</button>}
                       {record.recordedBy === currentRole && proposals.some((proposal) => proposal.recordId === record.id) && <span className="text-xs font-semibold text-amber-700 dark:text-amber-300">等對方確認修改</span>}
                     </div>
                   )}
@@ -247,6 +258,21 @@ export default function CrimeRecordsPage() {
           ))
         )}
       </div>
+
+      <ConfirmModal
+        isOpen={Boolean(pendingStatusSave)}
+        title="確認已經錫返了？"
+        message="一旦確認，呢宗犯罪紀錄之後就唔可以再修改狀態同懲罰。"
+        confirmText="確認錫返了"
+        cancelText="再諗吓"
+        onCancel={() => setPendingStatusSave(null)}
+        onConfirm={() => {
+          if (!pendingStatusSave) return;
+          const { id, punishment } = pendingStatusSave;
+          setPendingStatusSave(null);
+          void submitRecordDetails(id, "錫返了", punishment);
+        }}
+      />
     </section>
   );
 }
