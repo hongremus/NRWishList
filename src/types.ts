@@ -90,6 +90,7 @@ export type CrimeRecord = {
 
 export type CrimeRecordProposal = {
   id: string;
+  recordId?: string;
   incidentDate: string;
   offender: UserRole;
   ruleNumber?: number;

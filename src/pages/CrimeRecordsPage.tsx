@@ -23,9 +23,9 @@ export default function CrimeRecordsPage() {
   const proposals = useStore((state) => state.crimeRecordProposals);
   const syncError = useStore((state) => state.syncError);
   const submitProposal = useStore((state) => state.submitCrimeRecordProposal);
+  const submitCrimeRecordUpdate = useStore((state) => state.submitCrimeRecordUpdate);
   const confirmProposal = useStore((state) => state.confirmCrimeRecordProposal);
   const rejectProposal = useStore((state) => state.rejectCrimeRecordProposal);
-  const updateCrimeRecord = useStore((state) => state.updateCrimeRecord);
   const [showForm, setShowForm] = useState(false);
   const [incidentDate, setIncidentDate] = useState(getToday);
   const [ruleNumber, setRuleNumber] = useState("");
@@ -61,7 +61,7 @@ export default function CrimeRecordsPage() {
   async function saveRecordDetails(id: string) {
     setActionError("");
     setSaving(true);
-    const saved = await updateCrimeRecord(id, editingStatus, editingPunishment, currentRole);
+    const saved = await submitCrimeRecordUpdate(id, editingStatus, editingPunishment, currentRole);
     setSaving(false);
     if (saved) cancelEditing();
     else setActionError(syncError || "更新未成功，請稍後再試。 ");
@@ -164,12 +164,13 @@ export default function CrimeRecordsPage() {
           <h2 className="px-1 text-sm font-black text-gray-700 dark:text-gray-200">待確認案件</h2>
           {proposals.map((proposal) => {
             const canConfirm = proposal.proposedBy !== currentRole;
+            const isUpdate = Boolean(proposal.recordId);
             return (
               <article key={proposal.id} className="rounded-2xl border border-amber-200 bg-amber-50 p-4 shadow-sm dark:border-amber-900/50 dark:bg-amber-900/20">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-amber-800 dark:text-amber-200">
-                      <span>{formatDate(proposal.incidentDate)}</span>
+                      <span>{isUpdate ? "修改犯罪紀錄" : formatDate(proposal.incidentDate)}</span>
                       <span>· {proposal.offender} 被控</span>
                     </div>
                     <p className="mt-2 whitespace-pre-wrap break-words text-sm font-medium leading-6 text-amber-950 dark:text-amber-100">{proposal.description}</p>
@@ -227,7 +228,8 @@ export default function CrimeRecordsPage() {
                   ) : (
                     <div className="mt-2 flex flex-wrap items-center gap-2">
                       <p className="text-xs font-semibold text-gray-600 dark:text-gray-300">狀態：{record.status}{record.punishment ? ` · 懲罰：${record.punishment}` : ""}</p>
-                      {record.recordedBy === currentRole && <button type="button" onClick={() => startEditing(record)} className="rounded-lg bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-600 dark:bg-gray-800 dark:text-gray-300">編輯狀態／懲罰</button>}
+                      {record.recordedBy === currentRole && !proposals.some((proposal) => proposal.recordId === record.id) && <button type="button" onClick={() => startEditing(record)} className="rounded-lg bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-600 dark:bg-gray-800 dark:text-gray-300">提出修改</button>}
+                      {record.recordedBy === currentRole && proposals.some((proposal) => proposal.recordId === record.id) && <span className="text-xs font-semibold text-amber-700 dark:text-amber-300">等對方確認修改</span>}
                     </div>
                   )}
                 </div>

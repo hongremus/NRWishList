@@ -227,6 +227,7 @@ function fromDatabaseCrimeRecord(row: Record<string, unknown>): CrimeRecord {
 function fromDatabaseCrimeRecordProposal(row: Record<string, unknown>): CrimeRecordProposal {
   return {
     id: String(row.id),
+    recordId: typeof row.record_id === "string" ? row.record_id : undefined,
     incidentDate: String(row.incident_date),
     offender: row.offender === "Nicole" ? "Nicole" : "Remus",
     ruleNumber: row.rule_number == null ? undefined : Number(row.rule_number),
@@ -292,7 +293,7 @@ interface AppState {
   submitCrimeRecordProposal: (proposal: Omit<CrimeRecordProposal, "id" | "createdAt" | "proposedBy">, proposedBy: UserRole) => Promise<boolean>;
   confirmCrimeRecordProposal: (proposalId: string, confirmedBy: UserRole) => Promise<boolean>;
   rejectCrimeRecordProposal: (proposalId: string) => Promise<boolean>;
-  updateCrimeRecord: (id: string, status: CrimeStatus, punishment: string, updatedBy: UserRole) => Promise<boolean>;
+  submitCrimeRecordUpdate: (id: string, status: CrimeStatus, punishment: string, proposedBy: UserRole) => Promise<boolean>;
 }
 
 export const useStore = create<AppState>()(
@@ -885,6 +886,43 @@ export const useStore = create<AppState>()(
           return false;
         }
 
+        if (proposal.recordId) {
+          const existingRecord = get().crimeRecords.find((item) => item.id === proposal.recordId);
+          if (!existingRecord || existingRecord.recordedBy !== proposal.proposedBy) {
+            set({ syncError: "無法確認呢項犯罪紀錄修改。" });
+            return false;
+          }
+          if (!supabase) {
+            set((state) => ({
+              crimeRecords: state.crimeRecords.map((item) => item.id === proposal.recordId
+                ? { ...item, status: proposal.status, punishment: proposal.punishment }
+                : item),
+              crimeRecordProposals: state.crimeRecordProposals.filter((item) => item.id !== proposalId),
+            }));
+            return true;
+          }
+          const { error: updateError } = await supabase
+            .from("crime_records")
+            .update({ status: proposal.status, punishment: proposal.punishment })
+            .eq("id", proposal.recordId)
+            .eq("couple_id", COUPLE_ID);
+          if (updateError) {
+            set({ syncError: `確認犯罪紀錄修改失敗：${updateError.message}` });
+            return false;
+          }
+          const { error: updateDeleteError } = await supabase
+            .from("crime_record_proposals")
+            .delete()
+            .eq("id", proposalId)
+            .eq("couple_id", COUPLE_ID);
+          if (updateDeleteError) {
+            set({ syncError: `清除待確認修改失敗：${updateDeleteError.message}` });
+            return false;
+          }
+          await get().loadCrimeRecords();
+          return true;
+        }
+
         const record: CrimeRecord = {
           id: createUuid(),
           incidentDate: proposal.incidentDate,
@@ -954,31 +992,46 @@ export const useStore = create<AppState>()(
         await get().loadCrimeRecords();
         return true;
       },
-      updateCrimeRecord: async (id, status, punishment, updatedBy) => {
+      submitCrimeRecordUpdate: async (id, status, punishment, proposedBy) => {
         const record = get().crimeRecords.find((item) => item.id === id);
-        if (!record || record.recordedBy !== updatedBy) {
+        if (!record || record.recordedBy !== proposedBy) {
           set({ syncError: "只有提交犯罪紀錄嘅一方可以修改狀態同懲罰。" });
           return false;
         }
-        const cleanPunishment = punishment.trim();
+        const proposal: CrimeRecordProposal = {
+          id: createUuid(),
+          recordId: id,
+          incidentDate: record.incidentDate,
+          offender: record.offender,
+          ruleNumber: record.ruleNumber,
+          description: record.description,
+          status,
+          punishment: punishment.trim(),
+          proposedBy,
+          createdAt: new Date().toISOString(),
+        };
         if (!supabase) {
-          set((state) => ({
-            crimeRecords: state.crimeRecords.map((record) => record.id === id
-              ? { ...record, status, punishment: cleanPunishment }
-              : record),
-          }));
+          set((state) => ({ crimeRecordProposals: [proposal, ...state.crimeRecordProposals] }));
           return true;
         }
-        const { error } = await supabase
-          .from("crime_records")
-          .update({ status, punishment: cleanPunishment })
-          .eq("id", id)
-          .eq("recorded_by", updatedBy)
-          .eq("couple_id", COUPLE_ID);
+        const { error } = await supabase.from("crime_record_proposals").insert({
+          id: proposal.id,
+          couple_id: COUPLE_ID,
+          record_id: proposal.recordId,
+          incident_date: proposal.incidentDate,
+          offender: proposal.offender,
+          rule_number: proposal.ruleNumber ?? null,
+          description: proposal.description,
+          status: proposal.status,
+          punishment: proposal.punishment,
+          proposed_by: proposal.proposedBy,
+          created_at: proposal.createdAt,
+        });
         if (error) {
-          set({ syncError: `更新犯罪紀錄失敗：${error.message}` });
+          set({ syncError: `提交犯罪紀錄修改失敗：${error.message}` });
           return false;
         }
+        set((state) => ({ crimeRecordProposals: [proposal, ...state.crimeRecordProposals], syncError: null }));
         await get().loadCrimeRecords();
         return true;
       },

@@ -98,6 +98,7 @@ create table if not exists public.crime_records (
 create table if not exists public.crime_record_proposals (
   id uuid primary key default gen_random_uuid(),
   couple_id text not null default 'remus-nicole',
+  record_id uuid references public.crime_records(id) on delete cascade,
   incident_date date not null,
   offender text not null check (offender in ('Remus', 'Nicole')),
   rule_number integer check (rule_number between 1 and 10),
@@ -117,6 +118,8 @@ alter table public.crime_record_proposals
   add column if not exists status text not null default '未處理';
 alter table public.crime_record_proposals
   add column if not exists punishment text not null default '';
+alter table public.crime_record_proposals
+  add column if not exists record_id uuid references public.crime_records(id) on delete cascade;
 
 create index if not exists wishes_couple_created_at_idx
   on public.wishes (couple_id, created_at desc);
