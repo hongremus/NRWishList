@@ -61,7 +61,7 @@ export default function CrimeRecordsPage() {
   async function saveRecordDetails(id: string) {
     setActionError("");
     setSaving(true);
-    const saved = await updateCrimeRecord(id, editingStatus, editingPunishment);
+    const saved = await updateCrimeRecord(id, editingStatus, editingPunishment, currentRole);
     setSaving(false);
     if (saved) cancelEditing();
     else setActionError(syncError || "更新未成功，請稍後再試。 ");
@@ -227,7 +227,7 @@ export default function CrimeRecordsPage() {
                   ) : (
                     <div className="mt-2 flex flex-wrap items-center gap-2">
                       <p className="text-xs font-semibold text-gray-600 dark:text-gray-300">狀態：{record.status}{record.punishment ? ` · 懲罰：${record.punishment}` : ""}</p>
-                      <button type="button" onClick={() => startEditing(record)} className="rounded-lg bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-600 dark:bg-gray-800 dark:text-gray-300">編輯狀態／懲罰</button>
+                      {record.recordedBy === currentRole && <button type="button" onClick={() => startEditing(record)} className="rounded-lg bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-600 dark:bg-gray-800 dark:text-gray-300">編輯狀態／懲罰</button>}
                     </div>
                   )}
                 </div>

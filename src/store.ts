@@ -292,7 +292,7 @@ interface AppState {
   submitCrimeRecordProposal: (proposal: Omit<CrimeRecordProposal, "id" | "createdAt" | "proposedBy">, proposedBy: UserRole) => Promise<boolean>;
   confirmCrimeRecordProposal: (proposalId: string, confirmedBy: UserRole) => Promise<boolean>;
   rejectCrimeRecordProposal: (proposalId: string) => Promise<boolean>;
-  updateCrimeRecord: (id: string, status: CrimeStatus, punishment: string) => Promise<boolean>;
+  updateCrimeRecord: (id: string, status: CrimeStatus, punishment: string, updatedBy: UserRole) => Promise<boolean>;
 }
 
 export const useStore = create<AppState>()(
@@ -954,7 +954,12 @@ export const useStore = create<AppState>()(
         await get().loadCrimeRecords();
         return true;
       },
-      updateCrimeRecord: async (id, status, punishment) => {
+      updateCrimeRecord: async (id, status, punishment, updatedBy) => {
+        const record = get().crimeRecords.find((item) => item.id === id);
+        if (!record || record.recordedBy !== updatedBy) {
+          set({ syncError: "只有提交犯罪紀錄嘅一方可以修改狀態同懲罰。" });
+          return false;
+        }
         const cleanPunishment = punishment.trim();
         if (!supabase) {
           set((state) => ({
@@ -968,6 +973,7 @@ export const useStore = create<AppState>()(
           .from("crime_records")
           .update({ status, punishment: cleanPunishment })
           .eq("id", id)
+          .eq("recorded_by", updatedBy)
           .eq("couple_id", COUPLE_ID);
         if (error) {
           set({ syncError: `更新犯罪紀錄失敗：${error.message}` });
