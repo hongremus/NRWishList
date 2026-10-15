@@ -26,6 +26,8 @@ export default function HouseRulesPage() {
   const pendingApprovalCount = proposals.filter((proposal) =>
     isRemus ? !proposal.remusApproved : !proposal.nicoleApproved,
   ).length;
+  const crimeRecordProposals = useStore((state) => state.crimeRecordProposals);
+  const pendingCrimeRecordCount = crimeRecordProposals.filter((proposal) => proposal.proposedBy !== currentRole).length;
 
   function openEditor(ruleNumber: number) {
     const rule = houseRules.find((item) => item.ruleNumber === ruleNumber);
@@ -79,6 +81,14 @@ export default function HouseRulesPage() {
         </div>
       </div>
 
+      {(pendingApprovalCount > 0 || pendingCrimeRecordCount > 0) && (
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm font-semibold text-amber-800 dark:border-amber-900/50 dark:bg-amber-900/20 dark:text-amber-200">
+          <span aria-hidden="true">🔔</span>
+          {pendingApprovalCount > 0 && <span>有 {pendingApprovalCount} 條家規修改等你確認</span>}
+          {pendingCrimeRecordCount > 0 && <span>有 {pendingCrimeRecordCount} 宗犯罪紀錄等你確認</span>}
+        </div>
+      )}
+
       <div className="grid grid-cols-2 gap-1 rounded-2xl bg-gray-100 p-1 dark:bg-gray-800">
         <button
           type="button"
@@ -97,12 +107,6 @@ export default function HouseRulesPage() {
       </div>
 
       {activeSection === "crime" ? <CrimeRecordsPage /> : <div className="space-y-2">
-        {pendingApprovalCount > 0 && (
-          <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm font-semibold text-amber-800 dark:border-amber-900/50 dark:bg-amber-900/20 dark:text-amber-200">
-            <span aria-hidden="true">🔔</span>
-            <span>有 {pendingApprovalCount} 條家規等你確認</span>
-          </div>
-        )}
         {(actionError || syncError) && (
           <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs leading-5 text-red-700 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-200">
             {actionError || syncError}
