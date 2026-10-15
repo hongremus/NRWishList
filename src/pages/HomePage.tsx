@@ -166,7 +166,7 @@ export default function HomePage() {
           </div>
         )}
 
-        <div className="mb-3 flex gap-1 rounded-2xl bg-gray-100 p-1 dark:bg-gray-800">
+        <div className="mb-3 grid grid-cols-2 gap-1 rounded-2xl bg-gray-100 p-1 sm:grid-cols-4 dark:bg-gray-800">
           <button
             onClick={() => setActivePage("wishes")}
             className={`flex-1 rounded-xl px-3 py-2 text-sm font-bold transition-all ${
