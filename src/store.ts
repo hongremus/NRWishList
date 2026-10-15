@@ -677,6 +677,10 @@ export const useStore = create<AppState>()(
           set({ syncError: `提交家規修改失敗：${error.message}` });
           return false;
         }
+        set((state) => ({
+          houseRuleProposals: [...state.houseRuleProposals, proposal],
+          syncError: null,
+        }));
         await get().loadHouseRules();
         return true;
       },

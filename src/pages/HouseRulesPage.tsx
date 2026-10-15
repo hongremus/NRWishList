@@ -10,12 +10,14 @@ export default function HouseRulesPage() {
   const currentUser = useStore((state) => state.currentUser);
   const houseRules = useStore((state) => state.houseRules);
   const proposals = useStore((state) => state.houseRuleProposals);
+  const syncError = useStore((state) => state.syncError);
   const submitProposal = useStore((state) => state.submitHouseRuleProposal);
   const approveProposal = useStore((state) => state.approveHouseRuleProposal);
   const rejectProposal = useStore((state) => state.rejectHouseRuleProposal);
   const [editingRuleNumber, setEditingRuleNumber] = useState<number | null>(null);
   const [draftText, setDraftText] = useState("");
   const [saving, setSaving] = useState(false);
+  const [actionError, setActionError] = useState("");
 
   const currentRole = currentUser?.role ?? "Remus";
   const isRemus = currentRole === "Remus";
@@ -34,19 +36,26 @@ export default function HouseRulesPage() {
   async function saveProposal(ruleNumber: number) {
     const rule = houseRules.find((item) => item.ruleNumber === ruleNumber);
     if (!draftText.trim() && !getRuleText(rule).trim()) return;
+    setActionError("");
     setSaving(true);
     const saved = await submitProposal(ruleNumber, draftText, currentRole);
     setSaving(false);
-    if (saved) closeEditor();
+    if (saved) {
+      closeEditor();
+    } else {
+      setActionError(syncError || "提交未成功，請檢查網絡或資料庫設定後再試。 ");
+    }
   }
 
   async function handleApprove(proposalId: string) {
+    setActionError("");
     setSaving(true);
     await approveProposal(proposalId, currentRole);
     setSaving(false);
   }
 
   async function handleReject(proposalId: string) {
+    setActionError("");
     setSaving(true);
     await rejectProposal(proposalId);
     setSaving(false);
@@ -66,6 +75,11 @@ export default function HouseRulesPage() {
       </div>
 
       <div className="space-y-2">
+        {(actionError || syncError) && (
+          <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs leading-5 text-red-700 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-200">
+            {actionError || syncError}
+          </div>
+        )}
         {Array.from({ length: 10 }, (_, index) => index + 1).map((ruleNumber) => {
           const rule = houseRules.find((item) => item.ruleNumber === ruleNumber);
           const proposal = proposals.find((item) => item.ruleNumber === ruleNumber);
