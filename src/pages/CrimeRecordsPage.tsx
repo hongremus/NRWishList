@@ -25,12 +25,14 @@ export default function CrimeRecordsPage() {
   const submitProposal = useStore((state) => state.submitCrimeRecordProposal);
   const confirmProposal = useStore((state) => state.confirmCrimeRecordProposal);
   const rejectProposal = useStore((state) => state.rejectCrimeRecordProposal);
+  const updateCrimeRecord = useStore((state) => state.updateCrimeRecord);
   const [showForm, setShowForm] = useState(false);
   const [incidentDate, setIncidentDate] = useState(getToday);
   const [ruleNumber, setRuleNumber] = useState("");
   const [description, setDescription] = useState("");
-  const [status, setStatus] = useState<CrimeStatus>("未處理");
-  const [punishment, setPunishment] = useState("");
+  const [editingRecordId, setEditingRecordId] = useState<string | null>(null);
+  const [editingStatus, setEditingStatus] = useState<CrimeStatus>("未處理");
+  const [editingPunishment, setEditingPunishment] = useState("");
   const [saving, setSaving] = useState(false);
   const [actionError, setActionError] = useState("");
 
@@ -42,9 +44,27 @@ export default function CrimeRecordsPage() {
     setIncidentDate(getToday());
     setRuleNumber("");
     setDescription("");
-    setStatus("未處理");
-    setPunishment("");
     setShowForm(false);
+  }
+
+  function startEditing(record: typeof crimeRecords[number]) {
+    setEditingRecordId(record.id);
+    setEditingStatus(record.status);
+    setEditingPunishment(record.punishment);
+  }
+
+  function cancelEditing() {
+    setEditingRecordId(null);
+    setEditingPunishment("");
+  }
+
+  async function saveRecordDetails(id: string) {
+    setActionError("");
+    setSaving(true);
+    const saved = await updateCrimeRecord(id, editingStatus, editingPunishment);
+    setSaving(false);
+    if (saved) cancelEditing();
+    else setActionError(syncError || "更新未成功，請稍後再試。 ");
   }
 
   async function submitCrime() {
@@ -56,8 +76,8 @@ export default function CrimeRecordsPage() {
       offender,
       ruleNumber: ruleNumber ? Number(ruleNumber) : undefined,
       description,
-      status,
-      punishment: punishment.trim(),
+      status: "未處理",
+      punishment: "",
     }, currentRole);
     setSaving(false);
     if (saved) {
@@ -133,21 +153,6 @@ export default function CrimeRecordsPage() {
             發生咩事
             <textarea value={description} onChange={(event) => setDescription(event.target.value)} rows={4} placeholder="例如：偷食咗對方留低嘅蛋糕，仲扮唔知。" className="mt-1.5 w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm leading-6 dark:border-gray-700 dark:bg-gray-800 dark:text-white" />
           </label>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <label className="text-xs font-semibold text-gray-600 dark:text-gray-300">
-              案件狀態
-              <select value={status} onChange={(event) => setStatus(event.target.value as CrimeStatus)} className="mt-1.5 w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white">
-                <option value="未處理">未處理</option>
-                <option value="已道歉">已道歉</option>
-                <option value="已補償">已補償</option>
-                <option value="已處理">已處理</option>
-              </select>
-            </label>
-            <label className="text-xs font-semibold text-gray-600 dark:text-gray-300">
-              懲罰／處理方式
-              <input value={punishment} onChange={(event) => setPunishment(event.target.value)} placeholder="例如：請對方飲品一杯" className="mt-1.5 w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white" />
-            </label>
-          </div>
           <button type="button" disabled={saving || !incidentDate || !description.trim()} onClick={() => void submitCrime()} className={`w-full rounded-xl py-2.5 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-50 ${isRemus ? "bg-blue-500" : "bg-pink-500"}`}>
             提交，等對方確認
           </button>
@@ -203,7 +208,28 @@ export default function CrimeRecordsPage() {
                   </div>
                   <p className="mt-2 whitespace-pre-wrap break-words text-sm font-medium leading-6 text-gray-800 dark:text-gray-100">{record.description}</p>
                   <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">{ruleLabel(record.ruleNumber)} · {record.confirmedBy} 已確認</p>
-                  <p className="mt-2 text-xs font-semibold text-gray-600 dark:text-gray-300">狀態：{record.status}{record.punishment ? ` · 懲罰：${record.punishment}` : ""}</p>
+                  {editingRecordId === record.id ? (
+                    <div className="mt-3 space-y-2 rounded-xl bg-gray-50 p-3 dark:bg-gray-800">
+                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                        <select value={editingStatus} onChange={(event) => setEditingStatus(event.target.value as CrimeStatus)} className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+                          <option value="未處理">未處理</option>
+                          <option value="已道歉">已道歉</option>
+                          <option value="已補償">已補償</option>
+                          <option value="已處理">已處理</option>
+                        </select>
+                        <input value={editingPunishment} onChange={(event) => setEditingPunishment(event.target.value)} placeholder="懲罰／處理方式" className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white" />
+                      </div>
+                      <div className="flex gap-2">
+                        <button type="button" disabled={saving} onClick={() => void saveRecordDetails(record.id)} className={`rounded-lg px-3 py-1.5 text-xs font-bold text-white disabled:opacity-50 ${isRemus ? "bg-blue-500" : "bg-pink-500"}`}>儲存</button>
+                        <button type="button" disabled={saving} onClick={cancelEditing} className="rounded-lg bg-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-600 disabled:opacity-50 dark:bg-gray-700 dark:text-gray-300">取消</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                      <p className="text-xs font-semibold text-gray-600 dark:text-gray-300">狀態：{record.status}{record.punishment ? ` · 懲罰：${record.punishment}` : ""}</p>
+                      <button type="button" onClick={() => startEditing(record)} className="rounded-lg bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-600 dark:bg-gray-800 dark:text-gray-300">編輯狀態／懲罰</button>
+                    </div>
+                  )}
                 </div>
               </div>
             </article>

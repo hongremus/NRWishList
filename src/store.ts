@@ -292,6 +292,7 @@ interface AppState {
   submitCrimeRecordProposal: (proposal: Omit<CrimeRecordProposal, "id" | "createdAt" | "proposedBy">, proposedBy: UserRole) => Promise<boolean>;
   confirmCrimeRecordProposal: (proposalId: string, confirmedBy: UserRole) => Promise<boolean>;
   rejectCrimeRecordProposal: (proposalId: string) => Promise<boolean>;
+  updateCrimeRecord: (id: string, status: CrimeStatus, punishment: string) => Promise<boolean>;
 }
 
 export const useStore = create<AppState>()(
@@ -948,6 +949,28 @@ export const useStore = create<AppState>()(
           .eq("couple_id", COUPLE_ID);
         if (error) {
           set({ syncError: `拒絕犯罪紀錄失敗：${error.message}` });
+          return false;
+        }
+        await get().loadCrimeRecords();
+        return true;
+      },
+      updateCrimeRecord: async (id, status, punishment) => {
+        const cleanPunishment = punishment.trim();
+        if (!supabase) {
+          set((state) => ({
+            crimeRecords: state.crimeRecords.map((record) => record.id === id
+              ? { ...record, status, punishment: cleanPunishment }
+              : record),
+          }));
+          return true;
+        }
+        const { error } = await supabase
+          .from("crime_records")
+          .update({ status, punishment: cleanPunishment })
+          .eq("id", id)
+          .eq("couple_id", COUPLE_ID);
+        if (error) {
+          set({ syncError: `更新犯罪紀錄失敗：${error.message}` });
           return false;
         }
         await get().loadCrimeRecords();

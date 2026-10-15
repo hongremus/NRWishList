@@ -160,6 +160,7 @@ drop policy if exists "shared couple can update house rule proposals" on public.
 drop policy if exists "shared couple can delete house rule proposals" on public.house_rule_proposals;
 drop policy if exists "shared couple can read crime records" on public.crime_records;
 drop policy if exists "shared couple can insert crime records" on public.crime_records;
+drop policy if exists "shared couple can update crime records" on public.crime_records;
 drop policy if exists "shared couple can read crime record proposals" on public.crime_record_proposals;
 drop policy if exists "shared couple can insert crime record proposals" on public.crime_record_proposals;
 drop policy if exists "shared couple can delete crime record proposals" on public.crime_record_proposals;
@@ -213,6 +214,9 @@ create policy "shared couple can read crime records" on public.crime_records
   for select to anon, authenticated using (couple_id = 'remus-nicole');
 create policy "shared couple can insert crime records" on public.crime_records
   for insert to anon, authenticated with check (couple_id = 'remus-nicole');
+create policy "shared couple can update crime records" on public.crime_records
+  for update to anon, authenticated
+  using (couple_id = 'remus-nicole') with check (couple_id = 'remus-nicole');
 
 create policy "shared couple can read crime record proposals" on public.crime_record_proposals
   for select to anon, authenticated using (couple_id = 'remus-nicole');
