@@ -52,3 +52,22 @@ export type Wish = {
   completedCount: number;
   history: WishHistory[];
 };
+
+export type HouseRule = {
+  id: string;
+  ruleNumber: number;
+  text: string;
+  updatedBy?: UserRole;
+  updatedAt?: string;
+};
+
+export type HouseRuleProposal = {
+  id: string;
+  ruleNumber: number;
+  currentText: string;
+  proposedText: string;
+  proposedBy: UserRole;
+  remusApproved: boolean;
+  nicoleApproved: boolean;
+  createdAt: string;
+};

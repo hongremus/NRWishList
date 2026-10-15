@@ -1,6 +1,6 @@
 import create from "zustand";
 import { persist } from "zustand/middleware";
-import { CalendarEvent, User, Wish, WishHistory } from "./types";
+import { CalendarEvent, HouseRule, HouseRuleProposal, User, UserRole, Wish, WishHistory } from "./types";
 import { supabase } from "./supabase";
 
 const COUPLE_ID = "remus-nicole";
@@ -166,6 +166,29 @@ function fromDatabaseCalendarEvent(row: Record<string, unknown>): CalendarEvent 
   };
 }
 
+function fromDatabaseHouseRule(row: Record<string, unknown>): HouseRule {
+  return {
+    id: String(row.id),
+    ruleNumber: Number(row.rule_number),
+    text: typeof row.text === "string" ? row.text : "",
+    updatedBy: row.updated_by === "Nicole" ? "Nicole" : row.updated_by === "Remus" ? "Remus" : undefined,
+    updatedAt: typeof row.updated_at === "string" ? row.updated_at : undefined,
+  };
+}
+
+function fromDatabaseHouseRuleProposal(row: Record<string, unknown>): HouseRuleProposal {
+  return {
+    id: String(row.id),
+    ruleNumber: Number(row.rule_number),
+    currentText: typeof row.current_text === "string" ? row.current_text : "",
+    proposedText: typeof row.proposed_text === "string" ? row.proposed_text : "",
+    proposedBy: row.proposed_by === "Nicole" ? "Nicole" : "Remus",
+    remusApproved: Boolean(row.remus_approved),
+    nicoleApproved: Boolean(row.nicole_approved),
+    createdAt: String(row.created_at),
+  };
+}
+
 function toDatabaseCalendarEvent(event: CalendarEvent) {
   return {
     id: event.id,
@@ -188,6 +211,8 @@ interface AppState {
   currentUser: User | null;
   wishes: Wish[];
   calendarEvents: CalendarEvent[];
+  houseRules: HouseRule[];
+  houseRuleProposals: HouseRuleProposal[];
   loadedCalendarMonths: string[];
   availableTags: string[];
   syncError: string | null;
@@ -197,6 +222,7 @@ interface AppState {
   loadRemoteData: (showLoading?: boolean) => Promise<void>;
   ensureCalendarMonths: (monthKey: string, showLoading?: boolean) => Promise<void>;
   refreshCalendarEvents: () => Promise<void>;
+  loadHouseRules: () => Promise<void>;
   subscribeToRemoteData: () => () => void;
   addWish: (w: Wish) => void;
   updateWish: (w: Wish) => void;
@@ -208,6 +234,9 @@ interface AppState {
   addTag: (tag: string) => void;
   deleteTag: (tag: string) => void;
   lockExpiredHistories: () => void;
+  submitHouseRuleProposal: (ruleNumber: number, text: string, proposedBy: UserRole) => Promise<boolean>;
+  approveHouseRuleProposal: (proposalId: string, approvedBy: UserRole) => Promise<boolean>;
+  rejectHouseRuleProposal: (proposalId: string) => Promise<boolean>;
 }
 
 export const useStore = create<AppState>()(
@@ -220,6 +249,12 @@ export const useStore = create<AppState>()(
       currentUser: null,
       wishes: [],
       calendarEvents: [],
+      houseRules: Array.from({ length: 10 }, (_, index) => ({
+        id: `local-rule-${index + 1}`,
+        ruleNumber: index + 1,
+        text: "",
+      })),
+      houseRuleProposals: [],
       loadedCalendarMonths: [],
       availableTags: defaultTags,
       syncError: null,
@@ -295,6 +330,36 @@ export const useStore = create<AppState>()(
           throw error;
         }
       },
+      loadHouseRules: async () => {
+        if (!supabase) return;
+
+        try {
+          const [{ data: ruleRows, error: ruleError }, { data: proposalRows, error: proposalError }] = await Promise.all([
+            supabase.from("house_rules").select("*").eq("couple_id", COUPLE_ID).order("rule_number"),
+            supabase.from("house_rule_proposals").select("*").eq("couple_id", COUPLE_ID).order("created_at"),
+          ]);
+          if (ruleError) throw ruleError;
+          if (proposalError) throw proposalError;
+
+          const rules = Array.from({ length: 10 }, (_, index) => {
+            const remoteRule = (ruleRows ?? [])
+              .map((row) => fromDatabaseHouseRule(row as Record<string, unknown>))
+              .find((rule) => rule.ruleNumber === index + 1);
+            return remoteRule ?? {
+              id: `local-rule-${index + 1}`,
+              ruleNumber: index + 1,
+              text: "",
+            };
+          });
+          set({
+            houseRules: rules,
+            houseRuleProposals: (proposalRows ?? []).map((row) => fromDatabaseHouseRuleProposal(row as Record<string, unknown>)),
+          });
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          set({ syncError: `讀取家規失敗：${message}` });
+        }
+      },
       loadRemoteData: async (showLoading = false) => {
         if (!supabase) return;
 
@@ -347,6 +412,8 @@ export const useStore = create<AppState>()(
             syncError: null,
           });
 
+          await get().loadHouseRules();
+
           if (showLoading) {
             await get().refreshCalendarEvents();
           } else {
@@ -377,6 +444,12 @@ export const useStore = create<AppState>()(
             void get().refreshCalendarEvents().catch((error) => {
               console.error("Unable to refresh calendar data", error);
             });
+          })
+          .on("postgres_changes", { event: "*", schema: "public", table: "house_rules", filter: `couple_id=eq.${COUPLE_ID}` }, () => {
+            void get().loadHouseRules();
+          })
+          .on("postgres_changes", { event: "*", schema: "public", table: "house_rule_proposals", filter: `couple_id=eq.${COUPLE_ID}` }, () => {
+            void get().loadHouseRules();
           })
           .subscribe();
 
@@ -561,6 +634,120 @@ export const useStore = create<AppState>()(
             else void get().loadRemoteData();
           });
         }
+      },
+      submitHouseRuleProposal: async (ruleNumber, text, proposedBy) => {
+        const trimmedText = text.trim();
+        const currentRule = get().houseRules.find((rule) => rule.ruleNumber === ruleNumber);
+        if (ruleNumber < 1 || ruleNumber > 10 || (!trimmedText && !currentRule?.text.trim())) return false;
+        if (get().houseRuleProposals.some((proposal) => proposal.ruleNumber === ruleNumber)) {
+          set({ syncError: "呢條家規已經有待確認修改。" });
+          return false;
+        }
+
+        const proposal: HouseRuleProposal = {
+          id: typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+            ? crypto.randomUUID()
+            : `rule-proposal-${Date.now()}`,
+          ruleNumber,
+          currentText: currentRule?.text ?? "",
+          proposedText: trimmedText,
+          proposedBy,
+          remusApproved: proposedBy === "Remus",
+          nicoleApproved: proposedBy === "Nicole",
+          createdAt: new Date().toISOString(),
+        };
+
+        if (!supabase) {
+          set((state) => ({ houseRuleProposals: [...state.houseRuleProposals, proposal] }));
+          return true;
+        }
+
+        const { error } = await supabase.from("house_rule_proposals").insert({
+          id: proposal.id,
+          couple_id: COUPLE_ID,
+          rule_number: proposal.ruleNumber,
+          current_text: proposal.currentText,
+          proposed_text: proposal.proposedText,
+          proposed_by: proposal.proposedBy,
+          remus_approved: proposal.remusApproved,
+          nicole_approved: proposal.nicoleApproved,
+          created_at: proposal.createdAt,
+        });
+        if (error) {
+          set({ syncError: `提交家規修改失敗：${error.message}` });
+          return false;
+        }
+        await get().loadHouseRules();
+        return true;
+      },
+      approveHouseRuleProposal: async (proposalId, approvedBy) => {
+        const proposal = get().houseRuleProposals.find((item) => item.id === proposalId);
+        if (!proposal) return false;
+        const nextProposal = {
+          ...proposal,
+          remusApproved: proposal.remusApproved || approvedBy === "Remus",
+          nicoleApproved: proposal.nicoleApproved || approvedBy === "Nicole",
+        };
+        const isFullyApproved = nextProposal.remusApproved && nextProposal.nicoleApproved;
+
+        if (!supabase) {
+          set((state) => ({
+            houseRules: isFullyApproved
+              ? state.houseRules.map((rule) => rule.ruleNumber === proposal.ruleNumber
+                ? { ...rule, text: proposal.proposedText, updatedBy: approvedBy, updatedAt: new Date().toISOString() }
+                : rule)
+              : state.houseRules,
+            houseRuleProposals: isFullyApproved
+              ? state.houseRuleProposals.filter((item) => item.id !== proposalId)
+              : state.houseRuleProposals.map((item) => item.id === proposalId ? nextProposal : item),
+          }));
+          return true;
+        }
+
+        const { error: proposalError } = await supabase
+          .from("house_rule_proposals")
+          .update({
+            remus_approved: nextProposal.remusApproved,
+            nicole_approved: nextProposal.nicoleApproved,
+          })
+          .eq("id", proposalId)
+          .eq("couple_id", COUPLE_ID);
+        if (proposalError) {
+          set({ syncError: `確認家規修改失敗：${proposalError.message}` });
+          return false;
+        }
+
+        if (isFullyApproved) {
+          const { error: ruleError } = await supabase
+            .from("house_rules")
+            .update({ text: proposal.proposedText, updated_by: approvedBy, updated_at: new Date().toISOString() })
+            .eq("rule_number", proposal.ruleNumber)
+            .eq("couple_id", COUPLE_ID);
+          if (ruleError) {
+            set({ syncError: `套用家規修改失敗：${ruleError.message}` });
+            return false;
+          }
+          await supabase.from("house_rule_proposals").delete().eq("id", proposalId).eq("couple_id", COUPLE_ID);
+        }
+        await get().loadHouseRules();
+        return true;
+      },
+      rejectHouseRuleProposal: async (proposalId) => {
+        if (!supabase) {
+          set((state) => ({ houseRuleProposals: state.houseRuleProposals.filter((proposal) => proposal.id !== proposalId) }));
+          return true;
+        }
+        const { error } = await supabase
+          .from("house_rule_proposals")
+          .delete()
+          .eq("id", proposalId)
+          .eq("couple_id", COUPLE_ID);
+        if (error) {
+          set({ syncError: `拒絕家規修改失敗：${error.message}` });
+          return false;
+        }
+        await get().loadHouseRules();
+        return true;
       },
       lockExpiredHistories: () => {
         const TWO_DAYS_MS = 2 * 24 * 60 * 60 * 1000;

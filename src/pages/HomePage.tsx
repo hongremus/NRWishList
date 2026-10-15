@@ -6,6 +6,7 @@ import TagManagerModal from "../components/TagManagerModal";
 import StatsModal from "../components/StatsModal";
 import CalendarPage from "./CalendarPage";
 import RandomWishPage from "./RandomWishPage";
+import HouseRulesPage from "./HouseRulesPage";
 
 export default function HomePage() {
   const currentUser = useStore((s) => s.currentUser);
@@ -22,7 +23,7 @@ export default function HomePage() {
   const [showTagManager, setShowTagManager] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [showWishDetail, setShowWishDetail] = useState(false);
-  const [activePage, setActivePage] = useState<"wishes" | "calendar" | "random">("wishes");
+  const [activePage, setActivePage] = useState<"wishes" | "calendar" | "random" | "rules">("wishes");
   const [completedViewRequest, setCompletedViewRequest] = useState(0);
 
   const isRemus = currentUser?.username === "Remus";
@@ -190,6 +191,14 @@ export default function HomePage() {
           >
             🎲 做咩好？
           </button>
+          <button
+            onClick={() => setActivePage("rules")}
+            className={`flex-1 rounded-xl px-3 py-2 text-sm font-bold transition-all ${
+              activePage === "rules" ? "bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-gray-100" : "text-gray-500 dark:text-gray-400"
+            }`}
+          >
+            📜 家規
+          </button>
         </div>
 
         {activePage === "wishes" ? (
@@ -198,7 +207,7 @@ export default function HomePage() {
             initialStatusFilter={completedViewRequest > 0 ? "completed" : "open"}
             onDetailChange={setShowWishDetail}
           />
-        ) : activePage === "calendar" ? <CalendarPage /> : <RandomWishPage />}
+        ) : activePage === "calendar" ? <CalendarPage /> : activePage === "random" ? <RandomWishPage /> : <HouseRulesPage />}
       </main>
 
       {/* 手機版右下角 Floating Action Button (新增願望) */}
