@@ -71,7 +71,7 @@ export default function HouseRulesPage() {
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/70">Our little constitution</p>
             <h1 className="mt-1 text-2xl font-black">家規</h1>
-            <p className="mt-2 text-sm leading-6 text-white/85">一齊寫低我哋想守住嘅十件事。</p>
+            <p className="mt-2 text-sm leading-6 text-white/85">一齊寫低我哋想守住嘅十件事。最緊要互相尊重！相親相愛🩷</p>
           </div>
           <span className="text-4xl" aria-hidden="true">📜</span>
         </div>
