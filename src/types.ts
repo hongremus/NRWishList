@@ -71,3 +71,25 @@ export type HouseRuleProposal = {
   nicoleApproved: boolean;
   createdAt: string;
 };
+
+export type CrimeRecord = {
+  id: string;
+  incidentDate: string;
+  offender: UserRole;
+  ruleNumber?: number;
+  description: string;
+  recordedBy: UserRole;
+  confirmedBy: UserRole;
+  createdAt: string;
+  confirmedAt: string;
+};
+
+export type CrimeRecordProposal = {
+  id: string;
+  incidentDate: string;
+  offender: UserRole;
+  ruleNumber?: number;
+  description: string;
+  proposedBy: UserRole;
+  createdAt: string;
+};

@@ -7,6 +7,7 @@ import StatsModal from "../components/StatsModal";
 import CalendarPage from "./CalendarPage";
 import RandomWishPage from "./RandomWishPage";
 import HouseRulesPage from "./HouseRulesPage";
+import CrimeRecordsPage from "./CrimeRecordsPage";
 
 export default function HomePage() {
   const currentUser = useStore((s) => s.currentUser);
@@ -24,7 +25,7 @@ export default function HomePage() {
   const [showTagManager, setShowTagManager] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [showWishDetail, setShowWishDetail] = useState(false);
-  const [activePage, setActivePage] = useState<"wishes" | "calendar" | "random" | "rules">("wishes");
+  const [activePage, setActivePage] = useState<"wishes" | "calendar" | "random" | "rules" | "crime">("wishes");
   const [completedViewRequest, setCompletedViewRequest] = useState(0);
 
   const isRemus = currentUser?.username === "Remus";
@@ -214,6 +215,14 @@ export default function HomePage() {
           >
             📜 家規
           </button>
+          <button
+            onClick={() => setActivePage("crime")}
+            className={`flex-1 rounded-xl px-3 py-2 text-sm font-bold transition-all ${
+              activePage === "crime" ? "bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-gray-100" : "text-gray-500 dark:text-gray-400"
+            }`}
+          >
+            🚨 紀錄
+          </button>
         </div>
 
         {activePage === "wishes" ? (
@@ -222,7 +231,7 @@ export default function HomePage() {
             initialStatusFilter={completedViewRequest > 0 ? "completed" : "open"}
             onDetailChange={setShowWishDetail}
           />
-        ) : activePage === "calendar" ? <CalendarPage /> : activePage === "random" ? <RandomWishPage /> : <HouseRulesPage />}
+        ) : activePage === "calendar" ? <CalendarPage /> : activePage === "random" ? <RandomWishPage /> : activePage === "rules" ? <HouseRulesPage /> : <CrimeRecordsPage />}
       </main>
 
       {/* 手機版右下角 Floating Action Button (新增願望) */}

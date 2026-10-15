@@ -80,6 +80,30 @@ create table if not exists public.house_rule_proposals (
   unique (couple_id, rule_number)
 );
 
+create table if not exists public.crime_records (
+  id uuid primary key default gen_random_uuid(),
+  couple_id text not null default 'remus-nicole',
+  incident_date date not null,
+  offender text not null check (offender in ('Remus', 'Nicole')),
+  rule_number integer check (rule_number between 1 and 10),
+  description text not null,
+  recorded_by text not null check (recorded_by in ('Remus', 'Nicole')),
+  confirmed_by text not null check (confirmed_by in ('Remus', 'Nicole')),
+  created_at timestamptz not null default now(),
+  confirmed_at timestamptz not null default now()
+);
+
+create table if not exists public.crime_record_proposals (
+  id uuid primary key default gen_random_uuid(),
+  couple_id text not null default 'remus-nicole',
+  incident_date date not null,
+  offender text not null check (offender in ('Remus', 'Nicole')),
+  rule_number integer check (rule_number between 1 and 10),
+  description text not null,
+  proposed_by text not null check (proposed_by in ('Remus', 'Nicole')),
+  created_at timestamptz not null default now()
+);
+
 create index if not exists wishes_couple_created_at_idx
   on public.wishes (couple_id, created_at desc);
 
@@ -97,6 +121,8 @@ alter table public.wish_tags enable row level security;
 alter table public.calendar_events enable row level security;
 alter table public.house_rules enable row level security;
 alter table public.house_rule_proposals enable row level security;
+alter table public.crime_records enable row level security;
+alter table public.crime_record_proposals enable row level security;
 
 -- Simple shared-couple mode. Replace these policies with auth.uid()-based
 -- policies before storing sensitive/private data.
@@ -118,6 +144,11 @@ drop policy if exists "shared couple can read house rule proposals" on public.ho
 drop policy if exists "shared couple can insert house rule proposals" on public.house_rule_proposals;
 drop policy if exists "shared couple can update house rule proposals" on public.house_rule_proposals;
 drop policy if exists "shared couple can delete house rule proposals" on public.house_rule_proposals;
+drop policy if exists "shared couple can read crime records" on public.crime_records;
+drop policy if exists "shared couple can insert crime records" on public.crime_records;
+drop policy if exists "shared couple can read crime record proposals" on public.crime_record_proposals;
+drop policy if exists "shared couple can insert crime record proposals" on public.crime_record_proposals;
+drop policy if exists "shared couple can delete crime record proposals" on public.crime_record_proposals;
 
 create policy "shared couple can read wishes" on public.wishes
   for select to anon, authenticated using (couple_id = 'remus-nicole');
@@ -164,6 +195,18 @@ create policy "shared couple can update house rule proposals" on public.house_ru
 create policy "shared couple can delete house rule proposals" on public.house_rule_proposals
   for delete to anon, authenticated using (couple_id = 'remus-nicole');
 
+create policy "shared couple can read crime records" on public.crime_records
+  for select to anon, authenticated using (couple_id = 'remus-nicole');
+create policy "shared couple can insert crime records" on public.crime_records
+  for insert to anon, authenticated with check (couple_id = 'remus-nicole');
+
+create policy "shared couple can read crime record proposals" on public.crime_record_proposals
+  for select to anon, authenticated using (couple_id = 'remus-nicole');
+create policy "shared couple can insert crime record proposals" on public.crime_record_proposals
+  for insert to anon, authenticated with check (couple_id = 'remus-nicole');
+create policy "shared couple can delete crime record proposals" on public.crime_record_proposals
+  for delete to anon, authenticated using (couple_id = 'remus-nicole');
+
 insert into public.wish_tags (couple_id, name) values
   ('remus-nicole', '約會'), ('remus-nicole', '禮物'),
   ('remus-nicole', '旅行'), ('remus-nicole', '日常生活'),
@@ -208,5 +251,17 @@ begin
     where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'house_rule_proposals'
   ) then
     alter publication supabase_realtime add table public.house_rule_proposals;
+  end if;
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'crime_records'
+  ) then
+    alter publication supabase_realtime add table public.crime_records;
+  end if;
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'crime_record_proposals'
+  ) then
+    alter publication supabase_realtime add table public.crime_record_proposals;
   end if;
 end $$;

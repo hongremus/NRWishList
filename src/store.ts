@@ -1,6 +1,6 @@
 import create from "zustand";
 import { persist } from "zustand/middleware";
-import { CalendarEvent, HouseRule, HouseRuleProposal, User, UserRole, Wish, WishHistory } from "./types";
+import { CalendarEvent, CrimeRecord, CrimeRecordProposal, HouseRule, HouseRuleProposal, User, UserRole, Wish, WishHistory } from "./types";
 import { supabase } from "./supabase";
 
 const COUPLE_ID = "remus-nicole";
@@ -208,6 +208,32 @@ function fromDatabaseHouseRuleProposal(row: Record<string, unknown>): HouseRuleP
   };
 }
 
+function fromDatabaseCrimeRecord(row: Record<string, unknown>): CrimeRecord {
+  return {
+    id: String(row.id),
+    incidentDate: String(row.incident_date),
+    offender: row.offender === "Nicole" ? "Nicole" : "Remus",
+    ruleNumber: row.rule_number == null ? undefined : Number(row.rule_number),
+    description: typeof row.description === "string" ? row.description : "",
+    recordedBy: row.recorded_by === "Nicole" ? "Nicole" : "Remus",
+    confirmedBy: row.confirmed_by === "Nicole" ? "Nicole" : "Remus",
+    createdAt: String(row.created_at),
+    confirmedAt: String(row.confirmed_at),
+  };
+}
+
+function fromDatabaseCrimeRecordProposal(row: Record<string, unknown>): CrimeRecordProposal {
+  return {
+    id: String(row.id),
+    incidentDate: String(row.incident_date),
+    offender: row.offender === "Nicole" ? "Nicole" : "Remus",
+    ruleNumber: row.rule_number == null ? undefined : Number(row.rule_number),
+    description: typeof row.description === "string" ? row.description : "",
+    proposedBy: row.proposed_by === "Nicole" ? "Nicole" : "Remus",
+    createdAt: String(row.created_at),
+  };
+}
+
 function toDatabaseCalendarEvent(event: CalendarEvent) {
   return {
     id: event.id,
@@ -232,6 +258,8 @@ interface AppState {
   calendarEvents: CalendarEvent[];
   houseRules: HouseRule[];
   houseRuleProposals: HouseRuleProposal[];
+  crimeRecords: CrimeRecord[];
+  crimeRecordProposals: CrimeRecordProposal[];
   loadedCalendarMonths: string[];
   availableTags: string[];
   syncError: string | null;
@@ -242,6 +270,7 @@ interface AppState {
   ensureCalendarMonths: (monthKey: string, showLoading?: boolean) => Promise<void>;
   refreshCalendarEvents: () => Promise<void>;
   loadHouseRules: () => Promise<void>;
+  loadCrimeRecords: () => Promise<void>;
   subscribeToRemoteData: () => () => void;
   addWish: (w: Wish) => void;
   updateWish: (w: Wish) => void;
@@ -256,6 +285,9 @@ interface AppState {
   submitHouseRuleProposal: (ruleNumber: number, text: string, proposedBy: UserRole) => Promise<boolean>;
   approveHouseRuleProposal: (proposalId: string, approvedBy: UserRole) => Promise<boolean>;
   rejectHouseRuleProposal: (proposalId: string) => Promise<boolean>;
+  submitCrimeRecordProposal: (proposal: Omit<CrimeRecordProposal, "id" | "createdAt" | "proposedBy">, proposedBy: UserRole) => Promise<boolean>;
+  confirmCrimeRecordProposal: (proposalId: string, confirmedBy: UserRole) => Promise<boolean>;
+  rejectCrimeRecordProposal: (proposalId: string) => Promise<boolean>;
 }
 
 export const useStore = create<AppState>()(
@@ -274,6 +306,8 @@ export const useStore = create<AppState>()(
         text: "",
       })),
       houseRuleProposals: [],
+      crimeRecords: [],
+      crimeRecordProposals: [],
       loadedCalendarMonths: [],
       availableTags: defaultTags,
       syncError: null,
@@ -379,6 +413,25 @@ export const useStore = create<AppState>()(
           set({ syncError: `讀取家規失敗：${message}` });
         }
       },
+      loadCrimeRecords: async () => {
+        if (!supabase) return;
+
+        try {
+          const [{ data: recordRows, error: recordError }, { data: proposalRows, error: proposalError }] = await Promise.all([
+            supabase.from("crime_records").select("*").eq("couple_id", COUPLE_ID).order("incident_date", { ascending: false }).order("created_at", { ascending: false }),
+            supabase.from("crime_record_proposals").select("*").eq("couple_id", COUPLE_ID).order("created_at", { ascending: false }),
+          ]);
+          if (recordError) throw recordError;
+          if (proposalError) throw proposalError;
+          set({
+            crimeRecords: (recordRows ?? []).map((row) => fromDatabaseCrimeRecord(row as Record<string, unknown>)),
+            crimeRecordProposals: (proposalRows ?? []).map((row) => fromDatabaseCrimeRecordProposal(row as Record<string, unknown>)),
+          });
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          set({ syncError: `讀取犯罪紀錄失敗：${message}` });
+        }
+      },
       loadRemoteData: async (showLoading = false) => {
         if (!supabase) return;
 
@@ -432,6 +485,7 @@ export const useStore = create<AppState>()(
           });
 
           await get().loadHouseRules();
+          await get().loadCrimeRecords();
 
           if (showLoading) {
             await get().refreshCalendarEvents();
@@ -469,6 +523,12 @@ export const useStore = create<AppState>()(
           })
           .on("postgres_changes", { event: "*", schema: "public", table: "house_rule_proposals", filter: `couple_id=eq.${COUPLE_ID}` }, () => {
             void get().loadHouseRules();
+          })
+          .on("postgres_changes", { event: "*", schema: "public", table: "crime_records", filter: `couple_id=eq.${COUPLE_ID}` }, () => {
+            void get().loadCrimeRecords();
+          })
+          .on("postgres_changes", { event: "*", schema: "public", table: "crime_record_proposals", filter: `couple_id=eq.${COUPLE_ID}` }, () => {
+            void get().loadCrimeRecords();
           })
           .subscribe();
 
@@ -768,6 +828,116 @@ export const useStore = create<AppState>()(
           return false;
         }
         await get().loadHouseRules();
+        return true;
+      },
+      submitCrimeRecordProposal: async (crime, proposedBy) => {
+        const description = crime.description.trim();
+        if (!crime.incidentDate || !description) return false;
+
+        const proposal: CrimeRecordProposal = {
+          id: createUuid(),
+          incidentDate: crime.incidentDate,
+          offender: crime.offender,
+          ruleNumber: crime.ruleNumber,
+          description,
+          proposedBy,
+          createdAt: new Date().toISOString(),
+        };
+
+        if (!supabase) {
+          set((state) => ({ crimeRecordProposals: [proposal, ...state.crimeRecordProposals] }));
+          return true;
+        }
+
+        const { error } = await supabase.from("crime_record_proposals").insert({
+          id: proposal.id,
+          couple_id: COUPLE_ID,
+          incident_date: proposal.incidentDate,
+          offender: proposal.offender,
+          rule_number: proposal.ruleNumber ?? null,
+          description: proposal.description,
+          proposed_by: proposal.proposedBy,
+          created_at: proposal.createdAt,
+        });
+        if (error) {
+          set({ syncError: `提交犯罪紀錄失敗：${error.message}` });
+          return false;
+        }
+        set((state) => ({ crimeRecordProposals: [proposal, ...state.crimeRecordProposals], syncError: null }));
+        await get().loadCrimeRecords();
+        return true;
+      },
+      confirmCrimeRecordProposal: async (proposalId, confirmedBy) => {
+        const proposal = get().crimeRecordProposals.find((item) => item.id === proposalId);
+        if (!proposal) return false;
+        if (proposal.proposedBy === confirmedBy) {
+          set({ syncError: "要由對方確認先可以正式記錄。" });
+          return false;
+        }
+
+        const record: CrimeRecord = {
+          id: createUuid(),
+          incidentDate: proposal.incidentDate,
+          offender: proposal.offender,
+          ruleNumber: proposal.ruleNumber,
+          description: proposal.description,
+          recordedBy: proposal.proposedBy,
+          confirmedBy,
+          createdAt: new Date().toISOString(),
+          confirmedAt: new Date().toISOString(),
+        };
+
+        if (!supabase) {
+          set((state) => ({
+            crimeRecords: [record, ...state.crimeRecords],
+            crimeRecordProposals: state.crimeRecordProposals.filter((item) => item.id !== proposalId),
+          }));
+          return true;
+        }
+
+        const { error: recordError } = await supabase.from("crime_records").insert({
+          id: record.id,
+          couple_id: COUPLE_ID,
+          incident_date: record.incidentDate,
+          offender: record.offender,
+          rule_number: record.ruleNumber ?? null,
+          description: record.description,
+          recorded_by: record.recordedBy,
+          confirmed_by: record.confirmedBy,
+          created_at: record.createdAt,
+          confirmed_at: record.confirmedAt,
+        });
+        if (recordError) {
+          set({ syncError: `確認犯罪紀錄失敗：${recordError.message}` });
+          return false;
+        }
+        const { error: deleteError } = await supabase
+          .from("crime_record_proposals")
+          .delete()
+          .eq("id", proposalId)
+          .eq("couple_id", COUPLE_ID);
+        if (deleteError) {
+          set({ syncError: `清除待確認紀錄失敗：${deleteError.message}` });
+          return false;
+        }
+        await get().loadCrimeRecords();
+        return true;
+      },
+      rejectCrimeRecordProposal: async (proposalId) => {
+        if (!supabase) {
+          set((state) => ({ crimeRecordProposals: state.crimeRecordProposals.filter((item) => item.id !== proposalId) }));
+          return true;
+        }
+        const { error } = await supabase
+          .from("crime_record_proposals")
+          .delete()
+          .eq("id", proposalId)
+          .eq("couple_id", COUPLE_ID);
+        if (error) {
+          set({ syncError: `拒絕犯罪紀錄失敗：${error.message}` });
+          return false;
+        }
+        await get().loadCrimeRecords();
         return true;
       },
       lockExpiredHistories: () => {
