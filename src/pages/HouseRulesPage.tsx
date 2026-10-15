@@ -70,8 +70,7 @@ export default function HouseRulesPage() {
 
   return (
     <section className="space-y-4">
-      {activeSection === "rules" && (
-        <div className={`rounded-3xl p-5 text-white shadow-lg ${isRemus ? "bg-gradient-to-br from-blue-600 to-indigo-700" : "bg-gradient-to-br from-pink-500 to-rose-600"}`}>
+      <div className={`rounded-3xl p-5 text-white shadow-lg ${isRemus ? "bg-gradient-to-br from-blue-600 to-indigo-700" : "bg-gradient-to-br from-pink-500 to-rose-600"}`}>
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/70">Our little constitution</p>
@@ -87,7 +86,6 @@ export default function HouseRulesPage() {
             <span className="text-4xl" aria-hidden="true">📜</span>
           </div>
         </div>
-      )}
 
       <div className="grid grid-cols-2 gap-1 rounded-2xl bg-gray-100 p-1 dark:bg-gray-800">
         <button

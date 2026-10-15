@@ -35,7 +35,6 @@ export default function CrimeRecordsPage() {
   const currentRole = currentUser?.role ?? "Remus";
   const isRemus = currentRole === "Remus";
   const offender: UserRole = isRemus ? "Nicole" : "Remus";
-  const pendingForCurrentUser = proposals.filter((proposal) => proposal.proposedBy !== currentRole).length;
 
   function resetForm() {
     setIncidentDate(getToday());
@@ -86,21 +85,6 @@ export default function CrimeRecordsPage() {
 
   return (
     <section className="space-y-4">
-      <div className={`rounded-3xl p-5 text-white shadow-lg ${isRemus ? "bg-gradient-to-br from-slate-800 to-red-700" : "bg-gradient-to-br from-rose-700 to-pink-500"}`}>
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/70">Our relationship court</p>
-            <h1 className="mt-1 text-2xl font-black">犯罪紀錄</h1>
-            <p className="mt-2 text-sm leading-6 text-white/85">記低啲小罪行，最終都係為咗一齊笑返。</p>
-          </div>
-          <span className="text-4xl" aria-hidden="true">🚨</span>
-        </div>
-        <div className="mt-4 flex flex-wrap items-center gap-2 text-xs font-semibold text-white/90">
-          <span className="rounded-full bg-white/15 px-3 py-1.5">已確認 {crimeRecords.length} 宗</span>
-          {pendingForCurrentUser > 0 && <span className="rounded-full bg-amber-300 px-3 py-1.5 text-amber-950">等你確認 {pendingForCurrentUser} 宗</span>}
-        </div>
-      </div>
-
       {(actionError || syncError) && (
         <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs leading-5 text-red-700 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-200">
           {actionError || syncError}
