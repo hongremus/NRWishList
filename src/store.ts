@@ -852,6 +852,8 @@ export const useStore = create<AppState>()(
           ruleNumber: crime.ruleNumber,
           ruleText: crime.ruleNumber ? get().houseRules.find((rule) => rule.ruleNumber === crime.ruleNumber)?.text ?? "" : undefined,
           description,
+          status: "未處理",
+          punishment: "",
           proposedBy,
           createdAt: new Date().toISOString(),
         };
@@ -939,7 +941,7 @@ export const useStore = create<AppState>()(
           incidentDate: proposal.incidentDate,
           offender: proposal.offender,
           ruleNumber: proposal.ruleNumber,
-          ruleText: existingRecord.ruleText,
+          ruleText: proposal.ruleText,
           description: proposal.description,
           status: proposal.status,
           punishment: proposal.punishment,
