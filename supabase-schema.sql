@@ -57,6 +57,76 @@ create table if not exists public.calendar_events (
   check (is_all_day or start_time is not null or end_time is not null)
 );
 
+create table if not exists public.house_rules (
+  id uuid primary key default gen_random_uuid(),
+  couple_id text not null default 'remus-nicole',
+  rule_number integer not null check (rule_number between 1 and 10),
+  text text not null default '',
+  updated_by text check (updated_by in ('Remus', 'Nicole')),
+  updated_at timestamptz not null default now(),
+  unique (couple_id, rule_number)
+);
+
+create table if not exists public.house_rule_proposals (
+  id uuid primary key default gen_random_uuid(),
+  couple_id text not null default 'remus-nicole',
+  rule_number integer not null check (rule_number between 1 and 10),
+  current_text text not null default '',
+  proposed_text text not null default '',
+  proposed_by text not null check (proposed_by in ('Remus', 'Nicole')),
+  remus_approved boolean not null default false,
+  nicole_approved boolean not null default false,
+  created_at timestamptz not null default now(),
+  unique (couple_id, rule_number)
+);
+
+create table if not exists public.crime_records (
+  id uuid primary key default gen_random_uuid(),
+  couple_id text not null default 'remus-nicole',
+  incident_date date not null,
+  offender text not null check (offender in ('Remus', 'Nicole')),
+  rule_number integer check (rule_number between 1 and 10),
+  rule_text text not null default '',
+  description text not null,
+  status text not null default '未處理' check (status in ('未處理', '錫返了')),
+  punishment text not null default '',
+  recorded_by text not null check (recorded_by in ('Remus', 'Nicole')),
+  confirmed_by text not null check (confirmed_by in ('Remus', 'Nicole')),
+  created_at timestamptz not null default now(),
+  confirmed_at timestamptz not null default now()
+);
+
+create table if not exists public.crime_record_proposals (
+  id uuid primary key default gen_random_uuid(),
+  couple_id text not null default 'remus-nicole',
+  record_id uuid references public.crime_records(id) on delete cascade,
+  incident_date date not null,
+  offender text not null check (offender in ('Remus', 'Nicole')),
+  rule_number integer check (rule_number between 1 and 10),
+  rule_text text not null default '',
+  description text not null,
+  status text not null default '未處理' check (status in ('未處理', '錫返了')),
+  punishment text not null default '',
+  proposed_by text not null check (proposed_by in ('Remus', 'Nicole')),
+  created_at timestamptz not null default now()
+);
+
+-- Add crime status and punishment fields to databases created before v1.3.0.
+alter table public.crime_records
+  add column if not exists status text not null default '未處理';
+alter table public.crime_records
+  add column if not exists punishment text not null default '';
+alter table public.crime_record_proposals
+  add column if not exists status text not null default '未處理';
+alter table public.crime_record_proposals
+  add column if not exists punishment text not null default '';
+alter table public.crime_record_proposals
+  add column if not exists record_id uuid references public.crime_records(id) on delete cascade;
+alter table public.crime_records
+  add column if not exists rule_text text not null default '';
+alter table public.crime_record_proposals
+  add column if not exists rule_text text not null default '';
+
 create index if not exists wishes_couple_created_at_idx
   on public.wishes (couple_id, created_at desc);
 
@@ -72,6 +142,10 @@ alter table public.calendar_events replica identity full;
 alter table public.wishes enable row level security;
 alter table public.wish_tags enable row level security;
 alter table public.calendar_events enable row level security;
+alter table public.house_rules enable row level security;
+alter table public.house_rule_proposals enable row level security;
+alter table public.crime_records enable row level security;
+alter table public.crime_record_proposals enable row level security;
 
 -- Simple shared-couple mode. Replace these policies with auth.uid()-based
 -- policies before storing sensitive/private data.
@@ -86,6 +160,19 @@ drop policy if exists "shared couple can read calendar events" on public.calenda
 drop policy if exists "shared couple can insert calendar events" on public.calendar_events;
 drop policy if exists "shared couple can update calendar events" on public.calendar_events;
 drop policy if exists "shared couple can delete calendar events" on public.calendar_events;
+drop policy if exists "shared couple can read house rules" on public.house_rules;
+drop policy if exists "shared couple can insert house rules" on public.house_rules;
+drop policy if exists "shared couple can update house rules" on public.house_rules;
+drop policy if exists "shared couple can read house rule proposals" on public.house_rule_proposals;
+drop policy if exists "shared couple can insert house rule proposals" on public.house_rule_proposals;
+drop policy if exists "shared couple can update house rule proposals" on public.house_rule_proposals;
+drop policy if exists "shared couple can delete house rule proposals" on public.house_rule_proposals;
+drop policy if exists "shared couple can read crime records" on public.crime_records;
+drop policy if exists "shared couple can insert crime records" on public.crime_records;
+drop policy if exists "shared couple can update crime records" on public.crime_records;
+drop policy if exists "shared couple can read crime record proposals" on public.crime_record_proposals;
+drop policy if exists "shared couple can insert crime record proposals" on public.crime_record_proposals;
+drop policy if exists "shared couple can delete crime record proposals" on public.crime_record_proposals;
 
 create policy "shared couple can read wishes" on public.wishes
   for select to anon, authenticated using (couple_id = 'remus-nicole');
@@ -114,11 +201,48 @@ create policy "shared couple can update calendar events" on public.calendar_even
 create policy "shared couple can delete calendar events" on public.calendar_events
   for delete to anon, authenticated using (couple_id = 'remus-nicole');
 
+create policy "shared couple can read house rules" on public.house_rules
+  for select to anon, authenticated using (couple_id = 'remus-nicole');
+create policy "shared couple can insert house rules" on public.house_rules
+  for insert to anon, authenticated with check (couple_id = 'remus-nicole');
+create policy "shared couple can update house rules" on public.house_rules
+  for update to anon, authenticated
+  using (couple_id = 'remus-nicole') with check (couple_id = 'remus-nicole');
+
+create policy "shared couple can read house rule proposals" on public.house_rule_proposals
+  for select to anon, authenticated using (couple_id = 'remus-nicole');
+create policy "shared couple can insert house rule proposals" on public.house_rule_proposals
+  for insert to anon, authenticated with check (couple_id = 'remus-nicole');
+create policy "shared couple can update house rule proposals" on public.house_rule_proposals
+  for update to anon, authenticated
+  using (couple_id = 'remus-nicole') with check (couple_id = 'remus-nicole');
+create policy "shared couple can delete house rule proposals" on public.house_rule_proposals
+  for delete to anon, authenticated using (couple_id = 'remus-nicole');
+
+create policy "shared couple can read crime records" on public.crime_records
+  for select to anon, authenticated using (couple_id = 'remus-nicole');
+create policy "shared couple can insert crime records" on public.crime_records
+  for insert to anon, authenticated with check (couple_id = 'remus-nicole');
+create policy "shared couple can update crime records" on public.crime_records
+  for update to anon, authenticated
+  using (couple_id = 'remus-nicole') with check (couple_id = 'remus-nicole');
+
+create policy "shared couple can read crime record proposals" on public.crime_record_proposals
+  for select to anon, authenticated using (couple_id = 'remus-nicole');
+create policy "shared couple can insert crime record proposals" on public.crime_record_proposals
+  for insert to anon, authenticated with check (couple_id = 'remus-nicole');
+create policy "shared couple can delete crime record proposals" on public.crime_record_proposals
+  for delete to anon, authenticated using (couple_id = 'remus-nicole');
+
 insert into public.wish_tags (couple_id, name) values
   ('remus-nicole', '約會'), ('remus-nicole', '禮物'),
   ('remus-nicole', '旅行'), ('remus-nicole', '日常生活'),
   ('remus-nicole', '驚喜'), ('remus-nicole', '美食'), ('remus-nicole', '浪漫')
 on conflict (couple_id, name) do nothing;
+
+insert into public.house_rules (couple_id, rule_number)
+select 'remus-nicole', rule_number from generate_series(1, 10) as rule_number
+on conflict (couple_id, rule_number) do nothing;
 
 -- Enable Realtime for cross-device updates. Safe to run repeatedly.
 do $$
@@ -142,5 +266,29 @@ begin
     where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'calendar_events'
   ) then
     alter publication supabase_realtime add table public.calendar_events;
+  end if;
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'house_rules'
+  ) then
+    alter publication supabase_realtime add table public.house_rules;
+  end if;
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'house_rule_proposals'
+  ) then
+    alter publication supabase_realtime add table public.house_rule_proposals;
+  end if;
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'crime_records'
+  ) then
+    alter publication supabase_realtime add table public.crime_records;
+  end if;
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'crime_record_proposals'
+  ) then
+    alter publication supabase_realtime add table public.crime_record_proposals;
   end if;
 end $$;

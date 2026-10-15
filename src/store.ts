@@ -1,6 +1,6 @@
 import create from "zustand";
 import { persist } from "zustand/middleware";
-import { CalendarEvent, User, Wish, WishHistory } from "./types";
+import { CalendarEvent, CrimeRecord, CrimeRecordProposal, CrimeStatus, HouseRule, HouseRuleProposal, User, UserRole, Wish, WishHistory } from "./types";
 import { supabase } from "./supabase";
 
 const COUPLE_ID = "remus-nicole";
@@ -8,6 +8,25 @@ const COUPLE_ID = "remus-nicole";
 const defaultTags = ["約會", "禮物", "旅行", "日常生活", "驚喜", "美食", "浪漫"];
 let visibleRemoteLoadCount = 0;
 const calendarLoadPromises = new Map<string, Promise<void>>();
+
+function createUuid() {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  if (typeof crypto !== "undefined" && typeof crypto.getRandomValues === "function") {
+    const bytes = new Uint8Array(16);
+    crypto.getRandomValues(bytes);
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+    return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("")
+      .replace(/^(........)(....)(....)(....)(............)$/, "$1-$2-$3-$4-$5");
+  }
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (character) => {
+    const randomValue = Math.random() * 16 | 0;
+    const value = character === "x" ? randomValue : (randomValue & 0x3) | 0x8;
+    return value.toString(16);
+  });
+}
 
 function toDateKey(date: Date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
@@ -166,6 +185,62 @@ function fromDatabaseCalendarEvent(row: Record<string, unknown>): CalendarEvent 
   };
 }
 
+function fromDatabaseHouseRule(row: Record<string, unknown>): HouseRule {
+  return {
+    id: String(row.id),
+    ruleNumber: Number(row.rule_number),
+    text: typeof row.text === "string" ? row.text : "",
+    updatedBy: row.updated_by === "Nicole" ? "Nicole" : row.updated_by === "Remus" ? "Remus" : undefined,
+    updatedAt: typeof row.updated_at === "string" ? row.updated_at : undefined,
+  };
+}
+
+function fromDatabaseHouseRuleProposal(row: Record<string, unknown>): HouseRuleProposal {
+  return {
+    id: String(row.id),
+    ruleNumber: Number(row.rule_number),
+    currentText: typeof row.current_text === "string" ? row.current_text : "",
+    proposedText: typeof row.proposed_text === "string" ? row.proposed_text : "",
+    proposedBy: row.proposed_by === "Nicole" ? "Nicole" : "Remus",
+    remusApproved: Boolean(row.remus_approved),
+    nicoleApproved: Boolean(row.nicole_approved),
+    createdAt: String(row.created_at),
+  };
+}
+
+function fromDatabaseCrimeRecord(row: Record<string, unknown>): CrimeRecord {
+  return {
+    id: String(row.id),
+    incidentDate: String(row.incident_date),
+    offender: row.offender === "Nicole" ? "Nicole" : "Remus",
+    ruleNumber: row.rule_number == null ? undefined : Number(row.rule_number),
+    ruleText: typeof row.rule_text === "string" ? row.rule_text : undefined,
+    description: typeof row.description === "string" ? row.description : "",
+    status: row.status === "錫返了" || row.status === "已道歉" || row.status === "已補償" || row.status === "已處理" ? "錫返了" : "未處理",
+    punishment: typeof row.punishment === "string" ? row.punishment : "",
+    recordedBy: row.recorded_by === "Nicole" ? "Nicole" : "Remus",
+    confirmedBy: row.confirmed_by === "Nicole" ? "Nicole" : "Remus",
+    createdAt: String(row.created_at),
+    confirmedAt: String(row.confirmed_at),
+  };
+}
+
+function fromDatabaseCrimeRecordProposal(row: Record<string, unknown>): CrimeRecordProposal {
+  return {
+    id: String(row.id),
+    recordId: typeof row.record_id === "string" ? row.record_id : undefined,
+    incidentDate: String(row.incident_date),
+    offender: row.offender === "Nicole" ? "Nicole" : "Remus",
+    ruleNumber: row.rule_number == null ? undefined : Number(row.rule_number),
+    ruleText: typeof row.rule_text === "string" ? row.rule_text : undefined,
+    description: typeof row.description === "string" ? row.description : "",
+    status: row.status === "錫返了" || row.status === "已道歉" || row.status === "已補償" || row.status === "已處理" ? "錫返了" : "未處理",
+    punishment: typeof row.punishment === "string" ? row.punishment : "",
+    proposedBy: row.proposed_by === "Nicole" ? "Nicole" : "Remus",
+    createdAt: String(row.created_at),
+  };
+}
+
 function toDatabaseCalendarEvent(event: CalendarEvent) {
   return {
     id: event.id,
@@ -188,6 +263,10 @@ interface AppState {
   currentUser: User | null;
   wishes: Wish[];
   calendarEvents: CalendarEvent[];
+  houseRules: HouseRule[];
+  houseRuleProposals: HouseRuleProposal[];
+  crimeRecords: CrimeRecord[];
+  crimeRecordProposals: CrimeRecordProposal[];
   loadedCalendarMonths: string[];
   availableTags: string[];
   syncError: string | null;
@@ -197,6 +276,8 @@ interface AppState {
   loadRemoteData: (showLoading?: boolean) => Promise<void>;
   ensureCalendarMonths: (monthKey: string, showLoading?: boolean) => Promise<void>;
   refreshCalendarEvents: () => Promise<void>;
+  loadHouseRules: () => Promise<void>;
+  loadCrimeRecords: () => Promise<void>;
   subscribeToRemoteData: () => () => void;
   addWish: (w: Wish) => void;
   updateWish: (w: Wish) => void;
@@ -208,6 +289,13 @@ interface AppState {
   addTag: (tag: string) => void;
   deleteTag: (tag: string) => void;
   lockExpiredHistories: () => void;
+  submitHouseRuleProposal: (ruleNumber: number, text: string, proposedBy: UserRole) => Promise<boolean>;
+  approveHouseRuleProposal: (proposalId: string, approvedBy: UserRole) => Promise<boolean>;
+  rejectHouseRuleProposal: (proposalId: string) => Promise<boolean>;
+  submitCrimeRecordProposal: (proposal: Omit<CrimeRecordProposal, "id" | "createdAt" | "proposedBy">, proposedBy: UserRole) => Promise<boolean>;
+  confirmCrimeRecordProposal: (proposalId: string, confirmedBy: UserRole) => Promise<boolean>;
+  rejectCrimeRecordProposal: (proposalId: string) => Promise<boolean>;
+  submitCrimeRecordUpdate: (id: string, status: CrimeStatus, punishment: string, proposedBy: UserRole) => Promise<boolean>;
 }
 
 export const useStore = create<AppState>()(
@@ -220,6 +308,14 @@ export const useStore = create<AppState>()(
       currentUser: null,
       wishes: [],
       calendarEvents: [],
+      houseRules: Array.from({ length: 10 }, (_, index) => ({
+        id: `local-rule-${index + 1}`,
+        ruleNumber: index + 1,
+        text: "",
+      })),
+      houseRuleProposals: [],
+      crimeRecords: [],
+      crimeRecordProposals: [],
       loadedCalendarMonths: [],
       availableTags: defaultTags,
       syncError: null,
@@ -295,6 +391,55 @@ export const useStore = create<AppState>()(
           throw error;
         }
       },
+      loadHouseRules: async () => {
+        if (!supabase) return;
+
+        try {
+          const [{ data: ruleRows, error: ruleError }, { data: proposalRows, error: proposalError }] = await Promise.all([
+            supabase.from("house_rules").select("*").eq("couple_id", COUPLE_ID).order("rule_number"),
+            supabase.from("house_rule_proposals").select("*").eq("couple_id", COUPLE_ID).order("created_at"),
+          ]);
+          if (ruleError) throw ruleError;
+          if (proposalError) throw proposalError;
+
+          const rules = Array.from({ length: 10 }, (_, index) => {
+            const remoteRule = (ruleRows ?? [])
+              .map((row) => fromDatabaseHouseRule(row as Record<string, unknown>))
+              .find((rule) => rule.ruleNumber === index + 1);
+            return remoteRule ?? {
+              id: `local-rule-${index + 1}`,
+              ruleNumber: index + 1,
+              text: "",
+            };
+          });
+          set({
+            houseRules: rules,
+            houseRuleProposals: (proposalRows ?? []).map((row) => fromDatabaseHouseRuleProposal(row as Record<string, unknown>)),
+          });
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          set({ syncError: `讀取家規失敗：${message}` });
+        }
+      },
+      loadCrimeRecords: async () => {
+        if (!supabase) return;
+
+        try {
+          const [{ data: recordRows, error: recordError }, { data: proposalRows, error: proposalError }] = await Promise.all([
+            supabase.from("crime_records").select("*").eq("couple_id", COUPLE_ID).order("incident_date", { ascending: false }).order("created_at", { ascending: false }),
+            supabase.from("crime_record_proposals").select("*").eq("couple_id", COUPLE_ID).order("created_at", { ascending: false }),
+          ]);
+          if (recordError) throw recordError;
+          if (proposalError) throw proposalError;
+          set({
+            crimeRecords: (recordRows ?? []).map((row) => fromDatabaseCrimeRecord(row as Record<string, unknown>)),
+            crimeRecordProposals: (proposalRows ?? []).map((row) => fromDatabaseCrimeRecordProposal(row as Record<string, unknown>)),
+          });
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          set({ syncError: `讀取犯罪紀錄失敗：${message}` });
+        }
+      },
       loadRemoteData: async (showLoading = false) => {
         if (!supabase) return;
 
@@ -347,6 +492,9 @@ export const useStore = create<AppState>()(
             syncError: null,
           });
 
+          await get().loadHouseRules();
+          await get().loadCrimeRecords();
+
           if (showLoading) {
             await get().refreshCalendarEvents();
           } else {
@@ -377,6 +525,18 @@ export const useStore = create<AppState>()(
             void get().refreshCalendarEvents().catch((error) => {
               console.error("Unable to refresh calendar data", error);
             });
+          })
+          .on("postgres_changes", { event: "*", schema: "public", table: "house_rules", filter: `couple_id=eq.${COUPLE_ID}` }, () => {
+            void get().loadHouseRules();
+          })
+          .on("postgres_changes", { event: "*", schema: "public", table: "house_rule_proposals", filter: `couple_id=eq.${COUPLE_ID}` }, () => {
+            void get().loadHouseRules();
+          })
+          .on("postgres_changes", { event: "*", schema: "public", table: "crime_records", filter: `couple_id=eq.${COUPLE_ID}` }, () => {
+            void get().loadCrimeRecords();
+          })
+          .on("postgres_changes", { event: "*", schema: "public", table: "crime_record_proposals", filter: `couple_id=eq.${COUPLE_ID}` }, () => {
+            void get().loadCrimeRecords();
           })
           .subscribe();
 
@@ -561,6 +721,339 @@ export const useStore = create<AppState>()(
             else void get().loadRemoteData();
           });
         }
+      },
+      submitHouseRuleProposal: async (ruleNumber, text, proposedBy) => {
+        const trimmedText = text.trim();
+        const currentRule = get().houseRules.find((rule) => rule.ruleNumber === ruleNumber);
+        if (ruleNumber < 1 || ruleNumber > 10 || (!trimmedText && !currentRule?.text.trim())) return false;
+        if (get().houseRuleProposals.some((proposal) => proposal.ruleNumber === ruleNumber)) {
+          set({ syncError: "呢條家規已經有待確認修改。" });
+          return false;
+        }
+
+        const proposal: HouseRuleProposal = {
+          id: createUuid(),
+          ruleNumber,
+          currentText: currentRule?.text ?? "",
+          proposedText: trimmedText,
+          proposedBy,
+          remusApproved: proposedBy === "Remus",
+          nicoleApproved: proposedBy === "Nicole",
+          createdAt: new Date().toISOString(),
+        };
+
+        if (!supabase) {
+          set((state) => ({ houseRuleProposals: [...state.houseRuleProposals, proposal] }));
+          return true;
+        }
+
+        const { error } = await supabase.from("house_rule_proposals").insert({
+          id: proposal.id,
+          couple_id: COUPLE_ID,
+          rule_number: proposal.ruleNumber,
+          current_text: proposal.currentText,
+          proposed_text: proposal.proposedText,
+          proposed_by: proposal.proposedBy,
+          remus_approved: proposal.remusApproved,
+          nicole_approved: proposal.nicoleApproved,
+          created_at: proposal.createdAt,
+        });
+        if (error) {
+          set({ syncError: `提交家規修改失敗：${error.message}` });
+          return false;
+        }
+        set((state) => ({
+          houseRuleProposals: [...state.houseRuleProposals, proposal],
+          syncError: null,
+        }));
+        await get().loadHouseRules();
+        return true;
+      },
+      approveHouseRuleProposal: async (proposalId, approvedBy) => {
+        const proposal = get().houseRuleProposals.find((item) => item.id === proposalId);
+        if (!proposal) return false;
+        const nextProposal = {
+          ...proposal,
+          remusApproved: proposal.remusApproved || approvedBy === "Remus",
+          nicoleApproved: proposal.nicoleApproved || approvedBy === "Nicole",
+        };
+        const isFullyApproved = nextProposal.remusApproved && nextProposal.nicoleApproved;
+
+        if (!supabase) {
+          set((state) => ({
+            houseRules: isFullyApproved
+              ? state.houseRules.map((rule) => rule.ruleNumber === proposal.ruleNumber
+                ? { ...rule, text: proposal.proposedText, updatedBy: approvedBy, updatedAt: new Date().toISOString() }
+                : rule)
+              : state.houseRules,
+            houseRuleProposals: isFullyApproved
+              ? state.houseRuleProposals.filter((item) => item.id !== proposalId)
+              : state.houseRuleProposals.map((item) => item.id === proposalId ? nextProposal : item),
+          }));
+          return true;
+        }
+
+        const { error: proposalError } = await supabase
+          .from("house_rule_proposals")
+          .update({
+            remus_approved: nextProposal.remusApproved,
+            nicole_approved: nextProposal.nicoleApproved,
+          })
+          .eq("id", proposalId)
+          .eq("couple_id", COUPLE_ID);
+        if (proposalError) {
+          set({ syncError: `確認家規修改失敗：${proposalError.message}` });
+          return false;
+        }
+
+        if (isFullyApproved) {
+          const { error: ruleError } = await supabase
+            .from("house_rules")
+            .update({ text: proposal.proposedText, updated_by: approvedBy, updated_at: new Date().toISOString() })
+            .eq("rule_number", proposal.ruleNumber)
+            .eq("couple_id", COUPLE_ID);
+          if (ruleError) {
+            set({ syncError: `套用家規修改失敗：${ruleError.message}` });
+            return false;
+          }
+          await supabase.from("house_rule_proposals").delete().eq("id", proposalId).eq("couple_id", COUPLE_ID);
+        }
+        await get().loadHouseRules();
+        return true;
+      },
+      rejectHouseRuleProposal: async (proposalId) => {
+        if (!supabase) {
+          set((state) => ({ houseRuleProposals: state.houseRuleProposals.filter((proposal) => proposal.id !== proposalId) }));
+          return true;
+        }
+        const { error } = await supabase
+          .from("house_rule_proposals")
+          .delete()
+          .eq("id", proposalId)
+          .eq("couple_id", COUPLE_ID);
+        if (error) {
+          set({ syncError: `拒絕家規修改失敗：${error.message}` });
+          return false;
+        }
+        await get().loadHouseRules();
+        return true;
+      },
+      submitCrimeRecordProposal: async (crime, proposedBy) => {
+        const description = crime.description.trim();
+        if (!crime.incidentDate || !description || crime.offender === proposedBy) {
+          set({ syncError: "犯罪紀錄只可以提交對方作為犯案人。" });
+          return false;
+        }
+
+        const proposal: CrimeRecordProposal = {
+          id: createUuid(),
+          incidentDate: crime.incidentDate,
+          offender: crime.offender,
+          ruleNumber: crime.ruleNumber,
+          ruleText: crime.ruleNumber ? get().houseRules.find((rule) => rule.ruleNumber === crime.ruleNumber)?.text ?? "" : undefined,
+          description,
+          status: "未處理",
+          punishment: "",
+          proposedBy,
+          createdAt: new Date().toISOString(),
+        };
+
+        if (!supabase) {
+          set((state) => ({ crimeRecordProposals: [proposal, ...state.crimeRecordProposals] }));
+          return true;
+        }
+
+        const { error } = await supabase.from("crime_record_proposals").insert({
+          id: proposal.id,
+          couple_id: COUPLE_ID,
+          incident_date: proposal.incidentDate,
+          offender: proposal.offender,
+          rule_number: proposal.ruleNumber ?? null,
+          rule_text: proposal.ruleText ?? "",
+          description: proposal.description,
+          status: proposal.status,
+          punishment: proposal.punishment,
+          proposed_by: proposal.proposedBy,
+          created_at: proposal.createdAt,
+        });
+        if (error) {
+          set({ syncError: `提交犯罪紀錄失敗：${error.message}` });
+          return false;
+        }
+        set((state) => ({ crimeRecordProposals: [proposal, ...state.crimeRecordProposals], syncError: null }));
+        await get().loadCrimeRecords();
+        return true;
+      },
+      confirmCrimeRecordProposal: async (proposalId, confirmedBy) => {
+        const proposal = get().crimeRecordProposals.find((item) => item.id === proposalId);
+        if (!proposal) return false;
+        if (proposal.proposedBy === confirmedBy) {
+          set({ syncError: "要由對方確認先可以正式記錄。" });
+          return false;
+        }
+
+        if (proposal.recordId) {
+          const existingRecord = get().crimeRecords.find((item) => item.id === proposal.recordId);
+          if (!existingRecord || existingRecord.recordedBy !== proposal.proposedBy) {
+            set({ syncError: "無法確認呢項犯罪紀錄修改。" });
+            return false;
+          }
+          if (!supabase) {
+            set((state) => ({
+              crimeRecords: state.crimeRecords.map((item) => item.id === proposal.recordId
+                ? { ...item, status: proposal.status, punishment: proposal.punishment }
+                : item),
+              crimeRecordProposals: state.crimeRecordProposals.filter((item) => item.id !== proposalId),
+            }));
+            return true;
+          }
+          const { error: updateError } = await supabase
+            .from("crime_records")
+            .update({ status: proposal.status, punishment: proposal.punishment })
+            .eq("id", proposal.recordId)
+            .eq("couple_id", COUPLE_ID);
+          if (updateError) {
+            set({ syncError: `確認犯罪紀錄修改失敗：${updateError.message}` });
+            return false;
+          }
+          const { error: updateDeleteError } = await supabase
+            .from("crime_record_proposals")
+            .delete()
+            .eq("id", proposalId)
+            .eq("couple_id", COUPLE_ID);
+          if (updateDeleteError) {
+            set({ syncError: `清除待確認修改失敗：${updateDeleteError.message}` });
+            return false;
+          }
+          set((state) => ({
+            crimeRecords: state.crimeRecords.map((item) => item.id === proposal.recordId
+              ? { ...item, status: proposal.status, punishment: proposal.punishment }
+              : item),
+            crimeRecordProposals: state.crimeRecordProposals.filter((item) => item.id !== proposalId),
+            syncError: null,
+          }));
+          void get().loadCrimeRecords();
+          return true;
+        }
+
+        const record: CrimeRecord = {
+          id: createUuid(),
+          incidentDate: proposal.incidentDate,
+          offender: proposal.offender,
+          ruleNumber: proposal.ruleNumber,
+          ruleText: proposal.ruleText,
+          description: proposal.description,
+          status: proposal.status,
+          punishment: proposal.punishment,
+          recordedBy: proposal.proposedBy,
+          confirmedBy,
+          createdAt: new Date().toISOString(),
+          confirmedAt: new Date().toISOString(),
+        };
+
+        if (!supabase) {
+          set((state) => ({
+            crimeRecords: [record, ...state.crimeRecords],
+            crimeRecordProposals: state.crimeRecordProposals.filter((item) => item.id !== proposalId),
+          }));
+          return true;
+        }
+
+        const { error: recordError } = await supabase.from("crime_records").insert({
+          id: record.id,
+          couple_id: COUPLE_ID,
+          incident_date: record.incidentDate,
+          offender: record.offender,
+          rule_number: record.ruleNumber ?? null,
+          rule_text: record.ruleText ?? "",
+          description: record.description,
+          status: record.status,
+          punishment: record.punishment,
+          recorded_by: record.recordedBy,
+          confirmed_by: record.confirmedBy,
+          created_at: record.createdAt,
+          confirmed_at: record.confirmedAt,
+        });
+        if (recordError) {
+          set({ syncError: `確認犯罪紀錄失敗：${recordError.message}` });
+          return false;
+        }
+        const { error: deleteError } = await supabase
+          .from("crime_record_proposals")
+          .delete()
+          .eq("id", proposalId)
+          .eq("couple_id", COUPLE_ID);
+        if (deleteError) {
+          set({ syncError: `清除待確認紀錄失敗：${deleteError.message}` });
+          return false;
+        }
+        set((state) => ({
+          crimeRecords: [record, ...state.crimeRecords],
+          crimeRecordProposals: state.crimeRecordProposals.filter((item) => item.id !== proposalId),
+          syncError: null,
+        }));
+        void get().loadCrimeRecords();
+        return true;
+      },
+      rejectCrimeRecordProposal: async (proposalId) => {
+        if (!supabase) {
+          set((state) => ({ crimeRecordProposals: state.crimeRecordProposals.filter((item) => item.id !== proposalId) }));
+          return true;
+        }
+        const { error } = await supabase
+          .from("crime_record_proposals")
+          .delete()
+          .eq("id", proposalId)
+          .eq("couple_id", COUPLE_ID);
+        if (error) {
+          set({ syncError: `拒絕犯罪紀錄失敗：${error.message}` });
+          return false;
+        }
+        await get().loadCrimeRecords();
+        return true;
+      },
+      submitCrimeRecordUpdate: async (id, status, punishment, proposedBy) => {
+        const record = get().crimeRecords.find((item) => item.id === id);
+        if (!record || record.recordedBy !== proposedBy) {
+          set({ syncError: "只有提交犯罪紀錄嘅一方可以修改狀態同懲罰。" });
+          return false;
+        }
+        const proposal: CrimeRecordProposal = {
+          id: createUuid(),
+          recordId: id,
+          incidentDate: record.incidentDate,
+          offender: record.offender,
+          ruleNumber: record.ruleNumber,
+          description: record.description,
+          status,
+          punishment: punishment.trim(),
+          proposedBy,
+          createdAt: new Date().toISOString(),
+        };
+        if (!supabase) {
+          set((state) => ({ crimeRecordProposals: [proposal, ...state.crimeRecordProposals] }));
+          return true;
+        }
+        const { error } = await supabase.from("crime_record_proposals").insert({
+          id: proposal.id,
+          couple_id: COUPLE_ID,
+          record_id: proposal.recordId,
+          incident_date: proposal.incidentDate,
+          offender: proposal.offender,
+          rule_number: proposal.ruleNumber ?? null,
+          description: proposal.description,
+          status: proposal.status,
+          punishment: proposal.punishment,
+          proposed_by: proposal.proposedBy,
+          created_at: proposal.createdAt,
+        });
+        if (error) {
+          set({ syncError: `提交犯罪紀錄修改失敗：${error.message}` });
+          return false;
+        }
+        set((state) => ({ crimeRecordProposals: [proposal, ...state.crimeRecordProposals], syncError: null }));
+        await get().loadCrimeRecords();
+        return true;
       },
       lockExpiredHistories: () => {
         const TWO_DAYS_MS = 2 * 24 * 60 * 60 * 1000;

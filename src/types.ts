@@ -52,3 +52,53 @@ export type Wish = {
   completedCount: number;
   history: WishHistory[];
 };
+
+export type HouseRule = {
+  id: string;
+  ruleNumber: number;
+  text: string;
+  updatedBy?: UserRole;
+  updatedAt?: string;
+};
+
+export type HouseRuleProposal = {
+  id: string;
+  ruleNumber: number;
+  currentText: string;
+  proposedText: string;
+  proposedBy: UserRole;
+  remusApproved: boolean;
+  nicoleApproved: boolean;
+  createdAt: string;
+};
+
+export type CrimeStatus = "未處理" | "錫返了";
+
+export type CrimeRecord = {
+  id: string;
+  incidentDate: string;
+  offender: UserRole;
+  ruleNumber?: number;
+  ruleText?: string;
+  description: string;
+  status: CrimeStatus;
+  punishment: string;
+  recordedBy: UserRole;
+  confirmedBy: UserRole;
+  createdAt: string;
+  confirmedAt: string;
+};
+
+export type CrimeRecordProposal = {
+  id: string;
+  recordId?: string;
+  incidentDate: string;
+  offender: UserRole;
+  ruleNumber?: number;
+  ruleText?: string;
+  description: string;
+  status: CrimeStatus;
+  punishment: string;
+  proposedBy: UserRole;
+  createdAt: string;
+};

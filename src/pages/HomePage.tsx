@@ -6,10 +6,13 @@ import TagManagerModal from "../components/TagManagerModal";
 import StatsModal from "../components/StatsModal";
 import CalendarPage from "./CalendarPage";
 import RandomWishPage from "./RandomWishPage";
+import HouseRulesPage from "./HouseRulesPage";
 
 export default function HomePage() {
   const currentUser = useStore((s) => s.currentUser);
   const wishes = useStore((s) => s.wishes);
+  const houseRuleProposals = useStore((s) => s.houseRuleProposals);
+  const crimeRecordProposals = useStore((s) => s.crimeRecordProposals);
   const syncError = useStore((s) => s.syncError);
   const clearSyncError = useStore((s) => s.clearSyncError);
   const setCurrentUser = useStore((s) => s.setCurrentUser);
@@ -22,7 +25,7 @@ export default function HomePage() {
   const [showTagManager, setShowTagManager] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [showWishDetail, setShowWishDetail] = useState(false);
-  const [activePage, setActivePage] = useState<"wishes" | "calendar" | "random">("wishes");
+  const [activePage, setActivePage] = useState<"wishes" | "calendar" | "random" | "rules">("wishes");
   const [completedViewRequest, setCompletedViewRequest] = useState(0);
 
   const isRemus = currentUser?.username === "Remus";
@@ -46,6 +49,13 @@ export default function HomePage() {
         !latestHistory.remarks[ratingRole]?.trim(),
     );
   }).length;
+  const pendingHouseRuleCount = houseRuleProposals.filter((proposal) =>
+    isRemus ? !proposal.remusApproved : !proposal.nicoleApproved,
+  ).length;
+  const pendingCrimeRecordCount = crimeRecordProposals.filter((proposal) =>
+    proposal.proposedBy !== (isRemus ? "Remus" : "Nicole"),
+  ).length;
+  const pendingCoupleRuleCount = pendingHouseRuleCount + pendingCrimeRecordCount;
 
   useEffect(() => {
     // 檢查是否有儲存登入狀態
@@ -103,6 +113,17 @@ export default function HomePage() {
 
           {/* 右側操作按鈕 */}
           <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
+            {pendingCoupleRuleCount > 0 && (
+              <button
+                type="button"
+                onClick={() => setActivePage("rules")}
+                className="relative flex h-8 min-w-8 items-center justify-center rounded-full bg-amber-300 px-2 text-sm font-black leading-none text-amber-950 shadow-sm sm:h-9 sm:min-w-9"
+                title={`${pendingCoupleRuleCount} 條家規／犯罪紀錄等你確認`}
+                aria-label={`${pendingCoupleRuleCount} 條家規／犯罪紀錄等你確認`}
+              >
+                📜 {pendingCoupleRuleCount}
+              </button>
+            )}
             {pendingReviewCount > 0 && (
               <button
                 type="button"
@@ -165,7 +186,7 @@ export default function HomePage() {
           </div>
         )}
 
-        <div className="mb-3 flex gap-1 rounded-2xl bg-gray-100 p-1 dark:bg-gray-800">
+        <div className="mb-3 grid grid-cols-2 gap-1 rounded-2xl bg-gray-100 p-1 sm:grid-cols-4 dark:bg-gray-800">
           <button
             onClick={() => setActivePage("wishes")}
             className={`flex-1 rounded-xl px-3 py-2 text-sm font-bold transition-all ${
@@ -190,6 +211,14 @@ export default function HomePage() {
           >
             🎲 做咩好？
           </button>
+          <button
+            onClick={() => setActivePage("rules")}
+            className={`flex-1 rounded-xl px-3 py-2 text-sm font-bold transition-all ${
+              activePage === "rules" ? "bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-gray-100" : "text-gray-500 dark:text-gray-400"
+            }`}
+          >
+            📜 家規
+          </button>
         </div>
 
         {activePage === "wishes" ? (
@@ -198,7 +227,7 @@ export default function HomePage() {
             initialStatusFilter={completedViewRequest > 0 ? "completed" : "open"}
             onDetailChange={setShowWishDetail}
           />
-        ) : activePage === "calendar" ? <CalendarPage /> : <RandomWishPage />}
+        ) : activePage === "calendar" ? <CalendarPage /> : activePage === "random" ? <RandomWishPage /> : <HouseRulesPage />}
       </main>
 
       {/* 手機版右下角 Floating Action Button (新增願望) */}
