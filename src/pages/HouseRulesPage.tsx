@@ -159,7 +159,7 @@ export default function HouseRulesPage() {
                           onClick={() => void handleReject(proposal.id)}
                           className="touch-manipulation rounded-lg border border-amber-300 px-3 py-1.5 font-semibold text-amber-800 disabled:opacity-50 dark:border-amber-700 dark:text-amber-200"
                         >
-                          拒絕
+                          {proposal.proposedBy === currentRole ? "取消" : "拒絕"}
                         </button>
                       </div>
                     </div>

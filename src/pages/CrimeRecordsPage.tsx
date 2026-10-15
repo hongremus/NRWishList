@@ -206,7 +206,7 @@ export default function CrimeRecordsPage() {
                   ) : (
                     <span className="rounded-lg bg-white/70 px-3 py-1.5 text-xs font-semibold text-amber-700 dark:bg-[#171717]/70 dark:text-amber-200">等對方確認</span>
                   )}
-                  <button type="button" disabled={saving} onClick={() => void rejectCrime(proposal.id)} className="touch-manipulation rounded-lg border border-amber-300 px-3 py-1.5 text-xs font-semibold text-amber-800 disabled:opacity-50 dark:border-amber-700 dark:text-amber-100">拒絕</button>
+                  <button type="button" disabled={saving} onClick={() => void rejectCrime(proposal.id)} className="touch-manipulation rounded-lg border border-amber-300 px-3 py-1.5 text-xs font-semibold text-amber-800 disabled:opacity-50 dark:border-amber-700 dark:text-amber-100">{proposal.proposedBy === currentRole ? "取消" : "拒絕"}</button>
                 </div>
                 </article>
               </React.Fragment>
