@@ -1,6 +1,6 @@
 import create from "zustand";
 import { persist } from "zustand/middleware";
-import { CalendarEvent, CrimeRecord, CrimeRecordProposal, HouseRule, HouseRuleProposal, User, UserRole, Wish, WishHistory } from "./types";
+import { CalendarEvent, CrimeRecord, CrimeRecordProposal, CrimeStatus, HouseRule, HouseRuleProposal, User, UserRole, Wish, WishHistory } from "./types";
 import { supabase } from "./supabase";
 
 const COUPLE_ID = "remus-nicole";
@@ -215,6 +215,8 @@ function fromDatabaseCrimeRecord(row: Record<string, unknown>): CrimeRecord {
     offender: row.offender === "Nicole" ? "Nicole" : "Remus",
     ruleNumber: row.rule_number == null ? undefined : Number(row.rule_number),
     description: typeof row.description === "string" ? row.description : "",
+    status: row.status === "已道歉" || row.status === "已補償" || row.status === "已處理" ? row.status : "未處理",
+    punishment: typeof row.punishment === "string" ? row.punishment : "",
     recordedBy: row.recorded_by === "Nicole" ? "Nicole" : "Remus",
     confirmedBy: row.confirmed_by === "Nicole" ? "Nicole" : "Remus",
     createdAt: String(row.created_at),
@@ -229,6 +231,8 @@ function fromDatabaseCrimeRecordProposal(row: Record<string, unknown>): CrimeRec
     offender: row.offender === "Nicole" ? "Nicole" : "Remus",
     ruleNumber: row.rule_number == null ? undefined : Number(row.rule_number),
     description: typeof row.description === "string" ? row.description : "",
+    status: row.status === "已道歉" || row.status === "已補償" || row.status === "已處理" ? row.status : "未處理",
+    punishment: typeof row.punishment === "string" ? row.punishment : "",
     proposedBy: row.proposed_by === "Nicole" ? "Nicole" : "Remus",
     createdAt: String(row.created_at),
   };
@@ -859,6 +863,8 @@ export const useStore = create<AppState>()(
           offender: proposal.offender,
           rule_number: proposal.ruleNumber ?? null,
           description: proposal.description,
+          status: proposal.status,
+          punishment: proposal.punishment,
           proposed_by: proposal.proposedBy,
           created_at: proposal.createdAt,
         });
@@ -884,6 +890,8 @@ export const useStore = create<AppState>()(
           offender: proposal.offender,
           ruleNumber: proposal.ruleNumber,
           description: proposal.description,
+          status: proposal.status,
+          punishment: proposal.punishment,
           recordedBy: proposal.proposedBy,
           confirmedBy,
           createdAt: new Date().toISOString(),
@@ -905,6 +913,8 @@ export const useStore = create<AppState>()(
           offender: record.offender,
           rule_number: record.ruleNumber ?? null,
           description: record.description,
+          status: record.status,
+          punishment: record.punishment,
           recorded_by: record.recordedBy,
           confirmed_by: record.confirmedBy,
           created_at: record.createdAt,

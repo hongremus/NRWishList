@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useStore } from "../store";
-import { UserRole } from "../types";
+import { CrimeStatus, UserRole } from "../types";
 
 function getToday() {
   const date = new Date();
@@ -29,6 +29,8 @@ export default function CrimeRecordsPage() {
   const [incidentDate, setIncidentDate] = useState(getToday);
   const [ruleNumber, setRuleNumber] = useState("");
   const [description, setDescription] = useState("");
+  const [status, setStatus] = useState<CrimeStatus>("未處理");
+  const [punishment, setPunishment] = useState("");
   const [saving, setSaving] = useState(false);
   const [actionError, setActionError] = useState("");
 
@@ -40,6 +42,8 @@ export default function CrimeRecordsPage() {
     setIncidentDate(getToday());
     setRuleNumber("");
     setDescription("");
+    setStatus("未處理");
+    setPunishment("");
     setShowForm(false);
   }
 
@@ -52,6 +56,8 @@ export default function CrimeRecordsPage() {
       offender,
       ruleNumber: ruleNumber ? Number(ruleNumber) : undefined,
       description,
+      status,
+      punishment: punishment.trim(),
     }, currentRole);
     setSaving(false);
     if (saved) {
@@ -127,6 +133,21 @@ export default function CrimeRecordsPage() {
             發生咩事
             <textarea value={description} onChange={(event) => setDescription(event.target.value)} rows={4} placeholder="例如：偷食咗對方留低嘅蛋糕，仲扮唔知。" className="mt-1.5 w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm leading-6 dark:border-gray-700 dark:bg-gray-800 dark:text-white" />
           </label>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <label className="text-xs font-semibold text-gray-600 dark:text-gray-300">
+              案件狀態
+              <select value={status} onChange={(event) => setStatus(event.target.value as CrimeStatus)} className="mt-1.5 w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white">
+                <option value="未處理">未處理</option>
+                <option value="已道歉">已道歉</option>
+                <option value="已補償">已補償</option>
+                <option value="已處理">已處理</option>
+              </select>
+            </label>
+            <label className="text-xs font-semibold text-gray-600 dark:text-gray-300">
+              懲罰／處理方式
+              <input value={punishment} onChange={(event) => setPunishment(event.target.value)} placeholder="例如：請對方飲品一杯" className="mt-1.5 w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white" />
+            </label>
+          </div>
           <button type="button" disabled={saving || !incidentDate || !description.trim()} onClick={() => void submitCrime()} className={`w-full rounded-xl py-2.5 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-50 ${isRemus ? "bg-blue-500" : "bg-pink-500"}`}>
             提交，等對方確認
           </button>
@@ -148,6 +169,7 @@ export default function CrimeRecordsPage() {
                     </div>
                     <p className="mt-2 whitespace-pre-wrap break-words text-sm font-medium leading-6 text-amber-950 dark:text-amber-100">{proposal.description}</p>
                     <p className="mt-2 text-xs text-amber-700 dark:text-amber-300">{ruleLabel(proposal.ruleNumber)} · {proposal.proposedBy} 提交</p>
+                    <p className="mt-2 text-xs font-semibold text-amber-800 dark:text-amber-200">狀態：{proposal.status}{proposal.punishment ? ` · 懲罰：${proposal.punishment}` : ""}</p>
                   </div>
                   <span className="shrink-0 text-xl" aria-hidden="true">⚖️</span>
                 </div>
@@ -181,6 +203,7 @@ export default function CrimeRecordsPage() {
                   </div>
                   <p className="mt-2 whitespace-pre-wrap break-words text-sm font-medium leading-6 text-gray-800 dark:text-gray-100">{record.description}</p>
                   <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">{ruleLabel(record.ruleNumber)} · {record.confirmedBy} 已確認</p>
+                  <p className="mt-2 text-xs font-semibold text-gray-600 dark:text-gray-300">狀態：{record.status}{record.punishment ? ` · 懲罰：${record.punishment}` : ""}</p>
                 </div>
               </div>
             </article>

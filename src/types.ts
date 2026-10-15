@@ -72,12 +72,16 @@ export type HouseRuleProposal = {
   createdAt: string;
 };
 
+export type CrimeStatus = "未處理" | "已道歉" | "已補償" | "已處理";
+
 export type CrimeRecord = {
   id: string;
   incidentDate: string;
   offender: UserRole;
   ruleNumber?: number;
   description: string;
+  status: CrimeStatus;
+  punishment: string;
   recordedBy: UserRole;
   confirmedBy: UserRole;
   createdAt: string;
@@ -90,6 +94,8 @@ export type CrimeRecordProposal = {
   offender: UserRole;
   ruleNumber?: number;
   description: string;
+  status: CrimeStatus;
+  punishment: string;
   proposedBy: UserRole;
   createdAt: string;
 };
