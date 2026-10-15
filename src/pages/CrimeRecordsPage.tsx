@@ -173,7 +173,7 @@ export default function CrimeRecordsPage() {
             const firstCaseIndex = pendingProposals.findIndex((item) => !item.recordId);
             const firstUpdateIndex = pendingProposals.findIndex((item) => Boolean(item.recordId));
             return (
-              <React.Fragment key={proposal.id}>
+              <React.Fragment key={`${proposal.id}-${proposal.status}-${proposal.punishment}-${proposal.proposedBy}`}>
                 {index === firstCaseIndex && <h2 className="rounded-xl border border-amber-200 bg-amber-100 px-3 py-2 text-sm font-black text-amber-900 dark:border-amber-800/70 dark:bg-[#292315] dark:text-amber-100">待確認案件</h2>}
                 {index === firstUpdateIndex && <h2 className="rounded-xl border border-rose-200 bg-rose-100 px-3 py-2 text-sm font-black text-rose-900 dark:border-rose-800/70 dark:bg-rose-950/45 dark:text-rose-100">待確認懲罰／狀態修改</h2>}
                 <article className="rounded-2xl border border-amber-200 bg-amber-50 p-4 shadow-sm dark:border-amber-800/70 dark:bg-[#292315]">
@@ -191,11 +191,11 @@ export default function CrimeRecordsPage() {
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {canConfirm ? (
-                    <button type="button" disabled={saving} onClick={() => void confirmCrime(proposal.id)} className={`rounded-lg px-3 py-1.5 text-xs font-bold text-white disabled:opacity-50 ${isRemus ? "bg-blue-500" : "bg-pink-500"}`}>確認案件</button>
+                    <button type="button" disabled={saving} onClick={() => void confirmCrime(proposal.id)} className={`touch-manipulation rounded-lg px-3 py-1.5 text-xs font-bold text-white disabled:opacity-50 ${isRemus ? "bg-blue-500" : "bg-pink-500"}`}>確認案件</button>
                   ) : (
                     <span className="rounded-lg bg-white/70 px-3 py-1.5 text-xs font-semibold text-amber-700 dark:bg-[#171717]/70 dark:text-amber-200">等對方確認</span>
                   )}
-                  <button type="button" disabled={saving} onClick={() => void rejectCrime(proposal.id)} className="rounded-lg border border-amber-300 px-3 py-1.5 text-xs font-semibold text-amber-800 disabled:opacity-50 dark:border-amber-700 dark:text-amber-100">拒絕</button>
+                  <button type="button" disabled={saving} onClick={() => void rejectCrime(proposal.id)} className="touch-manipulation rounded-lg border border-amber-300 px-3 py-1.5 text-xs font-semibold text-amber-800 disabled:opacity-50 dark:border-amber-700 dark:text-amber-100">拒絕</button>
                 </div>
                 </article>
               </React.Fragment>

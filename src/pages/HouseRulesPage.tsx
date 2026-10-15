@@ -118,7 +118,7 @@ export default function HouseRulesPage() {
           const currentUserApproved = proposal && (isRemus ? proposal.remusApproved : proposal.nicoleApproved);
 
           return (
-            <article key={ruleNumber} className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+            <article key={`${ruleNumber}-${proposal?.id ?? "none"}-${proposal?.remusApproved ?? false}-${proposal?.nicoleApproved ?? false}`} className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-900">
               <div className="flex items-start gap-3">
                 <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-black text-white ${isRemus ? "bg-blue-500" : "bg-pink-500"}`}>
                   {ruleNumber}
@@ -145,7 +145,7 @@ export default function HouseRulesPage() {
                             type="button"
                             disabled={saving}
                             onClick={() => void handleApprove(proposal.id)}
-                            className={`rounded-lg px-3 py-1.5 text-xs font-bold text-white disabled:opacity-50 ${isRemus ? "bg-blue-500" : "bg-pink-500"}`}
+                            className={`touch-manipulation rounded-lg px-3 py-1.5 text-xs font-bold text-white disabled:opacity-50 ${isRemus ? "bg-blue-500" : "bg-pink-500"}`}
                           >
                             確認修改
                           </button>
@@ -157,7 +157,7 @@ export default function HouseRulesPage() {
                           type="button"
                           disabled={saving}
                           onClick={() => void handleReject(proposal.id)}
-                          className="rounded-lg border border-amber-300 px-3 py-1.5 font-semibold text-amber-800 disabled:opacity-50 dark:border-amber-700 dark:text-amber-200"
+                          className="touch-manipulation rounded-lg border border-amber-300 px-3 py-1.5 font-semibold text-amber-800 disabled:opacity-50 dark:border-amber-700 dark:text-amber-200"
                         >
                           拒絕
                         </button>
