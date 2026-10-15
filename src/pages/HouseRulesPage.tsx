@@ -76,18 +76,16 @@ export default function HouseRulesPage() {
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/70">Our little constitution</p>
             <h1 className="mt-1 text-2xl font-black">家規</h1>
             <p className="mt-2 text-sm leading-6 text-white/85">一齊寫低我哋想守住嘅十件事。最緊要互相尊重！相親相愛🩷</p>
+            {activeSection === "rules" && (pendingApprovalCount > 0 || pendingCrimeRecordCount > 0) && (
+              <div className="mt-4 flex flex-wrap items-center gap-2 text-xs font-bold text-amber-950">
+                {pendingApprovalCount > 0 && <span className="rounded-full bg-amber-300 px-3 py-1.5">家規待確認 {pendingApprovalCount} 條</span>}
+                {pendingCrimeRecordCount > 0 && <span className="rounded-full bg-amber-300 px-3 py-1.5">犯罪紀錄待確認 {pendingCrimeRecordCount} 宗</span>}
+              </div>
+            )}
           </div>
           <span className="text-4xl" aria-hidden="true">📜</span>
         </div>
       </div>
-
-      {(pendingApprovalCount > 0 || pendingCrimeRecordCount > 0) && (
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm font-semibold text-amber-800 dark:border-amber-900/50 dark:bg-amber-900/20 dark:text-amber-200">
-          <span aria-hidden="true">🔔</span>
-          {pendingApprovalCount > 0 && <span>有 {pendingApprovalCount} 條家規修改等你確認</span>}
-          {pendingCrimeRecordCount > 0 && <span>有 {pendingCrimeRecordCount} 宗犯罪紀錄等你確認</span>}
-        </div>
-      )}
 
       <div className="grid grid-cols-2 gap-1 rounded-2xl bg-gray-100 p-1 dark:bg-gray-800">
         <button
