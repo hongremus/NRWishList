@@ -147,7 +147,9 @@ export default function CrimeRecordsPage() {
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <label className="text-xs font-semibold text-gray-600 dark:text-gray-300">
               犯案日期
-              <input type="date" value={incidentDate} onChange={(event) => setIncidentDate(event.target.value)} className="mt-1.5 w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" />
+              <div className="mt-1.5 min-w-0 overflow-hidden rounded-xl">
+                <input type="date" value={incidentDate} onChange={(event) => setIncidentDate(event.target.value)} className="box-border min-w-0 w-full max-w-full appearance-none rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" />
+              </div>
             </label>
             <label className="text-xs font-semibold text-gray-600 dark:text-gray-300">
               犯案人
