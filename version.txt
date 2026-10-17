@@ -143,3 +143,4 @@ v1.3.1 — Touch and Confirm
 - 修正 iOS 實機收到家規或犯罪紀錄 realtime 更新後，確認／拒絕按鈕偶爾無法點擊的問題。
 - 改善 approval action block 更新時的觸控層重建及 iOS touch handling。
 - 犯罪紀錄狀態改為「錫返了」前需要使用者確認，確認後會鎖定狀態及懲罰，不能再修改。
+- 修正 iOS 日期／時間輸入欄超出畫面及網頁版日曆重複顯示兩個 picker icon 的問題。
