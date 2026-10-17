@@ -102,38 +102,6 @@ function getEventBarWidth(event: CalendarEvent, dateKey: string) {
   return "calc(100% + 0.625rem)";
 }
 
-function DateFieldIcon({ type }: { type: "date" | "time" }) {
-  return type === "date" ? (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 24 24"
-      className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <rect x="3" y="4.5" width="18" height="16" rx="2" />
-      <path d="M16 2.5v4M8 2.5v4M3 9.5h18" />
-    </svg>
-  ) : (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 24 24"
-      className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="12" cy="12" r="8.5" />
-      <path d="M12 7v5l3 2" />
-    </svg>
-  );
-}
-
 function toDateKey(date: Date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
@@ -1036,9 +1004,8 @@ export default function CalendarPage() {
                         isAllDay: form.endDate > startDate || form.isAllDay,
                       });
                     }}
-                    className="box-border min-w-0 w-full max-w-full appearance-none rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 pr-10 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+                    className="box-border min-w-0 w-full max-w-full appearance-none rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 pr-2 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
                   />
-                  <DateFieldIcon type="date" />
                 </div>
               </label>
               <label className="text-xs text-gray-500">
@@ -1055,9 +1022,8 @@ export default function CalendarPage() {
                         isAllDay: endDate > form.startDate || form.isAllDay,
                       });
                     }}
-                    className="box-border min-w-0 w-full max-w-full appearance-none rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 pr-10 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+                    className="box-border min-w-0 w-full max-w-full appearance-none rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 pr-2 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
                   />
-                  <DateFieldIcon type="date" />
                 </div>
               </label>
             </div>
@@ -1098,9 +1064,8 @@ export default function CalendarPage() {
                           endTime: addOneHour(startTime),
                         });
                       }}
-                      className="box-border min-w-0 w-full max-w-full appearance-none rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 pr-10 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+                      className="box-border min-w-0 w-full max-w-full appearance-none rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 pr-2 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
                     />
-                    <DateFieldIcon type="time" />
                   </div>
                 </label>
                 <label className="text-xs text-gray-500">
@@ -1112,9 +1077,8 @@ export default function CalendarPage() {
                       onChange={(event) =>
                         setForm({ ...form, endTime: event.target.value })
                       }
-                      className="box-border min-w-0 w-full max-w-full appearance-none rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 pr-10 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+                      className="box-border min-w-0 w-full max-w-full appearance-none rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 pr-2 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
                     />
-                    <DateFieldIcon type="time" />
                   </div>
                 </label>
               </div>
