@@ -362,7 +362,7 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
                       <span className="font-semibold text-gray-700 dark:text-gray-200">
                         第 {wish.history.length - index} 次完成
                       </span>
-                      <span>{new Date(h.completedAt).toLocaleString()}</span>
+                      <span>{new Date(h.completedAt).toLocaleDateString()}</span>
                     </div>
 
                     <div className="flex items-center justify-between text-xs">
