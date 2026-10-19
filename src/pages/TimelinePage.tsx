@@ -69,7 +69,14 @@ export default function TimelinePage() {
       const key = entry.occurredAt.slice(0, 7);
       grouped.set(key, [...(grouped.get(key) ?? []), entry]);
     });
-    grouped.forEach((items) => items.sort((a, b) => b.occurredAt.localeCompare(a.occurredAt)));
+    grouped.forEach((items) => items.sort((first, second) => {
+      const firstDate = first.occurredAt.slice(0, 10);
+      const secondDate = second.occurredAt.slice(0, 10);
+      if (firstDate !== secondDate) return secondDate.localeCompare(firstDate);
+      if (first.type !== second.type) return first.type === "calendar" ? -1 : 1;
+      if (first.type === "calendar") return first.title.localeCompare(second.title, "zh-Hant");
+      return second.occurredAt.localeCompare(first.occurredAt);
+    }));
     return grouped;
   }, [entries]);
 
