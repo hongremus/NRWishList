@@ -1020,6 +1020,10 @@ export const useStore = create<AppState>()(
           set({ syncError: "只有提交犯罪紀錄嘅一方可以修改狀態同懲罰。" });
           return false;
         }
+        if (record.status === "錫返了") {
+          set({ syncError: "呢宗犯罪紀錄已經標記為錫返了，唔可以再修改。" });
+          return false;
+        }
         const proposal: CrimeRecordProposal = {
           id: createUuid(),
           recordId: id,

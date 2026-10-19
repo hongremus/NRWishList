@@ -1,36 +1,28 @@
 NR Wish List 係 Remus 同 Nicole 共用嘅願望清單 app，主要功能包括：
-- 帳戶登入：Remus 同 Nicole 可以用自己嘅 Account Name 登入，使用各自身份操作願望；登入頁顯示由 Day 1 起計嘅相處年、月、日數。
-- 新增願望：記錄願望名稱、詳細描述、提出者、優先度、截止日同 Tag。
-- 編輯願望：隨時修改願望資料，包括名稱、描述、地區、優先度、截止日、Tag 同備註。
-- 完成管理：將願望標記為「搞掂咗」，完成前會先顯示確認訊息；完成後亦可以重做一次。
-- 完成紀錄：保存每次完成嘅時間、完成者、評分、備註同平均分數，方便回顧過往紀錄。
-- 評分同備註：完成願望後，Remus 同 Nicole 可以分別俾分同寫低感想，記錄一齊完成嘅體驗。
-- 地區分類：可以輸入香港地區，並喺願望卡及詳情頁顯示，亦可以按地區排序。
-- Tag 分類：用 Tag 整理不同類型願望，方便按分類篩選願望。
-- 優先度管理：以高、中、低三個級別標記願望重要程度，亦可以按優先度排序。
-- 清單篩選排序：可以按未搞掂、已完成、Tag 篩選，並按建立日期（最新／最舊）、優先度、截止日、完成次數或地區排序。
-- 統計分析：顯示願望總數、完成率、提出者、Top 5 完成排行及評分資料。
-- 共用日曆：Remus 同 Nicole 可以新增、編輯及刪除活動，並透過 Supabase Realtime 同步。
-- 日曆功能：支援香港假期、紀念日、浪漫約會活動、跨日活動及日期／時間驗證；今日日期會以紫框淺紫底標示。
-- Mobile 日曆版面：跨日活動顯示連續長條，粉紅／藍色活動分開 lane，單日活動顯示 dot，行高會按每行標示數量自動調整。
-- 活動重覆及跳轉：單日活動可以揀年份、月份及多個日子重覆，年份／月份 dropdown 改動後會即時切換月份。
-- 權限管理：普通活動只限建立者操作；用戶建立嘅約會活動可由兩人共同管理，固定紀念日保持唯讀。
-- 手機支援：針對 iPhone 同手機瀏覽器調整願望清單、日曆、輸入框、Modal 同滑動操作。
-- 共享同步：資料會保存到 Supabase，願望及日曆活動會同步最新變更。
+- 帳戶登入：使用各自 Account Name 登入，並顯示由 Day 1 起計嘅相處時間。
+- 願望管理：新增、編輯、完成、重做及刪除願望，支援描述、提出者、優先度、截止日、地區、Tag 同備註。
+- 完成紀錄：保存完成時間、完成者、評分及感想，支援多次完成同時間線回顧。
+- 篩選排序：按狀態、Tag、地區、優先度、截止日、建立日期、完成次數及附近地區整理願望。
+- 統計分析：顯示願望總數、完成率、提出者、完成排行、完成次數及評分資料。
+- 共用日曆：新增、編輯及刪除活動，支援香港假期、紀念日、約會活動、跨日活動、重覆活動及日期跳轉。
+- 日曆權限：普通活動由建立者管理，約會活動可由兩人共同管理，固定紀念日保持唯讀。
+- 家規及犯罪紀錄：支援雙方確認、拒絕、鎖定已解決紀錄及 Realtime 同步。
+- Random Date：按 Tag、評分及完成時間抽選已完成願望重做，亦支援未做過願望模式。
+- Supabase 同步及手機支援：願望、紀錄及日曆即時同步，並針對 iPhone 及手機瀏覽器優化版面與操作。
 
 NR Wish List Version History
 
 v1.0.0 — The Wish Awakens
-- 初版 NR Wish List。
-- 支援新增、完成、重做、刪除願望，以及優先度、負責人、截止日、Tag、備註同完成紀錄。
-- 接駁 Supabase，支援兩個人共享願望資料。
+- 初版 NR Wish List，支援新增、編輯、完成、重做及刪除願望。
+- 加入優先度、提出者、截止日、Tag、備註及完成紀錄。
+- 接駁 Supabase，支援 Remus 同 Nicole 共享及同步願望資料。
 
 v1.0.1 — Pocket Rocket
-- 集中改善手機版 responsive layout，包括 header、願望卡片、操作按鈕及 modal。
+- 集中改善手機版 responsive layout，包括 header、願望卡、操作按鈕及 modal。
 - Login page 加入版本顯示、NR Wish List app icon 同 favicon。
 
 v1.0.2 — Wish Upon Details
-- 重整願望詳情、評分、重做同刪除操作流程，成張願望卡可以撳入詳情頁。
+- 重整願望詳情、評分、重做及刪除操作流程。
 - 按登入使用者限制評分操作，只顯示自己可以俾嘅分。
 
 v1.0.3 — Canto-lish
@@ -38,16 +30,16 @@ v1.0.3 — Canto-lish
 - Wish detail modal 加入背景 scroll lock，改善 iPhone 使用體驗。
 
 v1.0.4 — Sync and the City
-- 改善 dark mode 嘅背景、卡片同 modal 顏色層次。
-- 完善 Supabase shared data sync、Realtime 同 mutation error handling，並建立 production deployment workflow。
+- 改善 Supabase shared data sync、Realtime 同 mutation error handling。
+- 建立 production deployment workflow。
 
 v1.0.5 — Zoom? No Thanks
-- 移除 dark mode toggle，統一使用 light mode，Wish cards 還原為白色外觀。
+- 移除 dark mode toggle，統一使用 light mode。
 - 所有 modal 加入 iPhone body scroll lock，並改善手機輸入框體驗。
 
 v1.0.6 — NR Goes Brrr
-- 設計並加入 NR monogram app logo、browser favicon、PWA icon 同 login page branding。
-- Tag 改為新增願望時必填，未揀 Tag 唔可以提交。
+- 加入 NR monogram app logo、browser favicon、PWA icon 同 login page branding。
+- Tag 改為新增願望時必填。
 
 v1.0.7 — Modal Kombat
 - 重整 subpage、modal、FAB 及完成願望詳情嘅層級和開關行為。
@@ -57,7 +49,7 @@ v1.0.8 — Password? Bye
 - 整理「許願」入口及新增願望版面，保留下方 FAB 作主要入口。
 
 v1.0.9 — Location, Location, Location
-- 新增地區欄位，支援保存、編輯、顯示及按地區排序。
+- 新增地區欄位，支援保存、顯示及按地區排序。
 - 加入地區／附近願望搜尋，並改善截止日清除及完成前確認流程。
 
 v1.0.10 — History Repeating
@@ -74,67 +66,51 @@ v1.0.12 — Stats McGee
 - 顯示願望提出者、完成次數及平均評分，方便比較共同完成紀錄。
 
 v1.1.0 — Calendar? We Ball
-- 新增 Remus 同 Nicole 共用行事曆，活動會透過 Supabase Realtime 同步。
-- 加入香港公眾假期、浪漫紀念日提示、建立者 marker 顏色及活動 CRUD。
-- 活動支援日期／時間驗證、自動結束時間，以及跨日全日活動。
-- 單日活動支援揀年份、月份及多個日子一次過重覆。
-- 年份／月份可以直接跳轉，並支援由 2026 年開始嘅逐年選擇。
-- 固定紀念日按年份顯示「我哋紀念日」、「1周年紀念」等名稱，並保持唯讀。
-- 約會活動開放 Remus 同 Nicole 共同重覆、編輯及刪除；普通活動仍只限建立者操作。
-- 2026 年 7 月 1 日改名為「港殤日」，10 月 1 日改名為「鄰近國家國慶日」。
+- 新增 Remus 同 Nicole 共用行事曆，活動透過 Supabase Realtime 同步。
+- 支援香港公眾假期、浪漫紀念日、約會活動、普通活動及跨日全日活動。
+- 加入日期／時間驗證、自動結束時間、年份／月份跳轉及多日期重覆活動。
+- 普通活動只限建立者管理；約會活動可由兩人共同編輯及刪除，固定紀念日保持唯讀。
 
 v1.1.1 — Calendar, Clearly
-- Mobile 行事曆加入連續跨日活動 bar、分開活動 lane、單日活動 dot，以及按內容自動調整行高。
-- 修正跨日 bar 對齊、modal／確認窗層級、今日紫色標記及月份直接切換。
-- Mobile 行事曆支援左右 swipe 轉換月份，並喺月份邊界停止切換。
-- 月份選擇由 2026 年開始，結束年份按 current year + 1 動態延伸。
-- 統一願望統計、管理 Tag、新增／編輯及重覆活動 modal 層級，避免內容互相穿底。
-- 轉換月份時自動選取該月份 1 號，方便即時查看該月活動。
-- 公眾假期移除旗仔 icon，管理 Tag 改為 header icon。
-- 登入頁相處日數改用日曆計算，正確顯示 Day 1、月份及周年，並隱藏零值單位。
+- 手機日曆加入連續跨日活動 bar、分開活動 lane、單日活動 dot，以及按內容自動調整行高。
+- 修正跨日 bar 對齊、今日標記、月份切換及 modal 層級。
 
 v1.1.2 — Small Moves, Better Days
-- 願望排序 dropdown 加入「新增日期（最舊）」。
-- 點擊日曆上／下個月日期時，自動跳到該日期所屬月份並選取該日。
+- 願望排序加入「新增日期（最舊）」。
+- 點擊日曆上／下個月日期時，自動跳到該月份並選取該日。
 
 v1.1.3 — Room To Say More
-- 評分改為 10 分滿分，現有 1–5 分可透過 Supabase migration 轉換為 10 分制。
+- 評分改為 10 分滿分，現有 1–5 分可透過 migration 轉換。
 - 評分 Remark 輸入框加高至 10 行，方便輸入較長評論。
 
 v1.1.4 — Sort It Out
-- 未搞掂及已完成願望使用各自嘅排序選項，並移除「全部」分類。
-- 已完成願望支援按最新／最舊完成時間及完成次數排序，多次完成會以最新完成時間計算。
-- 修正超長 description 及網站連結穿出願望卡片嘅問題。
+- 未搞掂及已完成願望使用各自排序選項，並移除「全部」分類。
+- 已完成願望支援按完成時間及完成次數排序，並修正長文字溢出。
 
 v1.1.5 — Calendar & Check-ins
-- 手機日曆單日非全日活動按建立者顏色合併小點，同色活動每日只顯示一粒。
-- 手機日曆跨日全日活動按月份統一分配 lane，重疊活動會自動新增一行，並保持長條位置一致。
-- 日曆格高度按每星期實際需要調整，只有受影響嘅星期行會拉高。
-- 「加入日曆」更新為「加入 Google 日曆」，並以外部連結開啟 Google Calendar，保留原本 web app 畫面。
-- Header 加入 pending review 數字提示，只有存在未評分及留言嘅近期完成願望時顯示。
-- Pending review 提示改用深酒紅圓形按鈕，點擊後會直接開啟已完成願望清單。
-- 香港公眾假期改用自動計算，按香港假期規則處理農曆日期及補假，毋須每年手動更新日期。
-- 保留 7 月 1 日「港殤日」及 10 月 1 日「總之係紅日」嘅全年特別顯示。
+- 改善手機日曆活動 lane、跨日 bar、行高及 Google Calendar 入口。
+- 加入 pending review 提示及按香港規則自動計算公眾假期。
 
 v1.1.6 — Split Wish Records
-- 願望主資料改由 `wishMaster` 管理，完成紀錄改由 `wishHistory` 管理。
-- 保留現有願望清單、完成紀錄、評分、留言及 Realtime 使用方式。
-- 舊 `wishes` table 暫時保留作 backup，方便確認新 table 運作正常後再清理。
+- 將願望主資料及完成紀錄分拆為 `wishMaster` 同 `wishHistory`。
+- 保留願望清單、完成紀錄、評分、留言及 Realtime 同步功能。
+- 舊 `wishes` table 暫時保留作 backup，方便確認 migration 後資料正常。
 
 v1.2.0 — Lucky Dip
-- 新增加權隨機抽選頁，從已完成及評分達 7 分或以上嘅願望中抽選下一個重做項目。
-- 支援按 Tag 篩選、評分及完成時間加權、抽獎滾動動畫，以及結果卡片即時顯示。
-- 加入「再做一次」確認流程，並按 Remus／Nicole 帳戶套用藍色／粉紅色主題。
+- 新增 Random Date 頁面，從已完成及評分達 7 分或以上嘅願望抽選下一個重做項目。
+- 支援按 Tag、評分及完成時間加權，並加入抽獎動畫及結果卡片。
 
 v1.2.1 — Two Ways To Date
-- Random Date 加入「再戰!」加權重做及「嚟緊Try!」未做過等機率抽選模式。
-- 未做過模式隱藏機率及重做按鈕，option 顯示地區等簡單資料；抽中結果整合到 Random Date hero card。
-- Wish List 同 Random Date 嘅 Tag 按使用數量由多至少排序，Random Date 會預設揀最前 Tag。
+- Random Date 加入「再戰!」加權重做及「嚟緊 Try!」未做過願望模式。
+- Wish List 同 Random Date 嘅 Tag 按使用數量排序，並預設選取最常用 Tag。
 
 v1.3.0 — House Rules
-- 新增「家規」頁面，提供 10 條共同家規位置，每條只保存一段文字。
-- 家規修改及清空會先建立待確認提案，提案人自動確認，另一方確認後先正式生效。
-- 支援拒絕待確認修改，並透過 Supabase Realtime 同步家規及提案狀態。
-- 「家規」頁面內加入「犯罪紀錄」，記錄犯案日期、犯案人、違反家規及事件描述。
-- 犯罪紀錄提交後需要另一方確認，先會正式加入已確認紀錄；雙方都可以拒絕待確認案件。
-- 支援 Supabase Realtime 同步家規、犯罪紀錄及待確認提案。
+- 新增家規頁面，提供 10 條共同家規位置。
+- 家規修改及清空會建立待確認提案，需要另一方確認先正式生效。
+- 加入犯罪紀錄，記錄犯案日期、犯案人、違反家規及事件描述。
+- 犯罪紀錄需要另一方確認，支援拒絕、Realtime 同步及已解決紀錄鎖定。
+
+v1.3.1 — Touch and Confirm
+- 修正 iOS 實機收到 Realtime 更新後，確認／拒絕按鈕偶爾無法點擊嘅問題。
+- 犯罪紀錄標記為「錫返了」前需要確認，完成後鎖定狀態及懲罰。
+- 修正 iOS 日期／時間輸入欄溢出，以及網頁版日曆重複顯示 picker icon 嘅問題。

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useStore } from "../store";
 import { CrimeStatus, UserRole } from "../types";
+import ConfirmModal from "../components/ConfirmModal";
 
 function getToday() {
   const date = new Date();
@@ -35,6 +36,7 @@ export default function CrimeRecordsPage() {
   const [editingPunishment, setEditingPunishment] = useState("");
   const [saving, setSaving] = useState(false);
   const [actionError, setActionError] = useState("");
+  const [pendingStatusSave, setPendingStatusSave] = useState<{ id: string; punishment: string } | null>(null);
 
   const currentRole = currentUser?.role ?? "Remus";
   const isRemus = currentRole === "Remus";
@@ -59,9 +61,18 @@ export default function CrimeRecordsPage() {
   }
 
   async function saveRecordDetails(id: string) {
+    const record = crimeRecords.find((item) => item.id === id);
+    if (editingStatus === "錫返了" && record?.status !== "錫返了") {
+      setPendingStatusSave({ id, punishment: editingPunishment });
+      return;
+    }
+    await submitRecordDetails(id, editingStatus, editingPunishment);
+  }
+
+  async function submitRecordDetails(id: string, status: CrimeStatus, punishment: string) {
     setActionError("");
     setSaving(true);
-    const saved = await submitCrimeRecordUpdate(id, editingStatus, editingPunishment, currentRole);
+    const saved = await submitCrimeRecordUpdate(id, status, punishment, currentRole);
     setSaving(false);
     if (saved) cancelEditing();
     else setActionError(syncError || "更新未成功，請稍後再試。 ");
@@ -175,7 +186,7 @@ export default function CrimeRecordsPage() {
             const firstCaseIndex = pendingProposals.findIndex((item) => !item.recordId);
             const firstUpdateIndex = pendingProposals.findIndex((item) => Boolean(item.recordId));
             return (
-              <React.Fragment key={proposal.id}>
+              <React.Fragment key={`${proposal.id}-${proposal.status}-${proposal.punishment}-${proposal.proposedBy}`}>
                 {index === firstCaseIndex && <h2 className="rounded-xl border border-amber-200 bg-amber-100 px-3 py-2 text-sm font-black text-amber-900 dark:border-amber-800/70 dark:bg-[#292315] dark:text-amber-100">待確認案件</h2>}
                 {index === firstUpdateIndex && <h2 className="rounded-xl border border-rose-200 bg-rose-100 px-3 py-2 text-sm font-black text-rose-900 dark:border-rose-800/70 dark:bg-rose-950/45 dark:text-rose-100">待確認懲罰／狀態修改</h2>}
                 <article className="rounded-2xl border border-amber-200 bg-amber-50 p-4 shadow-sm dark:border-amber-800/70 dark:bg-[#292315]">
@@ -193,11 +204,11 @@ export default function CrimeRecordsPage() {
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {canConfirm ? (
-                    <button type="button" disabled={saving} onClick={() => void confirmCrime(proposal.id)} className={`rounded-lg px-3 py-1.5 text-xs font-bold text-white disabled:opacity-50 ${isRemus ? "bg-blue-500" : "bg-pink-500"}`}>確認案件</button>
+                    <button type="button" disabled={saving} onClick={() => void confirmCrime(proposal.id)} className={`touch-manipulation rounded-lg px-3 py-1.5 text-xs font-bold text-white disabled:opacity-50 ${isRemus ? "bg-blue-500" : "bg-pink-500"}`}>確認案件</button>
                   ) : (
                     <span className="rounded-lg bg-white/70 px-3 py-1.5 text-xs font-semibold text-amber-700 dark:bg-[#171717]/70 dark:text-amber-200">等對方確認</span>
                   )}
-                  <button type="button" disabled={saving} onClick={() => void rejectCrime(proposal.id)} className="rounded-lg border border-amber-300 px-3 py-1.5 text-xs font-semibold text-amber-800 disabled:opacity-50 dark:border-amber-700 dark:text-amber-100">拒絕</button>
+                  <button type="button" disabled={saving} onClick={() => void rejectCrime(proposal.id)} className="touch-manipulation rounded-lg border border-amber-300 px-3 py-1.5 text-xs font-semibold text-amber-800 disabled:opacity-50 dark:border-amber-700 dark:text-amber-100">{proposal.proposedBy === currentRole ? "取消" : "拒絕"}</button>
                 </div>
                 </article>
               </React.Fragment>
@@ -239,7 +250,7 @@ export default function CrimeRecordsPage() {
                   ) : (
                     <div className="mt-2 flex flex-wrap items-center gap-2">
                       <p className="text-xs font-semibold text-gray-600 dark:text-gray-300">狀態：{record.status}{record.punishment ? ` · 懲罰：${record.punishment}` : ""}</p>
-                      {record.recordedBy === currentRole && !proposals.some((proposal) => proposal.recordId === record.id) && <button type="button" onClick={() => startEditing(record)} className="rounded-lg bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-600 dark:bg-slate-800 dark:text-slate-200">提出修改</button>}
+                      {record.recordedBy === currentRole && record.status !== "錫返了" && !proposals.some((proposal) => proposal.recordId === record.id) && <button type="button" onClick={() => startEditing(record)} className="rounded-lg bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-600 dark:bg-slate-800 dark:text-slate-200">提出修改</button>}
                       {record.recordedBy === currentRole && proposals.some((proposal) => proposal.recordId === record.id) && <span className="text-xs font-semibold text-amber-700 dark:text-amber-300">等對方確認修改</span>}
                     </div>
                   )}
@@ -249,6 +260,21 @@ export default function CrimeRecordsPage() {
           ))
         )}
       </div>
+
+      <ConfirmModal
+        isOpen={Boolean(pendingStatusSave)}
+        title="確認已經錫返了？"
+        message="一旦確認，呢宗犯罪紀錄之後就唔可以再修改狀態同懲罰。"
+        confirmText="確認錫返了"
+        cancelText="再諗吓"
+        onCancel={() => setPendingStatusSave(null)}
+        onConfirm={() => {
+          if (!pendingStatusSave) return;
+          const { id, punishment } = pendingStatusSave;
+          setPendingStatusSave(null);
+          void submitRecordDetails(id, "錫返了", punishment);
+        }}
+      />
     </section>
   );
 }
