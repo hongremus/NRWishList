@@ -245,6 +245,7 @@ function initialEvents(): CalendarEvent[] {
       endDate: RELATIONSHIP_START_DATE,
       isAllDay: true,
       isRomantic: true,
+      isTimeline: true,
       recurring: true,
     },
     {
@@ -254,6 +255,7 @@ function initialEvents(): CalendarEvent[] {
       endDate: addMonthsToDateKey(RELATIONSHIP_START_DATE, 3),
       isAllDay: true,
       isRomantic: true,
+      isTimeline: true,
     },
     {
       id: "six-month-anniversary",
@@ -262,6 +264,7 @@ function initialEvents(): CalendarEvent[] {
       endDate: addMonthsToDateKey(RELATIONSHIP_START_DATE, 6),
       isAllDay: true,
       isRomantic: true,
+      isTimeline: true,
     },
   ];
 }
@@ -334,6 +337,7 @@ export default function CalendarPage() {
     endDate: initialSelectedDate,
     isAllDay: false,
     isRomantic: false,
+    isTimeline: false,
     startTime: defaultEventTimes.startTime,
     endTime: defaultEventTimes.endTime,
     location: "",
@@ -466,6 +470,7 @@ export default function CalendarPage() {
       endDate: selectedDate,
       isAllDay: false,
       isRomantic: false,
+      isTimeline: false,
       ...getDefaultEventTimes(),
       location: "",
     });
@@ -545,6 +550,7 @@ export default function CalendarPage() {
       endDate: event.endDate,
       isAllDay: event.isAllDay,
       isRomantic: event.isRomantic || false,
+      isTimeline: event.isTimeline || false,
       startTime: event.startTime || defaultEventTimes.startTime,
       endTime: event.endTime || defaultEventTimes.endTime,
       location: event.location || "",
@@ -594,6 +600,7 @@ export default function CalendarPage() {
         endDate: form.endDate,
         isAllDay: form.isAllDay || isMultiDayForm,
         isRomantic: form.isRomantic,
+        isTimeline: form.isTimeline,
         startTime: isMultiDayForm ? undefined : form.startTime || undefined,
         endTime: isMultiDayForm ? undefined : form.endTime || undefined,
         location: form.location.trim() || undefined,
@@ -1067,6 +1074,16 @@ export default function CalendarPage() {
                 }
               />
               💕 拍拖活動
+            </label>
+            <label className="flex items-center gap-2 text-sm font-semibold text-blue-700 dark:text-blue-200">
+              <input
+                type="checkbox"
+                checked={form.isTimeline}
+                onChange={(event) =>
+                  setForm({ ...form, isTimeline: event.target.checked })
+                }
+              />
+              足跡
             </label>
             {!form.isAllDay && !isMultiDayForm && (
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">

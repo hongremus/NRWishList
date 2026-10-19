@@ -12,6 +12,7 @@ export type CalendarEvent = {
   id: string;
   title: string;
   detail?: string;
+  isTimeline?: boolean;
   startDate: string;
   endDate: string;
   isAllDay: boolean;
@@ -35,6 +36,20 @@ export type WishHistory = {
   remarks: { me?: string; gf?: string };
   averageRating?: number;
   isLocked?: boolean;
+};
+
+export type TimelineEntry = {
+  id: string;
+  type: "completion" | "calendar";
+  occurredAt: string;
+  title: string;
+  detail?: string;
+  region?: string;
+  tags: string[];
+  averageRating?: number;
+  remarks: { me?: string; gf?: string };
+  startDate?: string;
+  endDate?: string;
 };
 
 export type Wish = {
