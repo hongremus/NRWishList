@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { useStore } from "../store";
 import { Wish, WishHistory } from "../types";
+import { RELATIONSHIP_START_DATE } from "../appConfig";
 
 type CompletionEntry = {
   wish: Wish;
@@ -35,6 +36,19 @@ function getCompletionTime(entry: CompletionEntry) {
 function getRemarkPreview(remarks: string[]) {
   const text = remarks.join(" · ").replace(/\s+/g, " ").trim();
   return text.length > 72 ? `${text.slice(0, 72)}…` : text;
+}
+
+function getRelationshipDays() {
+  const [year, month, day] = RELATIONSHIP_START_DATE.split("-").map(Number);
+  const start = Date.UTC(year, month - 1, day);
+  const today = new Date();
+  const todayUtc = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
+  return Math.floor((todayUtc - start) / (1000 * 60 * 60 * 24)) + 1;
+}
+
+function formatRelationshipStartDate() {
+  const [year, month, day] = RELATIONSHIP_START_DATE.split("-").map(Number);
+  return `${year} 年 ${month} 月 ${day} 日`;
 }
 
 export default function TimelinePage() {
@@ -84,6 +98,9 @@ export default function TimelinePage() {
             <p className="text-xs font-bold tracking-wide text-gray-400">OUR STORY</p>
             <h2 className="mt-1 text-2xl font-black sm:text-3xl">我哋嘅足跡</h2>
             <p className="mt-2 text-sm text-gray-500">按完成時間，記低我哋一齊做過嘅事。</p>
+            <p className="mt-2 text-xs font-semibold text-gray-500">
+              由 {formatRelationshipStartDate()} 開始 · 我哋已經一齊咗 {getRelationshipDays()} 日
+            </p>
           </div>
           <div className="flex gap-4 text-right">
             <div>
