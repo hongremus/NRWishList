@@ -7,6 +7,7 @@ interface ConfirmModalProps {
   isOpen: boolean;
   title: string;
   message: string;
+  children?: React.ReactNode;
   confirmText?: string;
   cancelText?: string;
   isDanger?: boolean;
@@ -18,6 +19,7 @@ export default function ConfirmModal({
   isOpen,
   title,
   message,
+  children,
   confirmText = "確定",
   cancelText = "取消",
   isDanger = false,
@@ -39,6 +41,7 @@ export default function ConfirmModal({
       >
         <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">{title}</h3>
         <p className="text-sm text-gray-600 dark:text-gray-300 mb-6">{message}</p>
+        {children && <div className="min-w-0 max-w-full overflow-hidden">{children}</div>}
         <div className="flex gap-3 justify-end">
           {cancelText && (
             <button

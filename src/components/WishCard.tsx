@@ -15,6 +15,10 @@ function createHistoryId() {
   });
 }
 
+function getLocalDateKey(date = new Date()) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
 export default function WishCard({ wish, onDetailChange }: { wish: Wish; onDetailChange: (isOpen: boolean) => void }) {
   const update = useStore((s) => s.updateWish);
   const deleteWish = useStore((s) => s.deleteWish);
@@ -25,6 +29,8 @@ export default function WishCard({ wish, onDetailChange }: { wish: Wish; onDetai
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showCompleteConfirm, setShowCompleteConfirm] = useState(false);
+  const [completionDate, setCompletionDate] = useState(() => getLocalDateKey());
+  const [completionDateError, setCompletionDateError] = useState("");
 
   function openDetail() {
     setShowDetail(true);
@@ -38,9 +44,14 @@ export default function WishCard({ wish, onDetailChange }: { wish: Wish; onDetai
 
   function handleConfirmComplete() {
     if (wish.status === "open") {
+      if (!completionDate || completionDate > getLocalDateKey()) {
+        setCompletionDateError("完成日期唔可以遲過今日");
+        return;
+      }
+      const completedAt = new Date(`${completionDate}T12:00:00`).toISOString();
       const h = {
         id: createHistoryId(),
-        completedAt: new Date().toISOString(),
+        completedAt,
         completedBy: currentUser?.displayName || currentUser?.username || "未知",
         ratings: {},
         remarks: {},
@@ -190,6 +201,8 @@ export default function WishCard({ wish, onDetailChange }: { wish: Wish; onDetai
           <button
             onClick={(event) => {
               event.stopPropagation();
+              setCompletionDate(getLocalDateKey());
+              setCompletionDateError("");
               setShowCompleteConfirm(true);
             }}
             className={`min-w-0 flex-1 py-2.5 px-2 text-white rounded-xl text-xs font-semibold shadow-sm active:scale-95 transition-all flex items-center justify-center gap-1 sm:px-3 ${
@@ -266,7 +279,22 @@ export default function WishCard({ wish, onDetailChange }: { wish: Wish; onDetai
         cancelText="取消"
         onConfirm={handleConfirmComplete}
         onCancel={() => setShowCompleteConfirm(false)}
-      />
+      >
+        <label className="mb-6 block text-sm font-semibold text-gray-700 dark:text-gray-200">
+          完成日期
+          <input
+            type="date"
+            value={completionDate}
+            max={getLocalDateKey()}
+            onChange={(event) => {
+              setCompletionDate(event.target.value);
+              setCompletionDateError("");
+            }}
+            className="mt-2 block box-border min-w-0 max-w-full w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 font-normal text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+          />
+          {completionDateError && <span className="mt-1 block text-xs font-semibold text-red-600">{completionDateError}</span>}
+        </label>
+      </ConfirmModal>
     </div>
   );
 }

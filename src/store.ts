@@ -1,7 +1,8 @@
 import create from "zustand";
 import { persist } from "zustand/middleware";
-import { CalendarEvent, CrimeRecord, CrimeRecordProposal, CrimeStatus, HouseRule, HouseRuleProposal, User, UserRole, Wish, WishHistory } from "./types";
+import { CalendarEvent, CrimeRecord, CrimeRecordProposal, CrimeStatus, HouseRule, HouseRuleProposal, TimelineEntry, User, UserRole, Wish, WishHistory } from "./types";
 import { supabase } from "./supabase";
+import { RELATIONSHIP_START_DATE } from "./appConfig";
 
 const COUPLE_ID = "remus-nicole";
 
@@ -59,6 +60,26 @@ function getLoadedCalendarRange(months: string[]) {
   return {
     startDate: `${sortedMonths[0]}-01`,
     endDate: toDateKey(new Date(lastYear, lastMonth, 0)),
+  };
+}
+
+function getTimelineMonthRange(monthKey: string) {
+  const [year, month] = monthKey.split("-").map(Number);
+  const startDate = `${monthKey}-01`;
+  const nextMonth = new Date(year, month, 1);
+  const endDate = toDateKey(new Date(year, month, 0));
+  const nextMonthStart = toDateKey(nextMonth);
+  return { startDate, endDate, nextMonthStart };
+}
+
+function getTimelineRange(monthKeys: string[]) {
+  const sortedMonths = [...monthKeys].sort();
+  const first = getTimelineMonthRange(sortedMonths[0]);
+  const last = getTimelineMonthRange(sortedMonths[sortedMonths.length - 1]);
+  return {
+    startDate: first.startDate,
+    endDate: last.endDate,
+    nextMonthStart: last.nextMonthStart,
   };
 }
 
@@ -175,6 +196,7 @@ function fromDatabaseCalendarEvent(row: Record<string, unknown>): CalendarEvent 
     id: String(row.id),
     title: String(row.title),
     detail: typeof row.detail === "string" ? row.detail : undefined,
+    isTimeline: Boolean(row.is_timeline),
     startDate: String(row.start_date),
     endDate: String(row.end_date),
     isAllDay: Boolean(row.is_all_day),
@@ -185,6 +207,90 @@ function fromDatabaseCalendarEvent(row: Record<string, unknown>): CalendarEvent 
     isRomantic: Boolean(row.is_romantic),
     recurring: Boolean(row.recurring),
   };
+}
+
+function toTimelineEntries(
+  historyRows: unknown[],
+  calendarRows: unknown[],
+  wishes: Wish[],
+  startDate: string,
+  endDate: string,
+): TimelineEntry[] {
+  const wishById = new Map(wishes.map((wish) => [wish.id, wish]));
+  const completionEntries = historyRows.flatMap((row) => {
+    const databaseRow = row as Record<string, unknown>;
+    const wish = wishById.get(String(databaseRow.wish_id));
+    if (!wish) return [];
+    const history = fromDatabaseWishHistory(databaseRow);
+    return [{
+      id: `completion-${history.id}`,
+      type: "completion" as const,
+      occurredAt: history.completedAt,
+      title: wish.title,
+      region: wish.region,
+      tags: wish.tags,
+      averageRating: history.averageRating,
+      remarks: history.remarks,
+    }];
+  });
+  const calendarEntries = calendarRows.map((row) => {
+    const event = fromDatabaseCalendarEvent(row as Record<string, unknown>);
+    return {
+      id: `calendar-${event.id}`,
+      type: "calendar" as const,
+      occurredAt: event.startDate,
+      title: event.title,
+      detail: event.detail,
+      tags: [],
+      remarks: {},
+      startDate: event.startDate,
+      endDate: event.endDate,
+    };
+  });
+  const [startYear, startMonth, startDay] = RELATIONSHIP_START_DATE.split("-").map(Number);
+  const builtInEvents: CalendarEvent[] = [
+    {
+      id: "anniversary",
+      title: "我哋紀念日",
+      startDate: RELATIONSHIP_START_DATE,
+      endDate: RELATIONSHIP_START_DATE,
+      isAllDay: true,
+      isRomantic: true,
+      isTimeline: true,
+      recurring: true,
+    },
+    {
+      id: "three-month-anniversary",
+      title: "3個月紀念日",
+      startDate: toDateKey(new Date(startYear, startMonth - 1 + 3, startDay)),
+      endDate: toDateKey(new Date(startYear, startMonth - 1 + 3, startDay)),
+      isAllDay: true,
+      isRomantic: true,
+      isTimeline: true,
+    },
+    {
+      id: "six-month-anniversary",
+      title: "半年紀念日",
+      startDate: toDateKey(new Date(startYear, startMonth - 1 + 6, startDay)),
+      endDate: toDateKey(new Date(startYear, startMonth - 1 + 6, startDay)),
+      isAllDay: true,
+      isRomantic: true,
+      isTimeline: true,
+    },
+  ];
+  const builtInEntries = builtInEvents
+    .filter((event) => event.startDate >= startDate && event.startDate <= endDate && event.startDate <= toDateKey(new Date()))
+    .map((event) => ({
+      id: `calendar-${event.id}`,
+      type: "calendar" as const,
+      occurredAt: `${event.startDate}T12:00:00`,
+      title: event.title,
+      tags: [],
+      remarks: {},
+      startDate: event.startDate,
+      endDate: event.endDate,
+    }));
+  return [...completionEntries, ...calendarEntries, ...builtInEntries];
 }
 
 function fromDatabaseHouseRule(row: Record<string, unknown>): HouseRule {
@@ -249,6 +355,7 @@ function toDatabaseCalendarEvent(event: CalendarEvent) {
     couple_id: COUPLE_ID,
     title: event.title,
     detail: event.detail || null,
+    is_timeline: event.isTimeline || false,
     start_date: event.startDate,
     end_date: event.endDate,
     is_all_day: event.isAllDay,
@@ -265,6 +372,9 @@ interface AppState {
   users: User[];
   currentUser: User | null;
   wishes: Wish[];
+  timelineEntries: TimelineEntry[];
+  loadedTimelineMonths: string[];
+  isLoadingTimeline: boolean;
   loadedHistoryCount: number;
   hasMoreHistory: boolean;
   isLoadingMoreHistory: boolean;
@@ -281,6 +391,7 @@ interface AppState {
   clearSyncError: () => void;
   loadRemoteData: (showLoading?: boolean) => Promise<void>;
   loadMoreHistory: () => Promise<boolean>;
+  loadTimelineWindow: (monthKeys: string[], force?: boolean) => Promise<void>;
   ensureCalendarMonths: (monthKey: string, showLoading?: boolean) => Promise<void>;
   refreshCalendarEvents: () => Promise<void>;
   loadHouseRules: () => Promise<void>;
@@ -314,6 +425,9 @@ export const useStore = create<AppState>()(
       ],
       currentUser: null,
       wishes: [],
+      timelineEntries: [],
+      loadedTimelineMonths: [],
+      isLoadingTimeline: false,
       loadedHistoryCount: 0,
       hasMoreHistory: false,
       isLoadingMoreHistory: false,
@@ -566,6 +680,62 @@ export const useStore = create<AppState>()(
           const message = error instanceof Error ? error.message : String(error);
           set({ isLoadingMoreHistory: false, syncError: `讀取更多完成紀錄失敗：${message}` });
           return false;
+        }
+      },
+      loadTimelineWindow: async (monthKeys, force = false) => {
+        if (!supabase || monthKeys.length === 0 || get().isLoadingTimeline) return;
+        const requestedMonths = force
+          ? monthKeys
+          : monthKeys.filter((month) => !get().loadedTimelineMonths.includes(month));
+        if (requestedMonths.length === 0) return;
+        const range = getTimelineRange(requestedMonths);
+        const todayDate = toDateKey(new Date());
+        set({ isLoadingTimeline: true });
+        try {
+          const [{ data: historyRows, error: historyError }, { data: calendarRows, error: calendarError }] = await Promise.all([
+            supabase
+              .from("wishHistory")
+              .select("*")
+              .eq("couple_id", COUPLE_ID)
+              .gte("completed_at", `${range.startDate}T00:00:00`)
+              .lte("completed_at", new Date().toISOString())
+              .lt("completed_at", `${range.nextMonthStart}T00:00:00`)
+              .order("completed_at", { ascending: false }),
+            supabase
+              .from("calendar_events")
+              .select("*")
+              .eq("couple_id", COUPLE_ID)
+              .eq("is_timeline", true)
+              .lte("start_date", todayDate)
+              .lte("start_date", range.endDate)
+              .gte("end_date", range.startDate)
+              .order("start_date", { ascending: false }),
+          ]);
+          if (historyError) throw historyError;
+          if (calendarError) throw calendarError;
+          const newEntries = toTimelineEntries(
+            historyRows ?? [],
+            calendarRows ?? [],
+            get().wishes,
+            range.startDate,
+            range.endDate,
+          );
+          set((state) => {
+            const requestedMonthSet = new Set(requestedMonths);
+            const retainedEntries = force
+              ? state.timelineEntries.filter((entry) => !requestedMonthSet.has(entry.occurredAt.slice(0, 7)))
+              : state.timelineEntries;
+            const entryMap = new Map(retainedEntries.map((entry) => [entry.id, entry]));
+            newEntries.forEach((entry) => entryMap.set(entry.id, entry));
+            return {
+              timelineEntries: Array.from(entryMap.values()),
+              loadedTimelineMonths: Array.from(new Set([...state.loadedTimelineMonths, ...requestedMonths])).sort(),
+              isLoadingTimeline: false,
+            };
+          });
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          set({ isLoadingTimeline: false, syncError: `讀取足跡失敗：${message}` });
         }
       },
       subscribeToRemoteData: () => {

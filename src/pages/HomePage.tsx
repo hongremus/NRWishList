@@ -187,10 +187,10 @@ export default function HomePage() {
           </div>
         )}
 
-        <div className="mb-3 grid grid-cols-2 gap-1 rounded-2xl bg-gray-100 p-1 sm:grid-cols-5 dark:bg-gray-800">
+        <div className="mb-3 grid grid-cols-3 gap-1 rounded-2xl bg-gray-100 p-1 sm:grid-cols-5 dark:bg-gray-800">
           <button
             onClick={() => setActivePage("wishes")}
-            className={`flex-1 rounded-xl px-3 py-2 text-sm font-bold transition-all ${
+            className={`min-w-0 whitespace-nowrap rounded-xl px-2 py-2 text-sm font-bold transition-all sm:px-3 ${
               activePage === "wishes" ? "bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-gray-100" : "text-gray-500 dark:text-gray-400"
             }`}
           >
@@ -198,7 +198,7 @@ export default function HomePage() {
           </button>
           <button
             onClick={() => setActivePage("calendar")}
-            className={`flex-1 rounded-xl px-3 py-2 text-sm font-bold transition-all ${
+            className={`min-w-0 whitespace-nowrap rounded-xl px-2 py-2 text-sm font-bold transition-all sm:px-3 ${
               activePage === "calendar" ? "bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-gray-100" : "text-gray-500 dark:text-gray-400"
             }`}
           >
@@ -206,7 +206,7 @@ export default function HomePage() {
           </button>
           <button
             onClick={() => setActivePage("random")}
-            className={`flex-1 rounded-xl px-3 py-2 text-sm font-bold transition-all ${
+            className={`min-w-0 whitespace-nowrap rounded-xl px-2 py-2 text-sm font-bold transition-all sm:px-3 ${
               activePage === "random" ? "bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-gray-100" : "text-gray-500 dark:text-gray-400"
             }`}
           >
@@ -214,7 +214,7 @@ export default function HomePage() {
           </button>
           <button
             onClick={() => setActivePage("rules")}
-            className={`flex-1 rounded-xl px-3 py-2 text-sm font-bold transition-all ${
+            className={`min-w-0 whitespace-nowrap rounded-xl px-2 py-2 text-sm font-bold transition-all sm:px-3 ${
               activePage === "rules" ? "bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-gray-100" : "text-gray-500 dark:text-gray-400"
             }`}
           >
@@ -222,7 +222,7 @@ export default function HomePage() {
           </button>
           <button
             onClick={() => setActivePage("timeline")}
-            className={`flex-1 rounded-xl px-3 py-2 text-sm font-bold transition-all ${
+            className={`min-w-0 whitespace-nowrap rounded-xl px-2 py-2 text-sm font-bold transition-all sm:px-3 ${
               activePage === "timeline" ? "bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-gray-100" : "text-gray-500 dark:text-gray-400"
             }`}
           >

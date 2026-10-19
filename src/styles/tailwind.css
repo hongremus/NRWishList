@@ -20,6 +20,16 @@ select {
   color: #111827;
 }
 
+input[type="date"] {
+  box-sizing: border-box;
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
 input::placeholder,
 textarea::placeholder {
   color: #9ca3af;

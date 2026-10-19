@@ -120,3 +120,10 @@ v1.4.0 — Our Story, At A Glance
 - Timeline 首次只載入最新 30 條完成紀錄，支援載入更多，減少資料增加後嘅初始載入量。
 - Timeline 支援展開查看雙方完整感想，並顯示地區、Tag、完成次數及評分。
 - 修正 Android 系統 dark mode 令 Timeline 文字對比不足嘅問題，其他頁面配色保持不變。
+
+v1.4.1 — UAT Timeline and Mobile Polish
+- Timeline 改為年份／月份分組，支援最近六個月載入、按月展開及載入更早月份。
+- Calendar 活動可標記為「足跡」，並將內建紀念日加入 Timeline；未開始嘅未來活動唔會顯示。
+- 完成願望支援指定完成日期，並由 submit validation 阻止未來日期。
+- 修正 iOS date picker 喺 modal 內出界，以及手機 tab 改為三欄排列。
+- 新增 UAT Supabase migration script，並補充 iOS date／time picker 實機測試注意事項。
