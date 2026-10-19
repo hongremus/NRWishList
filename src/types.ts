@@ -11,6 +11,7 @@ export type User = {
 export type CalendarEvent = {
   id: string;
   title: string;
+  detail?: string;
   startDate: string;
   endDate: string;
   isAllDay: boolean;

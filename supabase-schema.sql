@@ -43,6 +43,7 @@ create table if not exists public.calendar_events (
   id uuid primary key default gen_random_uuid(),
   couple_id text not null default 'remus-nicole',
   title text not null,
+  detail text,
   start_date date not null,
   end_date date not null,
   is_all_day boolean not null default true,
@@ -56,6 +57,8 @@ create table if not exists public.calendar_events (
   check (end_date >= start_date),
   check (is_all_day or start_time is not null or end_time is not null)
 );
+
+alter table public.calendar_events add column if not exists detail text;
 
 create table if not exists public.house_rules (
   id uuid primary key default gen_random_uuid(),

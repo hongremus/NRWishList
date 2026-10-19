@@ -211,7 +211,14 @@ function getGoogleCalendarUrl(event: CalendarEvent, selectedDate: string) {
   const params = new URLSearchParams({
     action: "TEMPLATE",
     text: eventTitle,
-    details: event.createdBy ? `活動由 ${event.createdBy} 在 NR Wish List 建立` : "由 NR Wish List 建立",
+    details: [
+      event.detail,
+      event.createdBy
+        ? `活動由 ${event.createdBy} 在 NR Wish List 建立`
+        : "由 NR Wish List 建立",
+    ]
+      .filter(Boolean)
+      .join("\n\n"),
   });
 
   if (event.isAllDay) {
@@ -322,6 +329,7 @@ export default function CalendarPage() {
   const touchStartX = useRef<number | null>(null);
   const [form, setForm] = useState({
     title: "",
+    detail: "",
     startDate: initialSelectedDate,
     endDate: initialSelectedDate,
     isAllDay: false,
@@ -453,6 +461,7 @@ export default function CalendarPage() {
   function resetForm() {
     setForm({
       title: "",
+      detail: "",
       startDate: selectedDate,
       endDate: selectedDate,
       isAllDay: false,
@@ -531,6 +540,7 @@ export default function CalendarPage() {
     setFormError("");
     setForm({
       title: event.title,
+      detail: event.detail || "",
       startDate: event.startDate,
       endDate: event.endDate,
       isAllDay: event.isAllDay,
@@ -579,6 +589,7 @@ export default function CalendarPage() {
       const eventToSave: CalendarEvent = {
         id: editingEventId || createCalendarEventId(),
         title: form.title.trim(),
+        detail: form.detail.trim() || undefined,
         startDate: form.startDate,
         endDate: form.endDate,
         isAllDay: form.isAllDay || isMultiDayForm,
@@ -586,7 +597,7 @@ export default function CalendarPage() {
         startTime: isMultiDayForm ? undefined : form.startTime || undefined,
         endTime: isMultiDayForm ? undefined : form.endTime || undefined,
         location: form.location.trim() || undefined,
-        createdBy: currentUser?.role ?? "Remus",
+        createdBy: existingEvent?.createdBy ?? currentUser?.role ?? "Remus",
         recurring: existingEvent?.recurring,
       };
       const saved = editingEventId
@@ -607,6 +618,7 @@ export default function CalendarPage() {
       setForm((current) => ({
         ...current,
         title: "",
+        detail: "",
         location: "",
         ...getDefaultEventTimes(),
       }));
@@ -895,7 +907,7 @@ export default function CalendarPage() {
                 className={`flex items-start gap-3 rounded-xl px-3 py-2.5 ${getEventListStyle(event)}`}
               >
                 <div className="min-w-0 flex-1">
-                  <div className="whitespace-normal break-words text-sm font-bold leading-5">
+                  <div className="break-words text-sm font-bold leading-5">
                     {event.isRomantic ? "💕 " : ""}
                     {getCalendarEventTitle(event, selectedDate)}
                   </div>
@@ -989,6 +1001,15 @@ export default function CalendarPage() {
                 {formError}
               </p>
             )}
+            <textarea
+              value={form.detail}
+              onChange={(event) =>
+                setForm({ ...form, detail: event.target.value })
+              }
+              placeholder="詳細內容（可以唔填）"
+              rows={3}
+              className="min-h-20 min-w-0 w-full resize-y rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+            />
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               <label className="text-xs text-gray-500">
                 邊日開始

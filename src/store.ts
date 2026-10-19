@@ -173,6 +173,7 @@ function fromDatabaseCalendarEvent(row: Record<string, unknown>): CalendarEvent 
   return {
     id: String(row.id),
     title: String(row.title),
+    detail: typeof row.detail === "string" ? row.detail : undefined,
     startDate: String(row.start_date),
     endDate: String(row.end_date),
     isAllDay: Boolean(row.is_all_day),
@@ -246,6 +247,7 @@ function toDatabaseCalendarEvent(event: CalendarEvent) {
     id: event.id,
     couple_id: COUPLE_ID,
     title: event.title,
+    detail: event.detail || null,
     start_date: event.startDate,
     end_date: event.endDate,
     is_all_day: event.isAllDay,

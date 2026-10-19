@@ -17,6 +17,7 @@ NR Wish List 係 Remus 同 Nicole 共用嘅願望清單，方便記低想一齊�
 - 新增「家規」頁面，提供 10 條共同家規位置；修改或清空家規需要另一方確認後先會生效
 - 「家規」頁面內加入「犯罪紀錄」，記錄日期、犯案人、違反家規及事件內容；新增案件需要對方確認後先會正式入案
 - 共用日曆，支援活動新增、編輯、刪除及即時同步
+- 活動支援單行標題及獨立多行詳細內容，編輯時保留原本建立者
 - 支援香港公眾假期、紀念日、約會活動、重覆活動及跨日活動
 - 支援加入 Google 日曆，同時保留 NR Wish List 畫面
 - 針對手機瀏覽器優化願望清單、日曆、表單及彈出視窗
@@ -52,6 +53,13 @@ VITE_SUPABASE_ANON_KEY=你的_Supabase_Anon_Key
 ### 3. 設定資料庫
 
 喺 Supabase SQL Editor 執行專案內嘅 [`supabase-schema.sql`](supabase-schema.sql)，建立所需資料表及資料庫設定。
+
+如果資料庫已經有 `calendar_events` 表，請額外執行一次：
+
+```sql
+alter table public.calendar_events
+add column if not exists detail text;
+```
 
 ### 4. 啟動開發伺服器
 
