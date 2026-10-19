@@ -6,6 +6,7 @@ import { supabase } from "./supabase";
 const COUPLE_ID = "remus-nicole";
 
 const defaultTags = ["約會", "禮物", "旅行", "日常生活", "驚喜", "美食", "浪漫"];
+const HISTORY_PAGE_SIZE = 30;
 let visibleRemoteLoadCount = 0;
 const calendarLoadPromises = new Map<string, Promise<void>>();
 
@@ -264,6 +265,9 @@ interface AppState {
   users: User[];
   currentUser: User | null;
   wishes: Wish[];
+  loadedHistoryCount: number;
+  hasMoreHistory: boolean;
+  isLoadingMoreHistory: boolean;
   calendarEvents: CalendarEvent[];
   houseRules: HouseRule[];
   houseRuleProposals: HouseRuleProposal[];
@@ -276,6 +280,7 @@ interface AppState {
   setCurrentUser: (u: User | null) => void;
   clearSyncError: () => void;
   loadRemoteData: (showLoading?: boolean) => Promise<void>;
+  loadMoreHistory: () => Promise<boolean>;
   ensureCalendarMonths: (monthKey: string, showLoading?: boolean) => Promise<void>;
   refreshCalendarEvents: () => Promise<void>;
   loadHouseRules: () => Promise<void>;
@@ -309,6 +314,9 @@ export const useStore = create<AppState>()(
       ],
       currentUser: null,
       wishes: [],
+      loadedHistoryCount: 0,
+      hasMoreHistory: false,
+      isLoadingMoreHistory: false,
       calendarEvents: [],
       houseRules: Array.from({ length: 10 }, (_, index) => ({
         id: `local-rule-${index + 1}`,
@@ -457,7 +465,7 @@ export const useStore = create<AppState>()(
             { data: tagRows, error: tagError },
           ] = await Promise.all([
             supabase.from("wishMaster").select("*").eq("couple_id", COUPLE_ID).order("created_at", { ascending: false }),
-            supabase.from("wishHistory").select("*").eq("couple_id", COUPLE_ID).order("completed_at", { ascending: false }),
+            supabase.from("wishHistory").select("*").eq("couple_id", COUPLE_ID).order("completed_at", { ascending: false }).order("id", { ascending: false }).range(0, HISTORY_PAGE_SIZE - 1),
             supabase.from("wish_tags").select("name").eq("couple_id", COUPLE_ID).order("name"),
           ]);
 
@@ -491,6 +499,9 @@ export const useStore = create<AppState>()(
               );
             }),
             availableTags: tagRows?.length ? tagRows.map((row) => row.name) : defaultTags,
+            loadedHistoryCount: (historyRows ?? []).length,
+            hasMoreHistory: (historyRows ?? []).length === HISTORY_PAGE_SIZE,
+            isLoadingMoreHistory: false,
             syncError: null,
           });
 
@@ -507,6 +518,54 @@ export const useStore = create<AppState>()(
             visibleRemoteLoadCount = Math.max(0, visibleRemoteLoadCount - 1);
             if (visibleRemoteLoadCount === 0) set({ isLoadingRemote: false });
           }
+        }
+      },
+      loadMoreHistory: async () => {
+        if (!supabase || get().isLoadingMoreHistory || !get().hasMoreHistory) {
+          return false;
+        }
+
+        set({ isLoadingMoreHistory: true });
+        try {
+          const offset = get().loadedHistoryCount;
+          const { data, error } = await supabase
+            .from("wishHistory")
+            .select("*")
+            .eq("couple_id", COUPLE_ID)
+            .order("completed_at", { ascending: false })
+            .order("id", { ascending: false })
+            .range(offset, offset + HISTORY_PAGE_SIZE - 1);
+          if (error) throw error;
+
+          const historyRows = data ?? [];
+          const historiesByWish = new Map<string, WishHistory[]>();
+          for (const row of historyRows) {
+            const history = fromDatabaseWishHistory(row as Record<string, unknown>);
+            const wishId = String((row as Record<string, unknown>).wish_id);
+            const histories = historiesByWish.get(wishId) ?? [];
+            histories.push(history);
+            historiesByWish.set(wishId, histories);
+          }
+
+          set((state) => ({
+            wishes: state.wishes.map((wish) => {
+              const additionalHistories = historiesByWish.get(wish.id) ?? [];
+              const knownHistoryIds = new Set(wish.history.map((history) => history.id));
+              return {
+                ...wish,
+                history: [...wish.history, ...additionalHistories.filter((history) => !knownHistoryIds.has(history.id))]
+                  .sort((first, second) => new Date(second.completedAt).getTime() - new Date(first.completedAt).getTime()),
+              };
+            }),
+            loadedHistoryCount: state.loadedHistoryCount + historyRows.length,
+            hasMoreHistory: historyRows.length === HISTORY_PAGE_SIZE,
+            isLoadingMoreHistory: false,
+          }));
+          return historyRows.length > 0;
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          set({ isLoadingMoreHistory: false, syncError: `讀取更多完成紀錄失敗：${message}` });
+          return false;
         }
       },
       subscribeToRemoteData: () => {

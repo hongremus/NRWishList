@@ -7,6 +7,7 @@ import StatsModal from "../components/StatsModal";
 import CalendarPage from "./CalendarPage";
 import RandomWishPage from "./RandomWishPage";
 import HouseRulesPage from "./HouseRulesPage";
+import TimelinePage from "./TimelinePage";
 
 export default function HomePage() {
   const currentUser = useStore((s) => s.currentUser);
@@ -25,7 +26,7 @@ export default function HomePage() {
   const [showTagManager, setShowTagManager] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [showWishDetail, setShowWishDetail] = useState(false);
-  const [activePage, setActivePage] = useState<"wishes" | "calendar" | "random" | "rules">("wishes");
+  const [activePage, setActivePage] = useState<"wishes" | "calendar" | "random" | "rules" | "timeline">("wishes");
   const [completedViewRequest, setCompletedViewRequest] = useState(0);
 
   const isRemus = currentUser?.username === "Remus";
@@ -186,7 +187,7 @@ export default function HomePage() {
           </div>
         )}
 
-        <div className="mb-3 grid grid-cols-2 gap-1 rounded-2xl bg-gray-100 p-1 sm:grid-cols-4 dark:bg-gray-800">
+        <div className="mb-3 grid grid-cols-2 gap-1 rounded-2xl bg-gray-100 p-1 sm:grid-cols-5 dark:bg-gray-800">
           <button
             onClick={() => setActivePage("wishes")}
             className={`flex-1 rounded-xl px-3 py-2 text-sm font-bold transition-all ${
@@ -219,6 +220,14 @@ export default function HomePage() {
           >
             📜 家規
           </button>
+          <button
+            onClick={() => setActivePage("timeline")}
+            className={`flex-1 rounded-xl px-3 py-2 text-sm font-bold transition-all ${
+              activePage === "timeline" ? "bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-gray-100" : "text-gray-500 dark:text-gray-400"
+            }`}
+          >
+            🕰️ 足跡
+          </button>
         </div>
 
         {activePage === "wishes" ? (
@@ -227,7 +236,7 @@ export default function HomePage() {
             initialStatusFilter={completedViewRequest > 0 ? "completed" : "open"}
             onDetailChange={setShowWishDetail}
           />
-        ) : activePage === "calendar" ? <CalendarPage /> : activePage === "random" ? <RandomWishPage /> : <HouseRulesPage />}
+        ) : activePage === "calendar" ? <CalendarPage /> : activePage === "random" ? <RandomWishPage /> : activePage === "timeline" ? <TimelinePage /> : <HouseRulesPage />}
       </main>
 
       {/* 手機版右下角 Floating Action Button (新增願望) */}
