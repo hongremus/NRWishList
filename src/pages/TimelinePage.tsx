@@ -27,8 +27,7 @@ function formatDate(dateString: string) {
 }
 
 function formatDateKey(dateKey: string) {
-  const [year, month, day] = dateKey.split("-").map(Number);
-  return `${year}年${month}月${day}日`;
+  return formatDate(`${dateKey}T12:00:00`);
 }
 
 function formatRelationshipStartDate() {
