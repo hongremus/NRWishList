@@ -11,6 +11,7 @@ export type User = {
 export type CalendarEvent = {
   id: string;
   title: string;
+  completionNumber?: number;
   detail?: string;
   isTimeline?: boolean;
   startDate: string;

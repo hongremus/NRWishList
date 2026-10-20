@@ -217,6 +217,22 @@ function toTimelineEntries(
   endDate: string,
 ): TimelineEntry[] {
   const wishById = new Map(wishes.map((wish) => [wish.id, wish]));
+  const historyRowsByWish = new Map<string, Record<string, unknown>[]>();
+  for (const row of historyRows) {
+    const databaseRow = row as Record<string, unknown>;
+    const wishHistory = historyRowsByWish.get(String(databaseRow.wish_id)) ?? [];
+    wishHistory.push(databaseRow);
+    historyRowsByWish.set(String(databaseRow.wish_id), wishHistory);
+  }
+  const completionNumberByHistoryId = new Map<string, number>();
+  historyRowsByWish.forEach((rows, wishId) => {
+    const wish = wishById.get(wishId);
+    if (!wish) return;
+    rows.sort((first, second) => String(second.completed_at).localeCompare(String(first.completed_at)));
+    rows.forEach((row, index) => {
+      completionNumberByHistoryId.set(String(row.id), Math.max(1, wish.completedCount - index));
+    });
+  });
   const completionEntries = historyRows.flatMap((row) => {
     const databaseRow = row as Record<string, unknown>;
     const wish = wishById.get(String(databaseRow.wish_id));
@@ -227,6 +243,7 @@ function toTimelineEntries(
       type: "completion" as const,
       occurredAt: history.completedAt,
       title: wish.title,
+      completionNumber: completionNumberByHistoryId.get(history.id),
       region: wish.region,
       tags: wish.tags,
       averageRating: history.averageRating,

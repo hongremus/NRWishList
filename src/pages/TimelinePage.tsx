@@ -147,6 +147,7 @@ export default function TimelinePage() {
                       <span className={`absolute -left-[7px] top-1.5 h-3 w-3 rounded-full border-2 border-white ${entry.type === "calendar" ? "bg-pink-500" : "bg-blue-500"}`} />
                       <time className="text-xs font-bold text-gray-500">{formatDate(entry.occurredAt)}{entry.type === "calendar" && entry.endDate && entry.endDate !== entry.startDate ? ` 至 ${formatDateKey(entry.endDate)}` : ""}</time>
                       <h4 className="mt-1 break-words text-base font-black">{entry.title}</h4>
+                      {entry.type === "completion" && entry.completionNumber && <p className="mt-1 text-xs font-semibold text-gray-400">第 {entry.completionNumber} 次完成</p>}
                       {entry.type === "calendar" && <p className="mt-1 text-xs font-semibold text-pink-600">📅 足跡活動</p>}
                       {entry.detail && <p className="mt-1 whitespace-pre-wrap break-words text-xs text-gray-500">{entry.detail}</p>}
                       <div className="mt-1 flex flex-wrap gap-x-2 gap-y-1 text-xs text-gray-500">{entry.region && <span>📍 {entry.region}</span>}{entry.tags.map((tag) => <span key={tag}>#{tag}</span>)}{typeof entry.averageRating === "number" && <span className="font-bold text-amber-500">★ {entry.averageRating}/10</span>}</div>

@@ -126,4 +126,5 @@ v1.4.1 — UAT Timeline and Mobile Polish
 - Calendar 活動可標記為「足跡」，並將內建紀念日加入 Timeline；未開始嘅未來活動唔會顯示。
 - 完成願望支援指定完成日期，並由 submit validation 阻止未來日期。
 - 修正 iOS date picker 喺 modal 內出界，以及手機 tab 改為三欄排列。
+- Timeline 完成紀錄補回「第 X 次完成」資訊；完成紀錄顯示日期而不顯示 time，同日固定 Calendar 足跡先於完成紀錄。
 - 新增 UAT Supabase migration script，並補充 iOS date／time picker 實機測試注意事項。
