@@ -814,7 +814,9 @@ export default function CalendarPage() {
                 <div
                   className={`flex items-center gap-1 text-xs font-bold ${hasTimelineEvent ? "text-amber-500 dark:text-amber-300" : holiday ? "text-red-500" : day.getDay() === 0 ? "text-red-400" : "text-gray-600 dark:text-gray-300"}`}
                 >
-                  {day.getDate()}
+                  <span className={hasTimelineEvent ? "rounded-md bg-amber-100 px-1 text-amber-700 dark:bg-amber-900/50 dark:text-amber-200" : undefined}>
+                    {day.getDate()}
+                  </span>
                   <span className="flex items-center gap-0.5">
                     {hasRomanticEvent && (
                       <span aria-label="紀念日" className="text-[10px] leading-none sm:hidden">
