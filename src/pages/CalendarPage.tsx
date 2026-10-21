@@ -920,6 +920,11 @@ export default function CalendarPage() {
                     {event.isRomantic ? "💕 " : ""}
                     {getCalendarEventTitle(event, selectedDate)}
                   </div>
+                  {event.isTimeline && (
+                    <div className="mt-1 text-xs font-semibold text-yellow-600 dark:text-yellow-300">
+                      📅 足跡活動
+                    </div>
+                  )}
                   <div className="text-[11px]">
                     {formatEventTime(event)}
                     {event.location ? ` · 📍 ${event.location}` : ""}
