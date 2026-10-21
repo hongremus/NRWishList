@@ -786,6 +786,7 @@ export default function CalendarPage() {
             const hasMultiDayEvent = dayEvents.some(
               (event) => event.startDate !== event.endDate,
             );
+            const hasTimelineEvent = dayEvents.some((event) => event.isTimeline);
             const hasRomanticEvent = dayEvents.some((event) => event.isRomantic);
             const mobileActivityRows =
               lastActiveLaneIndex +
@@ -811,7 +812,7 @@ export default function CalendarPage() {
                 } ${day.getDay() === 0 ? "bg-red-50/60 dark:bg-red-950/20" : day.getDay() === 6 ? "bg-blue-50/60 dark:bg-blue-950/20" : ""} ${isToday ? "border-purple-500 bg-purple-50 dark:border-purple-400 dark:bg-purple-950/30" : ""} ${!inMonth ? "opacity-35" : ""}`}
               >
                 <div
-                  className={`flex items-center gap-1 text-xs font-bold ${holiday ? "text-red-500" : day.getDay() === 0 ? "text-red-400" : "text-gray-600 dark:text-gray-300"}`}
+                  className={`flex items-center gap-1 text-xs font-bold ${hasTimelineEvent ? "text-amber-500 dark:text-amber-300" : holiday ? "text-red-500" : day.getDay() === 0 ? "text-red-400" : "text-gray-600 dark:text-gray-300"}`}
                 >
                   {day.getDate()}
                   <span className="flex items-center gap-0.5">
