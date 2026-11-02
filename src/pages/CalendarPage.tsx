@@ -211,6 +211,7 @@ function getGoogleCalendarUrl(event: CalendarEvent, selectedDate: string) {
   const params = new URLSearchParams({
     action: "TEMPLATE",
     text: eventTitle,
+    colorId: "4",
     details: [
       event.detail,
       event.createdBy
