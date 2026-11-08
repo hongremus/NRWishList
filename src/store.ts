@@ -415,7 +415,7 @@ interface AppState {
   loadCrimeRecords: () => Promise<void>;
   subscribeToRemoteData: () => () => void;
   addWish: (w: Wish) => void;
-  updateWish: (w: Wish) => void;
+  updateWish: (w: Wish) => Promise<boolean>;
   deleteWish: (id: string) => void;
   addCalendarEvent: (event: CalendarEvent) => Promise<boolean>;
   addCalendarEvents: (events: CalendarEvent[]) => Promise<boolean>;
@@ -815,15 +815,17 @@ export const useStore = create<AppState>()(
       updateWish: async (w) => {
         const previousWish = get().wishes.find((item) => item.id === w.id);
         set((s) => ({ wishes: s.wishes.map((x) => (x.id === w.id ? w : x)) }));
-        if (!supabase) return;
-        const { error } = await supabase
+        if (!supabase) return true;
+        const { data: updatedRows, error } = await supabase
           .from("wishMaster")
           .update(toDatabaseWishMaster(w))
           .eq("id", w.id)
-          .eq("couple_id", COUPLE_ID);
-        if (error) {
-          set({ syncError: `更新願望失敗：${error.message}` });
-          return;
+          .eq("couple_id", COUPLE_ID)
+          .select("id, status, completed_count");
+        if (error || !updatedRows?.length) {
+          set({ syncError: `更新願望失敗：${error?.message ?? "找不到可更新的願望"}` });
+          await get().loadRemoteData();
+          return false;
         }
 
         const { error: historyError } = await supabase
@@ -832,7 +834,7 @@ export const useStore = create<AppState>()(
         if (historyError) {
           set({ syncError: `更新完成紀錄失敗：${historyError.message}` });
           await get().loadRemoteData();
-          return;
+          return false;
         }
 
         const currentHistoryIds = new Set(w.history.map((history) => history.id));
@@ -849,10 +851,11 @@ export const useStore = create<AppState>()(
           if (deleteHistoryError) {
             set({ syncError: `刪除完成紀錄失敗：${deleteHistoryError.message}` });
             await get().loadRemoteData();
-            return;
+            return false;
           }
         }
         await get().loadRemoteData();
+        return true;
       },
       deleteWish: async (id) => {
         set((s) => ({ wishes: s.wishes.filter((x) => x.id !== id) }));
