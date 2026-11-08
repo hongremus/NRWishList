@@ -461,11 +461,7 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
                                 placeholder="你對今次願望有咩感受或者想講嘅嘢..."
                                 value={remarkText}
                                 onChange={(e) => setRemarkText(e.target.value)}
-                                onKeyDown={(e) => {
-                                  if (e.key === "Enter") {
-                                    e.stopPropagation();
-                                  }
-                                }}
+                                onKeyDown={(e) => e.stopPropagation()}
                               />
                             </div>
 
