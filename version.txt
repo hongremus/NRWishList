@@ -128,3 +128,7 @@ v1.4.1 — UAT Timeline and Mobile Polish
 - 修正 iOS date picker 喺 modal 內出界，以及手機 tab 改為三欄排列。
 - Timeline 完成紀錄補回「第 X 次完成」資訊；完成紀錄顯示日期而不顯示 time，同日固定 Calendar 足跡先於完成紀錄。
 - 新增 UAT Supabase migration script，並補充 iOS date／time picker 實機測試注意事項。
+
+v1.4.2 — Reliable Completion and Web Remarks
+- 修正完成願望時 wish status 未更新但完成紀錄已保存嘅問題，更新主資料成功後先會保存 history。
+- 網頁版評分 Remark 修正 Space bar 被外層 WishCard keyboard handler 攔截嘅問題。

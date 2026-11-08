@@ -16,6 +16,8 @@
 - 改 House Rules approval flow 後，仍然可以新增、確認、取消同拒絕家規提案。
 - 改 Crime Records status 後，仍然可以新增案件、由對方確認，以及同步 realtime update。
 - 改 Calendar 後，願望清單、Random Date、登入同現有日曆功能仍然正常。
+- 完成願望後，Wish status 變成「搞掂咗」，同時完成紀錄只保存一次；重新整理後兩者仍然一致。
+- 網頁版評分 Remark 可以輸入空格及換行，Space bar 唔會觸發外層 WishCard 操作。
 
 **人類易明版：** 之前做到嘅嘢，今次改完之後都要再行一次，確定冇倒退。
 
