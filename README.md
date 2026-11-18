@@ -2,7 +2,7 @@
 
 NR Wish List 係 Remus 同 Nicole 共用嘅願望清單，方便記低想一齊完成嘅事情、追蹤完成紀錄、互相評分留言，同埋管理共同日曆。
 
-目前版本：**v1.4.2**
+目前版本：**v1.4.3**
 
 ## 功能
 
@@ -12,6 +12,7 @@ NR Wish List 係 Remus 同 Nicole 共用嘅願望清單，方便記低想一齊�
 - 保存每次完成紀錄，包括完成日期、完成者、評分及留言
 - 完成願望時同步更新願望狀態及完成紀錄，避免只保存其中一部分
 - 網頁版評分 Remark 支援正常輸入空格
+- 新增「防中伏區」，集中顯示已完成但評分 4 分或以下嘅紀錄，並可展開查看完整 Remark
 - 新增「我哋嘅足跡」Timeline，按年份／月份及完成時間回顧共同完成紀錄，同日活動會先顯示 Calendar 足跡
 - Timeline 跨日活動會顯示開始及結束日期與星期，方便自然閱讀活動範圍
 - Timeline 首次載入最新 30 條紀錄，支援按需要載入更多，避免紀錄增加後初次載入過重
@@ -28,6 +29,7 @@ NR Wish List 係 Remus 同 Nicole 共用嘅願望清單，方便記低想一齊�
 - 支援加入 Google 日曆，同時保留 NR Wish List 畫面
 - 針對手機瀏覽器優化願望清單、日曆、表單及彈出視窗
 - 修正 Android 系統 dark mode 對 Timeline 顏色及文字對比嘅影響
+- 修正手機版防中伏區 footer 避開 iPhone home indicator，並修正 realtime cleanup 嘅 Supabase 型別問題
 
 ## 技術架構
 

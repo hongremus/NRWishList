@@ -757,8 +757,9 @@ export const useStore = create<AppState>()(
       },
       subscribeToRemoteData: () => {
         if (!supabase) return () => undefined;
+        const client = supabase;
 
-        const channel = supabase
+        const channel = client
           .channel("nr-wishlist-sync")
           .on("postgres_changes", { event: "*", schema: "public", table: "wishMaster", filter: `couple_id=eq.${COUPLE_ID}` }, () => {
             void get().loadRemoteData();
@@ -789,7 +790,7 @@ export const useStore = create<AppState>()(
           .subscribe();
 
         return () => {
-          void supabase.removeChannel(channel);
+          void client.removeChannel(channel);
         };
       },
       addWish: async (w) => {
