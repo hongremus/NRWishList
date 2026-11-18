@@ -132,3 +132,9 @@ v1.4.1 — UAT Timeline and Mobile Polish
 v1.4.2 — Reliable Completion and Web Remarks
 - 修正完成願望時 wish status 未更新但完成紀錄已保存嘅問題，更新主資料成功後先會保存 history。
 - 網頁版評分 Remark 修正 Space bar 被外層 WishCard keyboard handler 攔截嘅問題。
+
+v1.4.3 — The Anti-Ambush List
+- 新增「防中伏區」，集中顯示已完成但評分 4 分或以下嘅紀錄。
+- 防中伏區支援按評分及完成日期排序，並可展開查看雙方完整 Remark。
+- 修正防中伏區手機 footer 嘅 iPhone safe-area spacing。
+- 修正 Supabase realtime cleanup 嘅 nullable client TypeScript diagnostic。
