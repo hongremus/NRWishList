@@ -42,8 +42,8 @@ export default function LowRatedModal({ onClose }: { onClose: () => void }) {
     }), [wishes]);
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-end justify-center bg-black/40 p-0 backdrop-blur-xs sm:items-center sm:p-4">
-      <div className="relative z-10 flex max-h-[90vh] w-full max-w-2xl flex-col rounded-t-3xl border border-gray-100 bg-white shadow-2xl dark:border-gray-800 dark:bg-gray-900 sm:rounded-3xl">
+    <div className="fixed inset-0 z-[200] flex items-end justify-center bg-black/40 p-3 backdrop-blur-xs sm:items-center sm:p-4">
+      <div className="relative z-10 flex max-h-[calc(100dvh-1.5rem)] w-full max-w-2xl flex-col rounded-3xl border border-gray-100 bg-white shadow-2xl dark:border-gray-800 dark:bg-gray-900 sm:max-h-[90vh]">
         <div className="flex shrink-0 items-center justify-between gap-2 border-b border-gray-100 p-4 dark:border-gray-800 sm:p-6">
           <div className="flex min-w-0 items-center gap-2">
             <span className="text-2xl">⚠️</span>
@@ -126,7 +126,7 @@ export default function LowRatedModal({ onClose }: { onClose: () => void }) {
           )}
         </div>
 
-        <div className="shrink-0 border-t border-gray-100 p-4 dark:border-gray-800 sm:p-6">
+        <div className="shrink-0 border-t border-gray-100 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] dark:border-gray-800 sm:p-6">
           <button
             type="button"
             onClick={onClose}
