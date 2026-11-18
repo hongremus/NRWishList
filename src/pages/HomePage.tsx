@@ -4,6 +4,7 @@ import WishList from "../components/WishList";
 import NewWishModal from "../components/NewWishModal";
 import TagManagerModal from "../components/TagManagerModal";
 import StatsModal from "../components/StatsModal";
+import LowRatedModal from "../components/LowRatedModal";
 import CalendarPage from "./CalendarPage";
 import RandomWishPage from "./RandomWishPage";
 import HouseRulesPage from "./HouseRulesPage";
@@ -25,6 +26,7 @@ export default function HomePage() {
   const [showNew, setShowNew] = useState(false);
   const [showTagManager, setShowTagManager] = useState(false);
   const [showStats, setShowStats] = useState(false);
+  const [showLowRated, setShowLowRated] = useState(false);
   const [showWishDetail, setShowWishDetail] = useState(false);
   const [activePage, setActivePage] = useState<"wishes" | "calendar" | "random" | "rules" | "timeline">("wishes");
   const [completedViewRequest, setCompletedViewRequest] = useState(0);
@@ -155,6 +157,14 @@ export default function HomePage() {
               📊
             </button>
             <button
+              type="button"
+              onClick={() => setShowLowRated(true)}
+              className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 text-white backdrop-blur-sm transition-all hover:bg-white/25 active:scale-95 sm:h-11 sm:w-11"
+              aria-label="開啟防中伏區"
+            >
+              ⚠️
+            </button>
+            <button
               onClick={logout}
               className="flex h-11 w-11 shrink-0 items-center justify-center bg-white/15 hover:bg-white/25 active:scale-95 text-white rounded-xl backdrop-blur-sm transition-all"
               title="登出"
@@ -256,6 +266,7 @@ export default function HomePage() {
       {showNew && <NewWishModal onClose={() => setShowNew(false)} />}
       {showTagManager && <TagManagerModal onClose={() => setShowTagManager(false)} />}
       {showStats && <StatsModal onClose={() => setShowStats(false)} />}
+      {showLowRated && <LowRatedModal onClose={() => setShowLowRated(false)} />}
     </div>
   );
 }
