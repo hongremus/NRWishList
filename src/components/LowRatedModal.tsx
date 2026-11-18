@@ -20,6 +20,10 @@ function formatDate(dateString: string) {
   }).format(date);
 }
 
+function previewRemark(text: string) {
+  return text.length > 84 ? `${text.slice(0, 84)}…` : text;
+}
+
 export default function LowRatedModal({ onClose }: { onClose: () => void }) {
   const wishes = useStore((state) => state.wishes);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -67,9 +71,10 @@ export default function LowRatedModal({ onClose }: { onClose: () => void }) {
             <div>
               {entries.map(({ wish, history }) => {
                 const remarks = [
-                  history.remarks.me ? `Remus：${history.remarks.me}` : "",
-                  history.remarks.gf ? `Nicole：${history.remarks.gf}` : "",
-                ].filter(Boolean);
+                  history.remarks.me ? { label: "Remus", text: history.remarks.me } : null,
+                  history.remarks.gf ? { label: "Nicole", text: history.remarks.gf } : null,
+                ].filter((remark): remark is { label: string; text: string } => Boolean(remark));
+                const canExpand = remarks.some((remark) => remark.text.length > 84);
                 const isExpanded = expandedId === history.id;
 
                 return (
@@ -96,11 +101,19 @@ export default function LowRatedModal({ onClose }: { onClose: () => void }) {
                       >
                         {isExpanded ? (
                           <div className="space-y-1 whitespace-pre-wrap break-words border-l-2 border-red-200 pl-3 dark:border-red-800">
-                            {remarks.map((remark) => <p key={remark}>{remark}</p>)}
+                            {remarks.map((remark) => <p key={remark.label}><strong className="font-semibold text-gray-700 dark:text-gray-200">{remark.label}：</strong>{remark.text}</p>)}
                             <span className="inline-block pt-1 font-semibold text-gray-500 dark:text-gray-400">收埋 ↑</span>
                           </div>
                         ) : (
-                          <span className="block line-clamp-2 break-words">{remarks.join(" · ")} <span className="font-semibold text-red-600 dark:text-red-300">展開 ↓</span></span>
+                          <div className="space-y-0.5">
+                            {remarks.map((remark) => (
+                              <p key={remark.label} className="flex min-w-0 gap-1">
+                                <strong className="shrink-0 font-semibold text-gray-700 dark:text-gray-200">{remark.label}：</strong>
+                                <span className="min-w-0 truncate">{previewRemark(remark.text)}</span>
+                              </p>
+                            ))}
+                            {canExpand && <span className="inline-block pt-1 font-semibold text-red-600 dark:text-red-300">查看完整評語 ↓</span>}
+                          </div>
                         )}
                       </button>
                     ) : (
