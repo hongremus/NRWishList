@@ -41,7 +41,7 @@ export default function HomePage() {
     const isWithinReviewWindow =
       Number.isFinite(latestCompletionTime) &&
       latestCompletionTime <= Date.now() &&
-      Date.now() - latestCompletionTime < 2 * 24 * 60 * 60 * 1000;
+      Date.now() - latestCompletionTime < 5 * 24 * 60 * 60 * 1000;
 
     return Boolean(
       wish.status === "completed" &&

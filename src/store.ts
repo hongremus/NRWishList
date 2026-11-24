@@ -1312,14 +1312,14 @@ export const useStore = create<AppState>()(
         return true;
       },
       lockExpiredHistories: () => {
-        const TWO_DAYS_MS = 2 * 24 * 60 * 60 * 1000;
+        const FIVE_DAYS_MS = 5 * 24 * 60 * 60 * 1000;
         const now = Date.now();
         set((s) => ({
           wishes: s.wishes.map((w) => ({
             ...w,
             history: w.history.map((h) => {
               const compTime = new Date(h.completedAt).getTime();
-              if (!isNaN(compTime) && now - compTime > TWO_DAYS_MS) {
+              if (!isNaN(compTime) && now - compTime > FIVE_DAYS_MS) {
                 return { ...h, isLocked: true };
               }
               return h;

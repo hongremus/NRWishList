@@ -86,7 +86,7 @@ export default function WishCard({ wish, onDetailChange }: { wish: Wish; onDetai
   const isWithinReviewWindow =
     Number.isFinite(latestCompletionTime) &&
     latestCompletionTime <= Date.now() &&
-    Date.now() - latestCompletionTime < 2 * 24 * 60 * 60 * 1000;
+    Date.now() - latestCompletionTime < 5 * 24 * 60 * 60 * 1000;
   const hasPendingReview = Boolean(
     wish.status === "completed" &&
       latestHistory &&

@@ -123,8 +123,8 @@ export default function WishModal({ wish, onClose }: { wish: Wish; onClose: () =
     const compTime = new Date(completedAtStr).getTime();
     if (isNaN(compTime)) return { text: "可以俾分", canRate: true };
 
-    const TWO_DAYS_MS = 2 * 24 * 60 * 60 * 1000;
-    const diff = compTime + TWO_DAYS_MS - Date.now();
+    const FIVE_DAYS_MS = 5 * 24 * 60 * 60 * 1000;
+    const diff = compTime + FIVE_DAYS_MS - Date.now();
     if (diff <= 0) {
       return { text: "⏰ 評分時間過咗", canRate: false };
     }

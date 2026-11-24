@@ -138,3 +138,7 @@ v1.4.3 — The Anti-Ambush List
 - 防中伏區支援按評分及完成日期排序，並可展開查看雙方完整 Remark。
 - 修正防中伏區手機 footer 嘅 iPhone safe-area spacing。
 - 修正 Supabase realtime cleanup 嘅 nullable client TypeScript diagnostic。
+
+v1.4.4 — Five Days To Reflect
+- 將完成後評分及留言期限由 2 日延長至 5 日。
+- 同步更新待評分提示及自動鎖定邏輯，確保各入口使用相同期限。
